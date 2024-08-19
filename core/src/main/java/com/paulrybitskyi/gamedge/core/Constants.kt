@@ -18,4 +18,12 @@ package com.paulrybitskyi.gamedge.core
 
 object Constants {
     const val SOURCE_CODE_LINK = "https://github.com/mars885/gamedge"
+    val TWITCH_SCOPES: Array<String> = arrayOf(
+        "user:read:email",
+        "user:edit:follows",
+        "user:read:subscriptions",
+        "chat:edit",
+        "chat:read",
+        "user:read:follows"
+    )
 }

@@ -36,6 +36,7 @@ import com.paulrybitskyi.gamedge.feature.discovery.widgets.hideProgressBar
 import com.paulrybitskyi.gamedge.feature.discovery.widgets.showProgressBar
 import com.paulrybitskyi.gamedge.feature.discovery.widgets.toSuccessState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -87,7 +88,7 @@ internal class GamesDiscoveryViewModel @Inject constructor(
                     categoryName = category.name,
                     title = stringProvider.getString(category.titleId),
                     isProgressBarVisible = false,
-                    games = emptyList(),
+                    games = persistentListOf(),
                 )
             }
         }
@@ -100,12 +101,12 @@ internal class GamesDiscoveryViewModel @Inject constructor(
             flows = GamesDiscoveryCategory.entries.map(::observeGames),
             transform = { it.toList() },
         )
-        .map { games -> currentItems.toSuccessState(games) }
-        .onError { logger.error(logTag, "Failed to observe games.", it) }
-        .onStart { isObservingGames = true }
-        .onCompletion { isObservingGames = false }
-        .onEach { emittedItems -> _items.update { emittedItems } }
-        .launchIn(viewModelScope)
+            .map { games -> currentItems.toSuccessState(games) }
+            .onError { logger.error(logTag, "Failed to observe games.", it) }
+            .onStart { isObservingGames = true }
+            .onCompletion { isObservingGames = false }
+            .onEach { emittedItems -> _items.update { emittedItems } }
+            .launchIn(viewModelScope)
     }
 
     private fun observeGames(category: GamesDiscoveryCategory): Flow<List<GamesDiscoveryItemGameUiModel>> {
@@ -122,21 +123,21 @@ internal class GamesDiscoveryViewModel @Inject constructor(
             flows = GamesDiscoveryCategory.entries.map(::refreshGames),
             transform = { it.toList() },
         )
-        .map { currentItems }
-        .onError {
-            logger.error(logTag, "Failed to refresh games.", it)
-            dispatchCommand(GeneralCommand.ShowLongToast(errorMapper.mapToMessage(it)))
-        }
-        .onStart {
-            isRefreshingGames = true
-            emit(currentItems.showProgressBar())
-        }
-        .onCompletion {
-            isRefreshingGames = false
-            emit(currentItems.hideProgressBar())
-        }
-        .onEach { emittedItems -> _items.update { emittedItems } }
-        .launchIn(viewModelScope)
+            .map { currentItems }
+            .onError {
+                logger.error(logTag, "Failed to refresh games.", it)
+                dispatchCommand(GeneralCommand.ShowLongToast(errorMapper.mapToMessage(it)))
+            }
+            .onStart {
+                isRefreshingGames = true
+                emit(currentItems.showProgressBar())
+            }
+            .onCompletion {
+                isRefreshingGames = false
+                emit(currentItems.hideProgressBar())
+            }
+            .onEach { emittedItems -> _items.update { emittedItems } }
+            .launchIn(viewModelScope)
     }
 
     private fun refreshGames(category: GamesDiscoveryCategory): Flow<List<Game>> {

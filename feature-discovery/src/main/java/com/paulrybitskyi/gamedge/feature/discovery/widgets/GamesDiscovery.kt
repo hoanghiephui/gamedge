@@ -52,6 +52,8 @@ import com.paulrybitskyi.gamedge.feature.discovery.GamesDiscoveryCategory
 import com.paulrybitskyi.gamedge.feature.discovery.GamesDiscoveryViewModel
 import com.paulrybitskyi.gamedge.feature.discovery.R
 import com.paulrybitskyi.gamedge.feature.discovery.titleId
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import com.paulrybitskyi.gamedge.core.R as CoreR
@@ -185,7 +187,7 @@ private fun GamesDiscoverySuccessStatePreview() {
             categoryName = category.name,
             title = stringResource(category.titleId),
             isProgressBarVisible = true,
-            games = games,
+            games = games.toImmutableList(),
         )
     }
 
@@ -210,7 +212,7 @@ private fun GamesDiscoveryEmptyStatePreview() {
             categoryName = category.name,
             title = stringResource(category.titleId),
             isProgressBarVisible = true,
-            games = emptyList(),
+            games = persistentListOf(),
         )
     }
 

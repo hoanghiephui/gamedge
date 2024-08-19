@@ -1,5 +1,6 @@
 [versions]
 compileSdk = "35"
+composeWebview = "0.33.6"
 targetSdk = "35"
 minSdk = "21"
 appVersionCode = "1"
@@ -20,6 +21,7 @@ ktlintPlugin = "12.1.1"
 # Kotlin
 coroutines = "1.8.1"
 serialization = "1.7.1"
+kotlinxCollectionsImmutable = "0.3.7"
 
 # AndroidX
 splash = "1.0.1"
@@ -95,12 +97,15 @@ gamedgeProtobuf = { id = "com.paulrybitskyi.gamedge.protobuf" }
 [libraries]
 # Plugins
 androidPlugin = { module = "com.android.tools.build:gradle", version.ref = "androidPlugin" }
+compose-webview = { module = "io.github.kevinnzou:compose-webview", version.ref = "composeWebview" }
 kotlinPlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 protobufPlugin = { module = "com.google.protobuf:protobuf-gradle-plugin", version.ref = "protobufPlugin" }
 
 # Kotlin
 coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
 kotlinxSerialization = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
+kotlinx-collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "kotlinxCollectionsImmutable" }
+
 
 # AndroidX
 splash = { module = "androidx.core:core-splashscreen", version.ref = "splash" }

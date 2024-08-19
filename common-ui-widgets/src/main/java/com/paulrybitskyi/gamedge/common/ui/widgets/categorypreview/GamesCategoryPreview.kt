@@ -19,6 +19,7 @@ package com.paulrybitskyi.gamedge.common.ui.widgets.categorypreview
 import android.content.res.Configuration
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -58,7 +59,7 @@ fun GamesCategoryPreview(
     isMoreButtonVisible: Boolean = true,
     onCategoryMoreButtonClicked: (() -> Unit)? = null,
 ) {
-    GamedgeCard(modifier = Modifier.fillMaxWidth()) {
+    Box(modifier = Modifier.fillMaxWidth()) {
         ConstraintLayout(modifier = Modifier.fillMaxWidth()) {
             val titleRefMargin = GamedgeTheme.spaces.spacing_3_5
             val progressBarMarginEnd = GamedgeTheme.spaces.spacing_1_5

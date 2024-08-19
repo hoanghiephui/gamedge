@@ -22,7 +22,7 @@ plugins {
 dependencies {
     implementation(libs.coroutines)
     implementation(libs.kotlinResult)
-
+    api(libs.kotlinx.collections.immutable)
     implementation(libs.daggerHiltCore)
     kapt(libs.daggerHiltCoreCompiler)
 

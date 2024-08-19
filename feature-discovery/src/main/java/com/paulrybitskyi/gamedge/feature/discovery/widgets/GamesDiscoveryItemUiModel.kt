@@ -17,6 +17,8 @@
 package com.paulrybitskyi.gamedge.feature.discovery.widgets
 
 import androidx.compose.runtime.Immutable
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
 
 @Immutable
 internal data class GamesDiscoveryItemUiModel(
@@ -24,15 +26,15 @@ internal data class GamesDiscoveryItemUiModel(
     val categoryName: String,
     val title: String,
     val isProgressBarVisible: Boolean,
-    val games: List<GamesDiscoveryItemGameUiModel>,
+    val games: ImmutableList<GamesDiscoveryItemGameUiModel>,
 )
 
 internal fun List<GamesDiscoveryItemUiModel>.toSuccessState(
     games: List<List<GamesDiscoveryItemGameUiModel>>,
 ): List<GamesDiscoveryItemUiModel> {
     return mapIndexed { index, itemModel ->
-        itemModel.copy(games = games[index])
-    }
+        itemModel.copy(games = games[index].toImmutableList())
+    }.toImmutableList()
 }
 
 internal fun List<GamesDiscoveryItemUiModel>.showProgressBar(): List<GamesDiscoveryItemUiModel> {

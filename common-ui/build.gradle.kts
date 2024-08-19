@@ -38,6 +38,7 @@ dependencies {
     api(libs.androidx.compose.runtime)
     api(libs.androidx.compose.ui.util)
     api(libs.androidx.metrics)
+    api(libs.compose.webview)
     implementation(libs.composeUi)
     implementation(libs.composeTooling)
     implementation(libs.composeFoundation)

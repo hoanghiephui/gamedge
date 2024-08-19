@@ -68,7 +68,7 @@ dependencies {
     implementation(libs.commonsKtx)
 
     implementation(libs.protobuf)
-
+    implementation(libs.protobufkotlin.lite)
     implementation(libs.daggerHiltAndroid)
     kapt(libs.daggerHiltAndroidCompiler)
 

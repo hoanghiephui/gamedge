@@ -23,6 +23,7 @@ import androidx.compose.animation.graphics.res.animatedVectorResource
 import androidx.compose.animation.graphics.res.rememberAnimatedVectorPainter
 import androidx.compose.animation.graphics.vector.AnimatedImageVector
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -135,10 +136,10 @@ internal fun GameInfoHeader(
                 .statusBarsPadding()
                 .size(56.dp)
                 .clickable(
-                    indication = rememberRipple(
+                    /*indication = rememberRipple(
                         bounded = false,
                         radius = 18.dp,
-                    ),
+                    ),*/
                     onClick = onBackButtonClicked,
                 )
                 .padding(GamedgeTheme.spaces.spacing_2_5)

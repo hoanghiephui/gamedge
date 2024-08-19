@@ -58,7 +58,7 @@ import com.paulrybitskyi.gamedge.core.R as CoreR
 
 // Intentional delay to keep the swipe refresh visible
 // because as soon as it is let go, it disappears instantaneously.
-private const val SwipeRefreshIntentionalDelay = 300L
+const val SwipeRefreshIntentionalDelay = 300L
 
 @Composable
 fun GamesDiscovery(

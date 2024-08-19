@@ -40,6 +40,9 @@ protobuf {
                 id("java") {
                     option("lite")
                 }
+                register("kotlin") {
+                    option("lite")
+                }
             }
         }
     }
@@ -56,6 +59,7 @@ dependencies {
     implementation(libs.prefsDataStore)
     implementation(libs.protoDataStore)
     implementation(libs.protobuf)
+    implementation(libs.protobufkotlin.lite)
 
     implementation(libs.kotlinResult)
 

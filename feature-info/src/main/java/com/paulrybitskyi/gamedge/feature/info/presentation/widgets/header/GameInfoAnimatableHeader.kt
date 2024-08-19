@@ -206,10 +206,10 @@ internal fun GameInfoAnimatableHeader(
                 .statusBarsPadding()
                 .size(56.dp)
                 .clickable(
-                    indication = rememberRipple(
+                    /*indication = rememberRipple(
                         bounded = false,
                         radius = 18.dp,
-                    ),
+                    ),*/
                     onClick = onBackButtonClicked,
                 )
                 .padding(GamedgeTheme.spaces.spacing_2_5)

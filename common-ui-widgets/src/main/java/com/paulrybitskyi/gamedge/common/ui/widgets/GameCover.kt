@@ -20,7 +20,7 @@ import android.content.res.Configuration
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.Text
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -106,6 +106,47 @@ fun GameCover(
             backgroundColor = backgroundColor,
             content = content,
         )
+    }
+}
+
+@Composable
+fun GameCoverPopular(
+    title: String?,
+    imageUrl: String?,
+    modifier: Modifier = Modifier,
+    hasRoundedShape: Boolean = true,
+    onCoverClicked: (() -> Unit)? = null,
+) {
+    Box(modifier = modifier) {
+        var imageState by remember { mutableStateOf<State>(State.Empty) }
+        val shouldDisplayTitle = rememberSaveable(title, imageState) {
+            (title != null) &&
+                    (imageState !is State.Success)
+        }
+
+        AsyncImage(
+            model = defaultImageRequest(imageUrl) {
+                secondaryImage(R.drawable.game_cover_placeholder)
+            },
+            contentDescription = null,
+            modifier = Modifier.matchParentSize(),
+            onState = { state ->
+                imageState = state
+            },
+            contentScale = ContentScale.Crop,
+        )
+
+        if (shouldDisplayTitle) {
+            Text(
+                text = checkNotNull(title),
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .padding(horizontal = GamedgeTheme.spaces.spacing_4_0),
+                color = Color.White,
+                textAlign = TextAlign.Center,
+                style = GamedgeTheme.typography.caption,
+            )
+        }
     }
 }
 

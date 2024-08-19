@@ -25,7 +25,6 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Shapes
 import androidx.compose.material.Typography
 import androidx.compose.material.ripple.LocalRippleTheme
-import androidx.compose.material.ripple.RippleTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
@@ -69,7 +68,7 @@ fun GamedgeTheme(
                 typography = typography,
                 shapes = shapes,
             ) {
-                CompositionLocalProvider(LocalRippleTheme provides GamedgeRippleTheme) {
+                CompositionLocalProvider() {
                     CompositionLocalProvider(LocalContentAlpha provides DefaultContentAlpha) {
                         content()
                     }
@@ -79,7 +78,7 @@ fun GamedgeTheme(
     }
 }
 
-@Immutable
+/*@Immutable
 private object GamedgeRippleTheme : RippleTheme {
 
     @Composable
@@ -93,4 +92,4 @@ private object GamedgeRippleTheme : RippleTheme {
         contentColor = Color.Black,
         lightTheme = true,
     )
-}
+}*/

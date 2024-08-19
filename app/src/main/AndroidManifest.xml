@@ -31,8 +31,7 @@
         <!-- See this https://stackoverflow.com/a/68899786/7015881 why tools:ignore is needed above -->
 
         <activity
-            android:name=".MainActivity"
-            android:screenOrientation="portrait"
+            android:name=".v2.MainActivity"
             android:windowSoftInputMode="adjustPan"
             android:exported="true">
 

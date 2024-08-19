@@ -35,7 +35,7 @@ internal class VersionNameProviderImpl @Inject constructor(
     override fun getVersionName(): String {
         return stringProvider.getString(
             R.string.version_name_template,
-            context.packageManager.getPackageInfo(context.packageName, 0).versionName,
+            context.packageManager.getPackageInfo(context.packageName, 0).versionName ?: "",
         )
     }
 }

@@ -209,8 +209,9 @@ private class LogoImageTransformation(
     override val cacheKey = "logo: w - $logoContainerWidth, h - $logoContainerHeight"
 
     override suspend fun transform(input: Bitmap, size: Size): Bitmap {
+        val bitmapConfig = input.config ?: Bitmap.Config.ARGB_8888
         val targetBitmap = Bitmap
-            .createBitmap(logoContainerWidth, logoContainerHeight, input.config)
+            .createBitmap(logoContainerWidth, logoContainerHeight, bitmapConfig)
             .apply { eraseColor(input.calculateFillColor()) }
 
         val targetCenterX = targetBitmap.centerX

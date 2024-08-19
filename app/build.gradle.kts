@@ -43,7 +43,7 @@ dependencies {
     implementation(project(localModules.featureSettings))
 
     implementation(libs.splash)
-
+    implementation(platform(libs.androidx.compose.bom))
     implementation(libs.composeUi)
     implementation(libs.composeTooling)
     implementation(libs.composeFoundation)

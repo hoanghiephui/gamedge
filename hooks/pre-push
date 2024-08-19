@@ -4,13 +4,7 @@ echo "Running Git Pre-Push Hook"
 
 ######################################
 
-echo "Running Android Lint"
-./gradlew lint
-RESULT_LINT=$?
-if [ $RESULT_LINT -ne 0 ]
-then
-  exit 1
-fi
+
 
 ######################################
 

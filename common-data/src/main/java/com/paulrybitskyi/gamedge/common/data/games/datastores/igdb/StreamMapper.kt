@@ -16,11 +16,8 @@
 
 package com.paulrybitskyi.gamedge.common.data.games.datastores.igdb
 
-import com.paulrybitskyi.gamedge.common.domain.games.entities.Game
 import com.paulrybitskyi.gamedge.common.domain.games.entities.StreamData
 import com.paulrybitskyi.gamedge.common.domain.games.entities.StreamItem
-import com.paulrybitskyi.gamedge.igdb.api.games.entities.ApiGame
-import com.paulrybitskyi.gamedge.igdb.api.stream.model.DataItem
 import com.paulrybitskyi.gamedge.igdb.api.stream.model.StreamsResponse
 import javax.inject.Inject
 
@@ -37,7 +34,7 @@ internal class StreamMapper @Inject constructor() {
                     isMature = dataItem.isMature,
                     type = dataItem.type,
                     title = dataItem.title,
-                    thumbnailUrl = dataItem.thumbnailUrl,
+                    thumbnailUrl = generateLinks(dataItem.thumbnailUrl),
                     tags = dataItem.tags,
                     gameName = dataItem.gameName,
                     userId = dataItem.userId,
@@ -53,4 +50,16 @@ internal class StreamMapper @Inject constructor() {
 
 internal fun StreamMapper.mapToDomainStreams(streamsResponse: StreamsResponse): StreamData {
     return mapToDomainStream(streamsResponse)
+}
+
+fun generateLinks(baseUrl: String): List<String> {
+    val sizes = listOf(
+        Pair(80, 45),
+        Pair(320, 180),
+        Pair(640, 360)
+    )
+
+    return sizes.map { (width, height) ->
+        baseUrl.replace("{width}", width.toString()).replace("{height}", height.toString())
+    }
 }

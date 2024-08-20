@@ -10,6 +10,7 @@ import com.android.itube.feature.twitch.section.rememberStreamInitialSectionStat
 import com.android.itube.feature.twitch.section.rememberStreamLoadedSectionState
 import com.android.itube.feature.twitch.section.rememberStreamLoadingSectionState
 import com.android.itube.feature.twitch.state.finiteUiState
+import com.paulrybitskyi.gamedge.common.ui.widgets.FiniteUiState
 import com.paulrybitskyi.gamedge.common.ui.widgets.ResultUiState
 
 data class StreamPageState(
@@ -25,20 +26,25 @@ fun rememberStreamPageState(
     val uiState by pageViewModel.uiState.collectAsStateWithLifecycle()
     val isInitialLoading = pageViewModel.isInitialLoading
     val isRefreshLoading = pageViewModel.isRefreshLoading
-    val contentSectionState = when {
-        isInitialLoading -> rememberStreamLoadingSectionState()
-        uiState.finiteUiState == ResultUiState.Success -> rememberStreamLoadedSectionState(
+    val contentSectionState = when(uiState.finiteUiState) {
+        ResultUiState.Loading -> rememberStreamLoadingSectionState()
+        ResultUiState.Success -> rememberStreamLoadedSectionState(
             isRefreshLoading = isRefreshLoading,
-            refresh = {},
+            refresh = {
+                pageViewModel.refreshGames(true)
+            },
             navigation = navigation,
-            uiState = uiState
+            uiState = uiState,
+            onBottomReached = { pageViewModel.onBottomReached() }
         )
 
         else -> rememberStreamInitialSectionState(
             isRefreshLoading = isRefreshLoading,
             finiteUiState = uiState.finiteUiState,
             onClickReload = pageViewModel::initialLoadIfNeeded,
-            refresh = {}
+            refresh = {
+                pageViewModel.refreshGames(true)
+            }
         )
     }
     return remember(

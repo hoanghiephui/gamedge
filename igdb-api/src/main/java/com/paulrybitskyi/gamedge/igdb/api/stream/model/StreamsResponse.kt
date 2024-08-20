@@ -50,7 +50,7 @@ data class DataItem(
 
     @Apicalypse("type")
     @SerialName("type")
-    val type: String,
+    val type: String? = null,
 
     @Apicalypse("title")
     @SerialName("title")
@@ -62,7 +62,7 @@ data class DataItem(
 
     @SerialName("tags")
     @Apicalypse("tags")
-    val tags: List<String>,
+    val tags: List<String> = emptyList(),
 
     @SerialName("game_name")
     @Apicalypse("game_name")
@@ -86,7 +86,7 @@ data class DataItem(
 
     @Apicalypse("viewer_count")
     @SerialName("viewer_count")
-    val viewerCount: Int,
+    val viewerCount: Long,
 
     @Apicalypse("game_id")
     @SerialName("game_id")

@@ -1,5 +1,6 @@
 package com.android.itube.feature.twitch
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -9,8 +10,10 @@ import com.android.itube.feature.twitch.state.disableLoading
 import com.android.itube.feature.twitch.state.enableLoading
 import com.android.itube.feature.twitch.state.toEmptyState
 import com.android.itube.feature.twitch.state.toErrorState
+import com.android.itube.feature.twitch.state.toLoadMoreSuccessState
 import com.android.itube.feature.twitch.state.toSuccessState
 import com.paulrybitskyi.gamedge.common.domain.auth.datastores.AuthLocalDataStore
+import com.paulrybitskyi.gamedge.common.domain.common.entities.nextOffset
 import com.paulrybitskyi.gamedge.common.domain.common.extensions.resultOrError
 import com.paulrybitskyi.gamedge.common.domain.games.usecases.StreamUseCase
 import com.paulrybitskyi.gamedge.common.ui.base.BaseViewModel
@@ -19,6 +22,8 @@ import com.paulrybitskyi.gamedge.core.ErrorMapper
 import com.paulrybitskyi.gamedge.core.Logger
 import com.paulrybitskyi.gamedge.core.utils.onError
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -41,6 +46,8 @@ class TwitchViewModel @Inject constructor(
     private val errorMapper: ErrorMapper,
     private val logger: Logger,
 ) : BaseViewModel() {
+    private var gamesRefreshingJob: Job? = null
+
     var isRefreshLoading by mutableStateOf(false)
         private set
 
@@ -92,6 +99,58 @@ class TwitchViewModel @Inject constructor(
             }
             .onEach { emittedUiState -> _uiState.update { emittedUiState } }
             .launchIn(viewModelScope)
+    }
+
+    fun refreshGames(isClearPage: Boolean) {
+        if (isInitialLoading || isRefreshLoading) {
+            return
+        }
+        gamesRefreshingJob = streamUseCase.execute(isClearPage)
+            .resultOrError()
+            .map { data ->
+                if (isClearPage) {
+                    currentUiState.toSuccessState(data)
+                } else {
+                    currentUiState.toLoadMoreSuccessState(data)
+                }
+            }
+            .onError {
+                logger.error(logTag, "Failed to getStreamItems", it)
+                dispatchCommand(GeneralCommand.ShowLongToast(errorMapper.mapToMessage(it)))
+                emit(currentUiState.toErrorState())
+            }
+            .onStart {
+                isRefreshLoading = true
+                emit(currentUiState.enableLoading())
+                // Show loading state for some time since it can be too quick
+                delay(0)
+            }
+            .onCompletion {
+                isRefreshLoading = false
+                // Delay disabling loading to avoid quick state changes like
+                // empty, loading, empty, success
+                delay(0)
+                emit(currentUiState.disableLoading())
+            }
+            .onEach { emittedUiState -> _uiState.update { emittedUiState } }
+            .launchIn(viewModelScope)
+    }
+
+    fun onBottomReached() {
+        loadMoreGames()
+    }
+    private fun loadMoreGames() {
+        //if (!hasMoreGamesToLoad) return
+        Log.d("AAA", "${currentUiState.items.size}")
+        viewModelScope.launch {
+            fetchNextGamesBatch()
+        }
+    }
+
+    private suspend fun fetchNextGamesBatch() {
+        //gamesRefreshingJob?.cancelAndJoin()
+        refreshGames(false)
+        //gamesRefreshingJob?.join()
     }
 
     private fun createEmptyUiState(): StreamUiState {

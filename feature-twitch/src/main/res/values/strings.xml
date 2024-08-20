@@ -3,4 +3,5 @@
     <string name="login_twitch">Login with Twitch</string>
     <string name="login_title">Sign in to Twitch</string>
     <string name="login_desc">Twitch is an interactive livestreaming service for content spanning gaming, entertainment, sports, music, and more</string>
+    <string name="count_view">%1$s viewers</string>
 </resources>

@@ -21,6 +21,7 @@ import androidx.annotation.DimenRes
 import androidx.compose.foundation.Indication
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -91,4 +92,9 @@ fun Modifier.clickable(
         indication = indication,
         onClick = onClick,
     )
+}
+
+fun LazyStaggeredGridState.reachedBottom(buffer: Int = 1): Boolean {
+    val lastVisibleItem = this.layoutInfo.visibleItemsInfo.lastOrNull()
+    return lastVisibleItem?.index != 0 && lastVisibleItem?.index == this.layoutInfo.totalItemsCount - buffer
 }

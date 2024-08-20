@@ -106,11 +106,11 @@ private fun LoginScreen(
     var state by remember {
         mutableStateOf<UiState>(UiState.Init)
     }
-    LaunchedEffect(key1 = authorizationTokenTwitch) {
+    LaunchedEffect(authorizationTokenTwitch, state) {
         state = if (authorizationTokenTwitch?.isNotBlank() == true) {
             UiState.Loaded(token = authorizationTokenTwitch)
         } else {
-            UiState.Init
+            UiState.Login
         }
     }
     val stateWeb = rememberWebViewState(LOGIN_URL)
@@ -153,7 +153,7 @@ private fun LoginScreen(
             label = "Animated Content"
         ) { targetState ->
             when (targetState) {
-                UiState.Init -> {
+                UiState.Login -> {
                     InitLogin(onLogin = {
                         state = UiState.Loading
                     })
@@ -176,6 +176,7 @@ private fun LoginScreen(
                 UiState.Error -> {
                     LoadingScreen(stateWeb.loadingState)
                 }
+                UiState.Init -> {}
             }
         }
     }

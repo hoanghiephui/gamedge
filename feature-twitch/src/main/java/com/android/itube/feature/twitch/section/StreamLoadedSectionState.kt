@@ -16,7 +16,8 @@ data class StreamLoadedSectionState(
     val refresh: () -> Unit,
     val lazyListState: LazyStaggeredGridState,
     val navigation: NavHostController,
-    val items: ImmutableList<StreamItem>
+    val items: ImmutableList<StreamItem>,
+    val onBottomReached: () -> Unit
 ) : StreamContentSectionState
 
 @Composable
@@ -24,7 +25,8 @@ fun rememberStreamLoadedSectionState(
     isRefreshLoading: Boolean,
     refresh: () -> Unit,
     navigation: NavHostController,
-    uiState: StreamUiState
+    uiState: StreamUiState,
+    onBottomReached: () -> Unit
 ): StreamLoadedSectionState {
     val context = LocalContext.current
     val lazyListState: LazyStaggeredGridState = rememberLazyStaggeredGridState()
@@ -33,14 +35,16 @@ fun rememberStreamLoadedSectionState(
         context,
         lazyListState,
         navigation,
-        items
+        items,
+        onBottomReached
     ) {
         StreamLoadedSectionState(
             isRefreshLoading = isRefreshLoading,
             refresh = refresh,
             lazyListState = lazyListState,
             navigation = navigation,
-            items = items
+            items = items,
+            onBottomReached = onBottomReached
         )
     }
 }

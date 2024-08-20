@@ -42,8 +42,9 @@ internal fun StreamUiState.toEmptyState(): StreamUiState {
 
 internal fun StreamUiState.toErrorState(): StreamUiState {
     return copy(
-        isLoading = false, items = emptyList(),
-        isError = false
+        isLoading = false,
+        items = emptyList(),
+        isError = true
     )
 }
 
@@ -59,4 +60,10 @@ internal fun StreamUiState.toSuccessState(
     data: StreamData,
 ): StreamUiState {
     return copy(isLoading = false, items = data.items)
+}
+
+internal fun StreamUiState.toLoadMoreSuccessState(
+    data: StreamData,
+): StreamUiState {
+    return copy(isLoading = false, items = items + data.items)
 }

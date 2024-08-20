@@ -146,7 +146,7 @@ fun NewsResourceHeaderImage(
             CircularProgressIndicator(
                 modifier = Modifier
                     .align(Alignment.Center)
-                    .size(80.dp),
+                    .size(50.dp),
                 color = MaterialTheme.colorScheme.tertiary,
             )
         }

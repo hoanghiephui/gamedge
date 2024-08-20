@@ -21,9 +21,11 @@ import com.paulrybitskyi.gamedge.common.api.addInterceptorAsFirstInChain
 import com.paulrybitskyi.gamedge.common.api.calladapter.ApiResultCallAdapterFactory
 import com.paulrybitskyi.gamedge.igdb.api.auth.Authorizer
 import com.paulrybitskyi.gamedge.igdb.api.common.AuthorizationInterceptor
+import com.paulrybitskyi.gamedge.igdb.api.common.AuthorizationStreamInterceptor
 import com.paulrybitskyi.gamedge.igdb.api.common.CredentialsStore
 import com.paulrybitskyi.gamedge.igdb.api.common.TwitchConstantsProvider
 import com.paulrybitskyi.gamedge.igdb.api.common.di.qualifiers.IgdbApi
+import com.paulrybitskyi.gamedge.igdb.api.common.di.qualifiers.StreamApi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -51,6 +53,20 @@ internal object CommonsModule {
     }
 
     @Provides
+    @Singleton
+    @StreamApi
+    fun provideOkHttpClientStream(
+        okHttpClient: OkHttpClient,
+        authorizationInterceptor: AuthorizationStreamInterceptor,
+        authenticator: Authenticator,
+    ): OkHttpClient {
+        return okHttpClient.newBuilder()
+            .addInterceptorAsFirstInChain(authorizationInterceptor)
+            .authenticator(authenticator)
+            .build()
+    }
+
+    @Provides
     @IgdbApi
     fun provideApiResultCallAdapterFactory(
         @IgdbApi errorMessageExtractor: ErrorMessageExtractor,
@@ -65,6 +81,19 @@ internal object CommonsModule {
         twitchConstantsProvider: TwitchConstantsProvider,
     ): AuthorizationInterceptor {
         return AuthorizationInterceptor(
+            credentialsStore = credentialsStore,
+            authorizer = authorizer,
+            clientId = twitchConstantsProvider.clientId,
+        )
+    }
+
+    @Provides
+    fun provideAuthorizationStreamInterceptor(
+        credentialsStore: CredentialsStore,
+        authorizer: Authorizer,
+        twitchConstantsProvider: TwitchConstantsProvider,
+    ): AuthorizationStreamInterceptor {
+        return AuthorizationStreamInterceptor(
             credentialsStore = credentialsStore,
             authorizer = authorizer,
             clientId = twitchConstantsProvider.clientId,

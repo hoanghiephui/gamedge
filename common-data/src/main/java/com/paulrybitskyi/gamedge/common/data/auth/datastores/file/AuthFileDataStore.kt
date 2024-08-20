@@ -20,7 +20,9 @@ import androidx.datastore.core.DataStore
 import com.paulrybitskyi.gamedge.common.domain.auth.datastores.AuthLocalDataStore
 import com.paulrybitskyi.gamedge.common.domain.auth.entities.OauthCredentials
 import com.paulrybitskyi.hiltbinder.BindType
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -49,4 +51,15 @@ internal class AuthFileDataStore @Inject constructor(
             ?.takeIf(ProtoOauthCredentials::isNotEmpty)
             ?.let(protoAuthMapper::mapToDomainOauthCredentials)
     }
+
+    override suspend fun saveAuthorizationTokenTwitch(token: String) {
+        protoDataStore.updateData {
+            it.copy {
+                this.authorizationToken = token
+            }
+        }
+    }
+
+    override val authorizationTokenTwitch: Flow<String>
+        get() = protoDataStore.data.map { it.authorizationToken }
 }

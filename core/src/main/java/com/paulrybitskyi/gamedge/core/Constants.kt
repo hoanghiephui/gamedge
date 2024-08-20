@@ -18,7 +18,7 @@ package com.paulrybitskyi.gamedge.core
 
 object Constants {
     const val SOURCE_CODE_LINK = "https://github.com/mars885/gamedge"
-    val TWITCH_SCOPES: Array<String> = arrayOf(
+    private val TWITCH_SCOPES: Array<String> = arrayOf(
         "user:read:email",
         "user:edit:follows",
         "user:read:subscriptions",
@@ -26,4 +26,9 @@ object Constants {
         "chat:read",
         "user:read:follows"
     )
+    val LOGIN_URL = "https://id.twitch.tv/oauth2/authorize" +
+            "?client_id=cs8ydzg1a67v3uau41e0f50zgit93q" +
+            "&redirect_uri=http%3A%2F%2Flocalhost/oauth_authorizing" +
+            "&response_type=token" +
+            "&scope=${TWITCH_SCOPES.joinToString("%20")}"
 }

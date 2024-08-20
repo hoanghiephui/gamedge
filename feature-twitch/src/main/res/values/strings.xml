@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="login_twitch">Login with Twitch</string>
+    <string name="login_title">Sign in to Twitch</string>
+    <string name="login_desc">Twitch is an interactive livestreaming service for content spanning gaming, entertainment, sports, music, and more</string>
+</resources>

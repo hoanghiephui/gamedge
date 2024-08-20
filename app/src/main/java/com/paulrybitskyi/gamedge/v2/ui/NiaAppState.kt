@@ -28,6 +28,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navOptions
+import com.android.itube.feature.twitch.navigation.TWITCH_ROUTE
+import com.android.itube.feature.twitch.navigation.navigateToTwitch
 import com.paulrybitskyi.gamedge.common.data.common.NetworkMonitor
 import com.paulrybitskyi.gamedge.common.ui.widgets.TrackDisposableJank
 import com.paulrybitskyi.gamedge.feature.discovery.navigation.FOR_YOU_ROUTE
@@ -75,6 +77,7 @@ class NiaAppState(
     val currentTopLevelDestination: TopLevelDestination?
         @Composable get() = when (currentDestination?.route) {
             FOR_YOU_ROUTE -> TopLevelDestination.FOR_YOU
+            TWITCH_ROUTE -> TopLevelDestination.TWITCH
             BOOKMARKS_ROUTE -> TopLevelDestination.BOOKMARKS
             INTERESTS_ROUTE -> TopLevelDestination.INTERESTS
             else -> null
@@ -119,6 +122,7 @@ class NiaAppState(
 
             when (topLevelDestination) {
                 TopLevelDestination.FOR_YOU -> navController.navigateToForYou(topLevelNavOptions)
+                TopLevelDestination.TWITCH -> navController.navigateToTwitch(topLevelNavOptions)
                 TopLevelDestination.BOOKMARKS -> navController.navigateToBookmarks(topLevelNavOptions)
                 TopLevelDestination.INTERESTS -> navController.navigateToInterests(null, topLevelNavOptions)
             }

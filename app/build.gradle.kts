@@ -41,6 +41,7 @@ dependencies {
     implementation(project(localModules.featureNews))
     implementation(project(localModules.featureSearch))
     implementation(project(localModules.featureSettings))
+    implementation(project(localModules.featureTwitch))
 
     implementation(libs.splash)
     implementation(platform(libs.androidx.compose.bom))

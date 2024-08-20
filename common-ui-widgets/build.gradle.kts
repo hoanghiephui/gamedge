@@ -41,7 +41,8 @@ dependencies {
     implementation(libs.composeRuntime)
     implementation(libs.composeConstraintLayout)
     implementation(libs.accompanistSwipeRefresh)
-
+    api(libs.lottie)
+    api(libs.lottie.compose)
     implementation(libs.coil)
 
     implementation(libs.daggerHiltAndroid)

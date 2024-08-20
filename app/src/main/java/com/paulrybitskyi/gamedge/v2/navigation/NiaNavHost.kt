@@ -19,6 +19,7 @@ package com.paulrybitskyi.gamedge.v2.navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
+import com.android.itube.feature.twitch.navigation.twitchScreen
 import com.paulrybitskyi.gamedge.feature.discovery.navigation.FOR_YOU_ROUTE
 import com.paulrybitskyi.gamedge.feature.discovery.navigation.forYouScreen
 import com.paulrybitskyi.gamedge.feature.likes.navigation.bookmarksScreen
@@ -50,6 +51,9 @@ fun NiaNavHost(
             onTopicClick = navController::navigateToInterests,
             onShowSnackbar = onShowSnackbar,
         )
+        twitchScreen(onTopicClick = {
+
+        })
         /*searchScreen(
             onBackClick = navController::popBackStack,
             onInterestsClick = { appState.navigateToTopLevelDestination(INTERESTS) },

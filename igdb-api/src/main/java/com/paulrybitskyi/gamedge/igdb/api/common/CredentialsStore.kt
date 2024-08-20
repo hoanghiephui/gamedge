@@ -22,4 +22,6 @@ interface CredentialsStore {
     suspend fun saveOauthCredentials(oauthCredentials: ApiOauthCredentials)
     suspend fun getLocalOauthCredentials(): ApiOauthCredentials?
     suspend fun getRemoteOauthCredentials(): ApiOauthCredentials?
+    suspend fun saveTokenTwitch(token: String)
+    suspend fun getTokenLoginTwitch(): String?
 }

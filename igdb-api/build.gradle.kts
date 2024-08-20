@@ -21,7 +21,7 @@ plugins {
     id(libs.plugins.androidLibrary.get().pluginId)
     id(libs.plugins.gamedgeAndroid.get().pluginId)
     id(libs.plugins.kotlinKapt.get().pluginId)
-
+    id("kotlin-parcelize")
     alias(libs.plugins.ksp)
     alias(libs.plugins.daggerHilt)
     alias(libs.plugins.kotlinxSerialization)

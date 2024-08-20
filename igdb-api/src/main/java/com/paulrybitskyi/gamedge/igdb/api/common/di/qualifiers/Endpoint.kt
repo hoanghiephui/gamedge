@@ -31,5 +31,6 @@ internal annotation class Endpoint(val type: Type) {
     enum class Type {
         AUTH,
         GAMES,
+        STREAM
     }
 }

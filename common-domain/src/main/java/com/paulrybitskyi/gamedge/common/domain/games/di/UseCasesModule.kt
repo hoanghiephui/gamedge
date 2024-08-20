@@ -32,6 +32,8 @@ import com.paulrybitskyi.gamedge.common.domain.games.usecases.RefreshPopularGame
 import com.paulrybitskyi.gamedge.common.domain.games.usecases.RefreshPopularGamesUseCaseImpl
 import com.paulrybitskyi.gamedge.common.domain.games.usecases.RefreshRecentlyReleasedGamesUseCase
 import com.paulrybitskyi.gamedge.common.domain.games.usecases.RefreshRecentlyReleasedGamesUseCaseImpl
+import com.paulrybitskyi.gamedge.common.domain.games.usecases.StreamUseCase
+import com.paulrybitskyi.gamedge.common.domain.games.usecases.StreamUseCaseImpl
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -80,4 +82,9 @@ internal interface UseCasesModule {
     fun bindRefreshRecentlyReleasedGamesUseCase(
         binding: RefreshRecentlyReleasedGamesUseCaseImpl,
     ): RefreshRecentlyReleasedGamesUseCase
+
+    @Binds
+    fun bindStreamUseCase(
+        binding: StreamUseCaseImpl
+    ): StreamUseCase
 }

@@ -22,6 +22,7 @@ import com.paulrybitskyi.gamedge.common.domain.auth.datastores.AuthRemoteDataSto
 import com.paulrybitskyi.gamedge.igdb.api.auth.entities.ApiOauthCredentials
 import com.paulrybitskyi.gamedge.igdb.api.common.CredentialsStore
 import com.paulrybitskyi.hiltbinder.BindType
+import kotlinx.coroutines.flow.firstOrNull
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -48,5 +49,13 @@ internal class CredentialsStoreImpl @Inject constructor(
         return authRemoteDataStore.getOauthCredentials()
             .get()
             ?.let(igdbAuthMapper::mapToApiOauthCredentials)
+    }
+
+    override suspend fun saveTokenTwitch(token: String) {
+        authLocalDataStore.saveAuthorizationTokenTwitch(token)
+    }
+
+    override suspend fun getTokenLoginTwitch(): String? {
+        return authLocalDataStore.authorizationTokenTwitch.firstOrNull()?.takeIf(String::isNotEmpty)
     }
 }

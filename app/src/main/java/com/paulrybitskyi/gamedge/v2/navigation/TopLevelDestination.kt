@@ -24,6 +24,12 @@ enum class TopLevelDestination(
         iconTextId = forYouR.string.games_discovery_toolbar_title,
         titleTextId = R.string.app_name,
     ),
+    TWITCH(
+        selectedIcon = NiaIcons.Upcoming,
+        unselectedIcon = NiaIcons.UpcomingBorder,
+        iconTextId = forYouR.string.games_discovery_toolbar_title,
+        titleTextId = R.string.app_name,
+    ),
     BOOKMARKS(
         selectedIcon = NiaIcons.Bookmarks,
         unselectedIcon = NiaIcons.BookmarksBorder,

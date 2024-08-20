@@ -71,3 +71,10 @@ enum class FiniteUiState {
     Loading,
     Success,
 }
+
+enum class ResultUiState {
+    Empty,
+    Loading,
+    Success,
+    Error
+}

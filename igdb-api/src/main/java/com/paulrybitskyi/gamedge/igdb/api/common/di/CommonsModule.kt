@@ -20,11 +20,13 @@ import com.paulrybitskyi.gamedge.common.api.ErrorMessageExtractor
 import com.paulrybitskyi.gamedge.common.api.addInterceptorAsFirstInChain
 import com.paulrybitskyi.gamedge.common.api.calladapter.ApiResultCallAdapterFactory
 import com.paulrybitskyi.gamedge.igdb.api.auth.Authorizer
+import com.paulrybitskyi.gamedge.igdb.api.common.AuthorizationGraphInterceptor
 import com.paulrybitskyi.gamedge.igdb.api.common.AuthorizationInterceptor
 import com.paulrybitskyi.gamedge.igdb.api.common.AuthorizationStreamInterceptor
 import com.paulrybitskyi.gamedge.igdb.api.common.CredentialsStore
 import com.paulrybitskyi.gamedge.igdb.api.common.TwitchConstantsProvider
 import com.paulrybitskyi.gamedge.igdb.api.common.di.qualifiers.IgdbApi
+import com.paulrybitskyi.gamedge.igdb.api.common.di.qualifiers.LiveApi
 import com.paulrybitskyi.gamedge.igdb.api.common.di.qualifiers.StreamApi
 import dagger.Module
 import dagger.Provides
@@ -67,6 +69,20 @@ internal object CommonsModule {
     }
 
     @Provides
+    @Singleton
+    @LiveApi
+    fun provideOkHttpClientLive(
+        okHttpClient: OkHttpClient,
+        authorizationInterceptor: AuthorizationGraphInterceptor,
+        authenticator: Authenticator,
+    ): OkHttpClient {
+        return okHttpClient.newBuilder()
+            .addInterceptorAsFirstInChain(authorizationInterceptor)
+            .authenticator(authenticator)
+            .build()
+    }
+
+    @Provides
     @IgdbApi
     fun provideApiResultCallAdapterFactory(
         @IgdbApi errorMessageExtractor: ErrorMessageExtractor,
@@ -97,6 +113,15 @@ internal object CommonsModule {
             credentialsStore = credentialsStore,
             authorizer = authorizer,
             clientId = twitchConstantsProvider.clientId,
+        )
+    }
+
+    @Provides
+    fun provideAuthorizationGraphInterceptor(
+        twitchConstantsProvider: TwitchConstantsProvider,
+    ): AuthorizationGraphInterceptor {
+        return AuthorizationGraphInterceptor(
+            clientId = twitchConstantsProvider.twitchGRAP,
         )
     }
 }

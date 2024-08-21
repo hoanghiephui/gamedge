@@ -1,13 +1,11 @@
 package com.paulrybitskyi.gamedge.igdb.api.stream.model
 
-import android.os.Parcelable
 import com.paulrybitskyi.gamedge.igdb.apicalypse.serialization.annotations.Apicalypse
 import com.paulrybitskyi.gamedge.igdb.apicalypse.serialization.annotations.ApicalypseClass
-import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-@Parcelize
+
 @ApicalypseClass
 @Serializable
 data class StreamsResponse(
@@ -19,9 +17,8 @@ data class StreamsResponse(
     @Apicalypse("data")
     @SerialName("data")
     val data: List<DataItem>
-) : Parcelable
+)
 
-@Parcelize
 @ApicalypseClass
 @Serializable
 data class Pagination(
@@ -29,9 +26,8 @@ data class Pagination(
     @Apicalypse("cursor")
     @SerialName("cursor")
     val cursor: String
-) : Parcelable
+)
 
-@Parcelize
 @ApicalypseClass
 @Serializable
 data class DataItem(
@@ -91,4 +87,4 @@ data class DataItem(
     @Apicalypse("game_id")
     @SerialName("game_id")
     val gameId: String
-) : Parcelable
+)

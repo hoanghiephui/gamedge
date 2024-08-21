@@ -1,11 +1,11 @@
-package com.paulrybitskyi.gamedge.igdb.api.stream
+package com.paulrybitskyi.gamedge.igdb.api.live
 
 import com.paulrybitskyi.gamedge.common.api.asConverterFactory
 import com.paulrybitskyi.gamedge.common.api.calladapter.ApiResultCallAdapterFactory
 import com.paulrybitskyi.gamedge.igdb.api.common.TwitchConstantsProvider
 import com.paulrybitskyi.gamedge.igdb.api.common.di.qualifiers.Endpoint
 import com.paulrybitskyi.gamedge.igdb.api.common.di.qualifiers.IgdbApi
-import com.paulrybitskyi.gamedge.igdb.api.common.di.qualifiers.StreamApi
+import com.paulrybitskyi.gamedge.igdb.api.common.di.qualifiers.LiveApi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -17,26 +17,26 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-internal object StreamEndpointModule {
+internal object LiveEndpointModule {
     @Provides
     @Singleton
-    fun provideStreamEndpoint(
-        streamService: StreamService,
-    ): StreamEndpoint {
-        return StreamEndpointImpl(
-            streamService = streamService,
+    fun provideLiveEndpoint(
+        liveService: LiveService,
+    ): LiveEndpoint {
+        return LiveEndpointImpl(
+            liveService = liveService
         )
     }
 
     @Provides
-    fun provideStreamService(@Endpoint(Endpoint.Type.STREAM) retrofit: Retrofit): StreamService {
-        return retrofit.create(StreamService::class.java)
+    fun provideLiveService(@Endpoint(Endpoint.Type.LIVE) retrofit: Retrofit): LiveService {
+        return retrofit.create(LiveService::class.java)
     }
 
     @Provides
-    @Endpoint(Endpoint.Type.STREAM)
+    @Endpoint(Endpoint.Type.LIVE)
     fun provideRetrofit(
-        @StreamApi okHttpClient: OkHttpClient,
+        @LiveApi okHttpClient: OkHttpClient,
         @IgdbApi callAdapterFactory: ApiResultCallAdapterFactory,
         json: Json,
         twitchConstantsProvider: TwitchConstantsProvider,
@@ -45,7 +45,7 @@ internal object StreamEndpointModule {
             .client(okHttpClient)
             .addCallAdapterFactory(callAdapterFactory)
             .addConverterFactory(json.asConverterFactory())
-            .baseUrl(twitchConstantsProvider.steamTwitchUrl)
+            .baseUrl(twitchConstantsProvider.graphUrl)
             .build()
     }
 }

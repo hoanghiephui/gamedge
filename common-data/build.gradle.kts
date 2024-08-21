@@ -53,7 +53,7 @@ dependencies {
     implementation(project(localModules.core))
     implementation(project(localModules.igdbApi))
     implementation(project(localModules.database))
-
+    implementation(project(":model"))
     implementation(libs.coroutines)
 
     implementation(libs.prefsDataStore)

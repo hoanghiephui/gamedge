@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.paulrybitskyi.gamedge.common.data.games.datastores.igdb
+package com.paulrybitskyi.gamedge.common.data.maper
 
 import com.paulrybitskyi.gamedge.common.domain.games.entities.StreamData
 import com.paulrybitskyi.gamedge.common.domain.games.entities.StreamItem

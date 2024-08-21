@@ -35,7 +35,8 @@ if (localFile.exists()) {
 
 val twitchAppClientId: String = localProperties.getProperty("TWITCH_APP_CLIENT_ID", "")
 val twitchAppClientSecret: String = localProperties.getProperty("TWITCH_APP_CLIENT_SECRET", "")
-val twitchHash: String = localProperties.getProperty("TWITCH_HASH", "")
+val twitchHash: String = localProperties.getProperty("TWITCH_HASH_VIDEO", "")
+val twitchHashChat: String = localProperties.getProperty("TWITCH_HASH_CHAT", "")
 val twitchGRAPHQL: String = localProperties.getProperty("TWITCH_GRAPHQL_ID", "")
 
 
@@ -46,7 +47,8 @@ android {
         stringField("TWITCH_APP_CLIENT_ID", twitchAppClientId)
         stringField("TWITCH_APP_CLIENT_SECRET", twitchAppClientSecret)
         stringField("TWITCH_GRAPHQL_ID", twitchGRAPHQL)
-        stringField("TWITCH_HASH", twitchHash)
+        stringField("TWITCH_HASH_VIDEO", twitchHash)
+        stringField("TWITCH_HASH_CHAT", twitchHashChat)
     }
 
     buildFeatures {
@@ -58,7 +60,7 @@ dependencies {
     api(project(localModules.commonApi))
     implementation(project(localModules.igdbApicalypse))
     implementation(project(localModules.core))
-
+    implementation(project(":model"))
     implementation(libs.coroutines)
     implementation(libs.kotlinxSerialization)
 

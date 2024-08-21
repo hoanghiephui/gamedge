@@ -24,6 +24,10 @@ internal interface TwitchConstantsProvider {
     val clientSecret: String
     val apiBaseUrl: String
     val steamTwitchUrl: String
+    val twitchHastVideo: String
+    val twitchHastChat: String
+    val twitchGRAP: String
+    val graphUrl: String
 }
 
 internal class ProdTwitchConstantsProvider @Inject constructor() : TwitchConstantsProvider {
@@ -32,4 +36,13 @@ internal class ProdTwitchConstantsProvider @Inject constructor() : TwitchConstan
     override val apiBaseUrl: String = Constants.TWITCH_API_BASE_URL
     override val steamTwitchUrl: String
         get() = Constants.TWITCH_API_STREAM_URL
+    override val twitchHastVideo: String
+        get() = BuildConfig.TWITCH_HASH_VIDEO
+    override val twitchHastChat: String
+        get() = BuildConfig.TWITCH_HASH_CHAT
+    override val twitchGRAP: String
+        get() = BuildConfig.TWITCH_GRAPHQL_ID
+
+    override val graphUrl: String
+        get() = Constants.TWITCH_API_LIVE_URL
 }

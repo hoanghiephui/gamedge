@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Paul Rybitskyi, paul.rybitskyi.work@gmail.com
+ * Copyright 2021 Paul Rybitskyi, paul.rybitskyi.work@gmail.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-package com.paulrybitskyi.gamedge.common.domain.games.datastores
+package com.paulrybitskyi.gamedge.igdb.api.common.di.qualifiers
 
-import com.paulrybitskyi.gamedge.common.domain.live.LiveRepository
-import com.paulrybitskyi.gamedge.common.domain.repository.StreamRepository
-import javax.inject.Inject
+import javax.inject.Qualifier
 
-class GamesDataStores @Inject constructor(
-    val local: GamesLocalDataStore,
-    val remote: GamesRemoteDataStore,
-    val streamRepository: StreamRepository,
-    val liveRepository: LiveRepository
+@Qualifier
+@Retention(AnnotationRetention.RUNTIME)
+@Target(
+    AnnotationTarget.CLASS,
+    AnnotationTarget.FIELD,
+    AnnotationTarget.FUNCTION,
+    AnnotationTarget.VALUE_PARAMETER,
 )
+internal annotation class LiveApi

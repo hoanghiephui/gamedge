@@ -3,12 +3,11 @@ package com.paulrybitskyi.gamedge.common.data.repository
 import com.github.michaelbull.result.mapEither
 import com.paulrybitskyi.gamedge.common.api.ApiResult
 import com.paulrybitskyi.gamedge.common.data.common.ApiErrorMapper
-import com.paulrybitskyi.gamedge.common.data.games.datastores.igdb.StreamMapper
-import com.paulrybitskyi.gamedge.common.data.games.datastores.igdb.mapToDomainStreams
+import com.paulrybitskyi.gamedge.common.data.maper.StreamMapper
+import com.paulrybitskyi.gamedge.common.data.maper.mapToDomainStreams
 import com.paulrybitskyi.gamedge.common.domain.common.DispatcherProvider
 import com.paulrybitskyi.gamedge.common.domain.common.DomainResult
 import com.paulrybitskyi.gamedge.common.domain.games.entities.StreamData
-import com.paulrybitskyi.gamedge.common.domain.games.entities.StreamItem
 import com.paulrybitskyi.gamedge.common.domain.repository.StreamRepository
 import com.paulrybitskyi.gamedge.igdb.api.stream.StreamEndpoint
 import com.paulrybitskyi.gamedge.igdb.api.stream.model.StreamsResponse
@@ -31,7 +30,7 @@ internal class StreamRepositoryImpl @Inject constructor(
     }
 
     private suspend fun ApiResult<StreamsResponse>.toDataStoreResult(): DomainResult<StreamData> {
-        return withContext(dispatcherProvider.computation) {
+        return withContext(dispatcherProvider.io) {
             mapEither(streamMapper::mapToDomainStreams, apiErrorMapper::mapToDomainError)
         }
     }

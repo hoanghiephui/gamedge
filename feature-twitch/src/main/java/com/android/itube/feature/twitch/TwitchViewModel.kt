@@ -14,6 +14,7 @@ import com.android.itube.feature.twitch.state.toSuccessState
 import com.paulrybitskyi.gamedge.common.domain.auth.datastores.AuthLocalDataStore
 import com.paulrybitskyi.gamedge.common.domain.common.extensions.resultOrError
 import com.paulrybitskyi.gamedge.common.domain.games.usecases.StreamUseCase
+import com.paulrybitskyi.gamedge.common.domain.live.usecases.LiveUseCase
 import com.paulrybitskyi.gamedge.common.ui.base.BaseViewModel
 import com.paulrybitskyi.gamedge.common.ui.base.events.common.GeneralCommand
 import com.paulrybitskyi.gamedge.common.ui.di.qualifiers.TransitionAnimationDuration
@@ -41,6 +42,7 @@ import javax.inject.Inject
 class TwitchViewModel @Inject constructor(
     private val authLocalDataStore: AuthLocalDataStore,
     private val streamUseCase: StreamUseCase,
+    private val liveUseCase: LiveUseCase,
     private val errorMapper: ErrorMapper,
     private val logger: Logger,
     @TransitionAnimationDuration

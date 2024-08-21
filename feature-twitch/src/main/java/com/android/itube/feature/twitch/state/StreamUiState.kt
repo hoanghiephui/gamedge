@@ -1,8 +1,8 @@
 package com.android.itube.feature.twitch.state
 
 import androidx.compose.runtime.Immutable
-import com.paulrybitskyi.gamedge.common.domain.games.entities.StreamData
-import com.paulrybitskyi.gamedge.common.domain.games.entities.StreamItem
+import com.android.model.StreamData
+import com.android.model.StreamItem
 import com.paulrybitskyi.gamedge.common.ui.widgets.ResultUiState
 
 @Immutable

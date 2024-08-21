@@ -11,6 +11,7 @@ import com.android.itube.feature.twitch.state.enableLoading
 import com.android.itube.feature.twitch.state.toErrorState
 import com.android.itube.feature.twitch.state.toLoadMoreSuccessState
 import com.android.itube.feature.twitch.state.toSuccessState
+import com.android.model.StreamItem
 import com.paulrybitskyi.gamedge.common.domain.auth.datastores.AuthLocalDataStore
 import com.paulrybitskyi.gamedge.common.domain.common.extensions.resultOrError
 import com.paulrybitskyi.gamedge.common.domain.games.usecases.StreamUseCase
@@ -21,6 +22,7 @@ import com.paulrybitskyi.gamedge.common.ui.di.qualifiers.TransitionAnimationDura
 import com.paulrybitskyi.gamedge.core.ErrorMapper
 import com.paulrybitskyi.gamedge.core.Logger
 import com.paulrybitskyi.gamedge.core.utils.onError
+import com.paulrybitskyi.gamedge.igdb.api.maper.GraphMapper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -45,6 +47,7 @@ class TwitchViewModel @Inject constructor(
     private val liveUseCase: LiveUseCase,
     private val errorMapper: ErrorMapper,
     private val logger: Logger,
+    private val graphMapper: GraphMapper,
     @TransitionAnimationDuration
     private val transitionAnimationDuration: Long,
 ) : BaseViewModel() {
@@ -55,6 +58,9 @@ class TwitchViewModel @Inject constructor(
 
     var isInitialLoading by mutableStateOf(false)
         private set
+    var isFetchLiveStreamURLLoading by mutableStateOf(false)
+        private set
+
     private val _uiState = MutableStateFlow(createEmptyUiState())
 
     private val currentUiState: StreamUiState
@@ -67,6 +73,25 @@ class TwitchViewModel @Inject constructor(
         started = SharingStarted.WhileSubscribed(5_000),
         initialValue = null,
     )
+
+    fun getLiveStreamURL(data: StreamItem) {
+        if (isFetchLiveStreamURLLoading) {
+            return
+        }
+        liveUseCase.getGraphQL(graphMapper.mapToGraphQLRequest(data))
+            .resultOrError()
+            .onError {
+                logger.error(logTag, "Failed to GetLiveStreamURL", it)
+                dispatchCommand(GeneralCommand.ShowLongToast(errorMapper.mapToMessage(it)))
+            }.onStart {
+                isFetchLiveStreamURLLoading = true
+            }.onCompletion {
+                isFetchLiveStreamURLLoading = false
+            }.distinctUntilChanged()
+            .onEach {
+
+            }.launchIn(viewModelScope)
+    }
 
     fun onSaveToken(token: String) {
         viewModelScope.launch {
@@ -82,7 +107,7 @@ class TwitchViewModel @Inject constructor(
             .resultOrError()
             .map { data -> currentUiState.toSuccessState(data) }
             .onError {
-                logger.error(logTag, "Failed to getStreamItems", it)
+                logger.error(logTag, "Failed to GetStreamItems", it)
                 dispatchCommand(GeneralCommand.ShowLongToast(errorMapper.mapToMessage(it)))
                 emit(currentUiState.toErrorState())
             }
@@ -129,13 +154,13 @@ class TwitchViewModel @Inject constructor(
                 isRefreshLoading = true
                 emit(currentUiState.enableLoading())
                 // Show loading state for some time since it can be too quick
-                val time = if(isClearPage) transitionAnimationDuration else 0L
+                val time = if (isClearPage) transitionAnimationDuration else 0L
                 delay(time)
             }
             .onCompletion {
                 // Delay disabling loading to avoid quick state changes like
                 // empty, loading, empty, success
-                val time = if(isClearPage) transitionAnimationDuration else 0L
+                val time = if (isClearPage) transitionAnimationDuration else 0L
                 delay(time)
                 isRefreshLoading = false
                 emit(currentUiState.disableLoading())
@@ -151,6 +176,7 @@ class TwitchViewModel @Inject constructor(
     fun onBottomReached() {
         loadMoreGames()
     }
+
     private fun loadMoreGames() {
         if (!hasMoreGamesToLoad) return
         Log.d("AAA", "${currentUiState.items.size}")

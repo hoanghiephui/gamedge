@@ -1,20 +1,20 @@
 package com.paulrybitskyi.gamedge.common.data.maper
 
-import com.android.model.GraphQLRequest
+import com.android.model.GraphQLRequestItem
 import com.paulrybitskyi.gamedge.common.domain.live.entities.StreamPlaybackAccessToken
-import com.paulrybitskyi.gamedge.igdb.api.live.model.GraphQLResponse
+import com.paulrybitskyi.gamedge.igdb.api.live.model.GraphQLResponseItem
 import javax.inject.Inject
 
 internal class LiveMapper @Inject constructor() {
     fun mapToDomainLive(
-        graphQLResponse: GraphQLResponse,
-        body: GraphQLRequest
+        graphQLResponse: GraphQLResponseItem,
+        body: GraphQLRequestItem
     ): StreamPlaybackAccessToken {
         return StreamPlaybackAccessToken(
-            token = graphQLResponse.graphQLResponse.first().data.streamPlaybackAccessToken.value,
-            signature = graphQLResponse.graphQLResponse.first().data.streamPlaybackAccessToken.signature,
-            streamerName = body.graphQLRequest.first().variables.login,
-            playerType = body.graphQLRequest.first().variables.playerType
+            token = graphQLResponse.data.streamPlaybackAccessToken.value,
+            signature = graphQLResponse.data.streamPlaybackAccessToken.signature,
+            streamerName = body.variables.login,
+            playerType = body.variables.playerType
         )
     }
 

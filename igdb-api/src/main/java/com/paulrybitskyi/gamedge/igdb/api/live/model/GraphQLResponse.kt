@@ -7,15 +7,6 @@ import kotlinx.serialization.Serializable
 
 @ApicalypseClass
 @Serializable
-data class GraphQLResponse(
-
-    @Apicalypse("GraphQLResponse")
-    @SerialName("GraphQLResponse")
-    val graphQLResponse: List<GraphQLResponseItem>
-)
-
-@ApicalypseClass
-@Serializable
 data class GraphQLResponseItem(
 
     @Apicalypse("extensions")

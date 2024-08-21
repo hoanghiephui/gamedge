@@ -17,7 +17,7 @@ dependencies {
     implementation(project(localModules.core))
     implementation(project(localModules.commonUi))
     implementation(project(localModules.commonUiWidgets))
-
+    implementation(project(localModules.igdbApi))
     implementation(libs.coroutines)
 
     implementation(libs.composeUi)

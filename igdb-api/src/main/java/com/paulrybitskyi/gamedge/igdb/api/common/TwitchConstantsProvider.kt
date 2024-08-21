@@ -19,26 +19,26 @@ package com.paulrybitskyi.gamedge.igdb.api.common
 import com.paulrybitskyi.gamedge.igdb.api.BuildConfig
 import javax.inject.Inject
 
-internal interface TwitchConstantsProvider {
+interface TwitchConstantsProvider {
     val clientId: String
     val clientSecret: String
     val apiBaseUrl: String
     val steamTwitchUrl: String
-    val twitchHastVideo: String
-    val twitchHastChat: String
+    val twitchHashVideo: String
+    val twitchHashChat: String
     val twitchGRAP: String
     val graphUrl: String
 }
 
-internal class ProdTwitchConstantsProvider @Inject constructor() : TwitchConstantsProvider {
+class ProdTwitchConstantsProvider @Inject constructor() : TwitchConstantsProvider {
     override val clientId: String = BuildConfig.TWITCH_APP_CLIENT_ID
     override val clientSecret: String = BuildConfig.TWITCH_APP_CLIENT_SECRET
     override val apiBaseUrl: String = Constants.TWITCH_API_BASE_URL
     override val steamTwitchUrl: String
         get() = Constants.TWITCH_API_STREAM_URL
-    override val twitchHastVideo: String
+    override val twitchHashVideo: String
         get() = BuildConfig.TWITCH_HASH_VIDEO
-    override val twitchHastChat: String
+    override val twitchHashChat: String
         get() = BuildConfig.TWITCH_HASH_CHAT
     override val twitchGRAP: String
         get() = BuildConfig.TWITCH_GRAPHQL_ID

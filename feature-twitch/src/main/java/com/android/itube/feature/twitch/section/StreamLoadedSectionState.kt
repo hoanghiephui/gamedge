@@ -11,7 +11,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import com.android.itube.feature.twitch.state.StreamUiState
-import com.paulrybitskyi.gamedge.common.domain.games.entities.StreamItem
+import com.android.model.StreamItem
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -22,6 +22,8 @@ data class StreamLoadedSectionState(
     val lazyListState: LazyStaggeredGridState,
     val navigation: NavHostController,
     val items: ImmutableList<StreamItem>,
+    val onClickVideo: (List<StreamItem>, Int) -> Unit,
+    val isFetchLiveStreamURLLoading: Boolean
 ) : StreamContentSectionState
 
 @Composable
@@ -30,7 +32,9 @@ fun rememberStreamLoadedSectionState(
     refresh: () -> Unit,
     navigation: NavHostController,
     uiState: StreamUiState,
-    onBottomReached: () -> Unit
+    onBottomReached: () -> Unit,
+    onClickVideo: (List<StreamItem>, Int) -> Unit,
+    isFetchLiveStreamURLLoading: Boolean
 ): StreamLoadedSectionState {
     val context = LocalContext.current
     val lazyListState: LazyStaggeredGridState = rememberLazyStaggeredGridState()
@@ -56,7 +60,9 @@ fun rememberStreamLoadedSectionState(
         context,
         lazyListState,
         navigation,
-        items
+        items,
+        onClickVideo,
+        isFetchLiveStreamURLLoading
     ) {
         StreamLoadedSectionState(
             isRefreshLoading = isRefreshLoading,
@@ -64,6 +70,8 @@ fun rememberStreamLoadedSectionState(
             lazyListState = lazyListState,
             navigation = navigation,
             items = items,
+            onClickVideo = onClickVideo,
+            isFetchLiveStreamURLLoading = isFetchLiveStreamURLLoading
         )
     }
 }

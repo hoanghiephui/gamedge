@@ -21,8 +21,7 @@ import com.paulrybitskyi.gamedge.common.domain.common.usecases.ObservableUseCase
 import com.paulrybitskyi.gamedge.common.domain.games.common.ObserveGamesUseCaseParams
 import com.paulrybitskyi.gamedge.common.domain.games.common.RefreshGamesUseCaseParams
 import com.paulrybitskyi.gamedge.common.domain.games.entities.Game
-import com.paulrybitskyi.gamedge.common.domain.games.entities.StreamData
-import com.paulrybitskyi.gamedge.common.domain.games.entities.StreamItem
+import com.android.model.StreamData
 
 typealias ObservableGamesUseCase = ObservableUseCase<ObserveGamesUseCaseParams, List<Game>>
 typealias RefreshableGamesUseCase = ObservableUseCase<RefreshGamesUseCaseParams, DomainResult<List<Game>>>

@@ -1,6 +1,6 @@
 package com.paulrybitskyi.gamedge.common.data.repository
 
-import com.android.model.GraphQLRequest
+import com.android.model.GraphQLRequestItem
 import com.github.michaelbull.result.mapEither
 import com.paulrybitskyi.gamedge.common.api.ApiResult
 import com.paulrybitskyi.gamedge.common.data.common.ApiErrorMapper
@@ -10,7 +10,7 @@ import com.paulrybitskyi.gamedge.common.domain.common.DomainResult
 import com.paulrybitskyi.gamedge.common.domain.live.LiveRepository
 import com.paulrybitskyi.gamedge.common.domain.live.entities.StreamPlaybackAccessToken
 import com.paulrybitskyi.gamedge.igdb.api.live.LiveEndpoint
-import com.paulrybitskyi.gamedge.igdb.api.live.model.GraphQLResponse
+import com.paulrybitskyi.gamedge.igdb.api.live.model.GraphQLResponseItem
 import com.paulrybitskyi.hiltbinder.BindType
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -24,13 +24,16 @@ internal class LiveRepositoryImpl @Inject constructor(
     private val apiErrorMapper: ApiErrorMapper,
     private val liveMapper: LiveMapper
 ) : LiveRepository {
-    override suspend fun getGraphQL(body: GraphQLRequest): DomainResult<StreamPlaybackAccessToken> {
+    override suspend fun getGraphQL(body: GraphQLRequestItem): DomainResult<StreamPlaybackAccessToken> {
         return liveEndpoint.graphQL(body).toDataResult(body)
     }
 
-    private suspend fun ApiResult<GraphQLResponse>.toDataResult(body: GraphQLRequest): DomainResult<StreamPlaybackAccessToken> {
+    private suspend fun ApiResult<List<GraphQLResponseItem>>.toDataResult(body: GraphQLRequestItem): DomainResult<StreamPlaybackAccessToken> {
         return withContext(dispatcherProvider.io) {
-            mapEither({ response -> liveMapper.mapToDomainLive(response, body) }, apiErrorMapper::mapToDomainError)
+            mapEither(
+                { response -> liveMapper.mapToDomainLive(response.first(), body) },
+                apiErrorMapper::mapToDomainError
+            )
         }
     }
 }

@@ -16,8 +16,8 @@
 
 package com.paulrybitskyi.gamedge.common.data.maper
 
-import com.paulrybitskyi.gamedge.common.domain.games.entities.StreamData
-import com.paulrybitskyi.gamedge.common.domain.games.entities.StreamItem
+import com.android.model.StreamData
+import com.android.model.StreamItem
 import com.paulrybitskyi.gamedge.igdb.api.stream.model.StreamsResponse
 import javax.inject.Inject
 

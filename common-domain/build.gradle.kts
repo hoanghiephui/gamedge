@@ -25,7 +25,7 @@ dependencies {
     api(libs.kotlinx.collections.immutable)
     implementation(libs.daggerHiltCore)
     kapt(libs.daggerHiltCoreCompiler)
-    implementation(project(":model"))
+    api(project(":model"))
 
     testImplementation(project(localModules.commonTestingDomain))
     testImplementation(libs.jUnit)

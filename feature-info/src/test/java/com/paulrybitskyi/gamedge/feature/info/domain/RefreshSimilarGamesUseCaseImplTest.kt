@@ -26,6 +26,7 @@ import com.paulrybitskyi.gamedge.common.domain.games.common.throttling.GamesRefr
 import com.paulrybitskyi.gamedge.common.domain.games.datastores.GamesDataStores
 import com.paulrybitskyi.gamedge.common.domain.games.datastores.GamesLocalDataStore
 import com.paulrybitskyi.gamedge.common.domain.games.datastores.GamesRemoteDataStore
+import com.paulrybitskyi.gamedge.common.domain.live.LiveRepository
 import com.paulrybitskyi.gamedge.common.domain.repository.StreamRepository
 import com.paulrybitskyi.gamedge.common.testing.domain.DOMAIN_ERROR_UNKNOWN
 import com.paulrybitskyi.gamedge.common.testing.domain.DOMAIN_GAMES
@@ -53,6 +54,7 @@ internal class RefreshSimilarGamesUseCaseImplTest {
     @MockK private lateinit var gamesRemoteDataStore: GamesRemoteDataStore
     @MockK private lateinit var throttler: GamesRefreshingThrottler
     @MockK private lateinit var streamRepository: StreamRepository
+    @MockK private lateinit var liveRepository: LiveRepository
 
     private lateinit var SUT: RefreshSimilarGamesUseCaseImpl
 
@@ -64,7 +66,8 @@ internal class RefreshSimilarGamesUseCaseImplTest {
             gamesDataStores = GamesDataStores(
                 local = gamesLocalDataStore,
                 remote = gamesRemoteDataStore,
-                streamRepository = streamRepository
+                streamRepository = streamRepository,
+                liveRepository = liveRepository
             ),
             dispatcherProvider = mainCoroutineRule.dispatcherProvider,
             throttlerTools = GamesRefreshingThrottlerTools(

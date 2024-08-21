@@ -10,7 +10,6 @@ import com.android.itube.feature.twitch.section.rememberStreamInitialSectionStat
 import com.android.itube.feature.twitch.section.rememberStreamLoadedSectionState
 import com.android.itube.feature.twitch.section.rememberStreamLoadingSectionState
 import com.android.itube.feature.twitch.state.finiteUiState
-import com.paulrybitskyi.gamedge.common.ui.widgets.FiniteUiState
 import com.paulrybitskyi.gamedge.common.ui.widgets.ResultUiState
 
 data class StreamPageState(
@@ -24,7 +23,7 @@ fun rememberStreamPageState(
     navigation: NavHostController,
 ): StreamPageState {
     val uiState by pageViewModel.uiState.collectAsStateWithLifecycle()
-    val isInitialLoading = pageViewModel.isInitialLoading
+    val isFetchLiveStreamURLLoading = pageViewModel.isFetchLiveStreamURLLoading
     val isRefreshLoading = pageViewModel.isRefreshLoading
     val contentSectionState = when(uiState.finiteUiState) {
         ResultUiState.Loading -> rememberStreamLoadingSectionState()
@@ -35,7 +34,11 @@ fun rememberStreamPageState(
             },
             navigation = navigation,
             uiState = uiState,
-            onBottomReached = { pageViewModel.onBottomReached() }
+            onBottomReached = { pageViewModel.onBottomReached() },
+            onClickVideo = { items, index ->
+                pageViewModel.getLiveStreamURL(items[index])
+            },
+            isFetchLiveStreamURLLoading = isFetchLiveStreamURLLoading
         )
 
         else -> rememberStreamInitialSectionState(

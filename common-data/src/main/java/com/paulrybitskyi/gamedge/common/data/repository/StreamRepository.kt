@@ -7,7 +7,7 @@ import com.paulrybitskyi.gamedge.common.data.maper.StreamMapper
 import com.paulrybitskyi.gamedge.common.data.maper.mapToDomainStreams
 import com.paulrybitskyi.gamedge.common.domain.common.DispatcherProvider
 import com.paulrybitskyi.gamedge.common.domain.common.DomainResult
-import com.paulrybitskyi.gamedge.common.domain.games.entities.StreamData
+import com.android.model.StreamData
 import com.paulrybitskyi.gamedge.common.domain.repository.StreamRepository
 import com.paulrybitskyi.gamedge.igdb.api.stream.StreamEndpoint
 import com.paulrybitskyi.gamedge.igdb.api.stream.model.StreamsResponse

@@ -1,6 +1,5 @@
 package com.android.itube.feature.twitch.section
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -19,10 +18,6 @@ import androidx.compose.material3.Badge
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -32,8 +27,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.android.itube.feature.twitch.R
-import com.paulrybitskyi.gamedge.common.domain.games.entities.StreamItem
-import com.paulrybitskyi.gamedge.common.ui.reachedBottom
+import com.android.model.StreamItem
+import com.paulrybitskyi.gamedge.common.ui.v2.component.NiaOverlayLoadingWheel
 import com.paulrybitskyi.gamedge.common.ui.widgets.NewsResourceHeaderImage
 import com.paulrybitskyi.gamedge.common.ui.widgets.PullRefresh
 import com.paulrybitskyi.gamedge.core.utils.formattedCount
@@ -57,7 +52,13 @@ fun StreamLoadedSection(
         ) {
             exploreFeed(
                 itemVideos = sectionState.items,
-                onClickVideo = { _, _ -> },
+                onClickVideo = sectionState.onClickVideo,
+            )
+        }
+        if (sectionState.isFetchLiveStreamURLLoading) {
+            NiaOverlayLoadingWheel(
+                contentDesc = "loading",
+                modifier = Modifier.align(Alignment.Center)
             )
         }
     }

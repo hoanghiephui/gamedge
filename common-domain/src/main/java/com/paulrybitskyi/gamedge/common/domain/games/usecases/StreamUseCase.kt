@@ -5,7 +5,7 @@ import com.paulrybitskyi.gamedge.common.domain.common.DomainResult
 import com.paulrybitskyi.gamedge.common.domain.common.extensions.onEachSuccess
 import com.paulrybitskyi.gamedge.common.domain.games.ObservableStreamUseCase
 import com.paulrybitskyi.gamedge.common.domain.games.datastores.GamesDataStores
-import com.paulrybitskyi.gamedge.common.domain.games.entities.StreamData
+import com.android.model.StreamData
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn

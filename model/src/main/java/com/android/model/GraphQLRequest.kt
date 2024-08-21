@@ -3,13 +3,6 @@ package com.android.model
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-
-@Serializable
-data class GraphQLRequest(
-    @SerialName("GraphQLRequest")
-    val graphQLRequest: List<GraphQLRequestItem>
-)
-
 @Serializable
 data class PersistedQuery(
     @SerialName("sha256Hash")

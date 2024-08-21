@@ -1,4 +1,4 @@
-package com.paulrybitskyi.gamedge.common.domain.games.entities
+package com.android.model
 
 data class StreamItem(
     val userName: String,
@@ -15,7 +15,10 @@ data class StreamItem(
     val id: String,
     val viewerCount: Long,
     val gameId: String
-)
+) {
+    val isLive: Boolean get() =
+        "live" == type
+}
 
 data class StreamData(
     val cursorPage: String,

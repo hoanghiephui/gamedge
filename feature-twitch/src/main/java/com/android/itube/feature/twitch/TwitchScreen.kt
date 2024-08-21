@@ -54,6 +54,7 @@ import com.kevinnzou.web.WebViewState
 import com.kevinnzou.web.rememberWebViewNavigator
 import com.kevinnzou.web.rememberWebViewState
 import com.paulrybitskyi.gamedge.common.ui.v2.component.NiaButton
+import com.paulrybitskyi.gamedge.common.ui.widgets.NetworkError
 import com.paulrybitskyi.gamedge.common.ui.widgets.TwitchLogo
 import com.paulrybitskyi.gamedge.core.Constants.LOGIN_URL
 import com.paulrybitskyi.gamedge.core.utils.getAccessTokenFromURL
@@ -164,7 +165,9 @@ private fun LoginScreen(
                         MakeWebView(
                             navigator, stateWeb, webClient
                         )
-                        LoadingScreen(stateWeb.loadingState)
+                        if (stateWeb.loadingState is LoadingState.Loading) {
+                            LoadingScreen()
+                        }
                     }
                 }
 
@@ -173,8 +176,9 @@ private fun LoginScreen(
                 }
 
                 UiState.Error -> {
-                    LoadingScreen(stateWeb.loadingState)
+                    ErrorScreen()
                 }
+
                 UiState.Init -> {
 
                 }
@@ -214,27 +218,25 @@ private fun MakeWebView(
 }
 
 @Composable
-private fun LoadingScreen(loadingState: LoadingState) {
-    if (loadingState is LoadingState.Loading) {
-        val infiniteTransition = rememberInfiniteTransition(label = "infinite transition")
-        val scale by infiniteTransition.animateFloat(
-            initialValue = 1f,
-            targetValue = 3f,
-            animationSpec = infiniteRepeatable(tween(1000), RepeatMode.Reverse),
-            label = "scale"
-        )
+private fun LoadingScreen() {
+    val infiniteTransition = rememberInfiniteTransition(label = "infinite transition")
+    val scale by infiniteTransition.animateFloat(
+        initialValue = 1f,
+        targetValue = 3f,
+        animationSpec = infiniteRepeatable(tween(1000), RepeatMode.Reverse),
+        label = "scale"
+    )
 
-        Box(modifier = Modifier.fillMaxSize()) {
-            Image(painter = painterResource(id = coreR.drawable.twitch_logo), contentDescription = "",
-                modifier = Modifier
-                    .graphicsLayer {
-                        scaleX = scale
-                        scaleY = scale
-                        transformOrigin = TransformOrigin.Center
-                    }
-                    .align(Alignment.Center)
-            )
-        }
+    Box(modifier = Modifier.fillMaxSize()) {
+        Image(painter = painterResource(id = coreR.drawable.twitch_logo), contentDescription = "",
+            modifier = Modifier
+                .graphicsLayer {
+                    scaleX = scale
+                    scaleY = scale
+                    transformOrigin = TransformOrigin.Center
+                }
+                .align(Alignment.Center)
+        )
     }
 }
 
@@ -279,6 +281,16 @@ private fun InitLogin(onLogin: () -> Unit) {
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun ErrorScreen() {
+    Box(modifier = Modifier.fillMaxSize()) {
+        NetworkError(
+            modifier = Modifier.align(Alignment.Center),
+            onClickReload = {},
+        )
     }
 
 }

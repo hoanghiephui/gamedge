@@ -29,7 +29,8 @@ android {
 
 dependencies {
     implementation(project(localModules.core))
-    api(platform(libs.androidx.compose.bom))
+
+    implementation(platform(libs.composeBom))
     api(libs.androidx.compose.foundation.layout)
     api(libs.androidx.compose.material.iconsExtended)
     api(libs.androidx.compose.material3)
@@ -42,7 +43,6 @@ dependencies {
     implementation(libs.composeUi)
     implementation(libs.composeTooling)
     implementation(libs.composeFoundation)
-    implementation(libs.composeActivity)
     implementation(libs.composeRuntime)
     implementation(libs.composeMaterial)
     implementation(libs.accompanistSystemUi)

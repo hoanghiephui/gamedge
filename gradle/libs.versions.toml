@@ -130,7 +130,6 @@ composeFoundation = { module = "androidx.compose.foundation:foundation" }
 composeMaterial = { module = "androidx.compose.material:material" }
 composeRuntime = { module = "androidx.compose.runtime:runtime" }
 composeAnimation = { module = "androidx.compose.animation:animation-graphics" }
-androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "androidxComposeBom" }
 androidx-compose-foundation-layout = { group = "androidx.compose.foundation", name = "foundation-layout" }
 androidx-compose-material-iconsExtended = { group = "androidx.compose.material", name = "material-icons-extended" }
 androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }

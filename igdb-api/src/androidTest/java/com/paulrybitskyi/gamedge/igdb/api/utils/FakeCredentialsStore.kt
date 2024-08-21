@@ -37,4 +37,12 @@ internal class FakeCredentialsStore @Inject constructor() : CredentialsStore {
     override suspend fun getRemoteOauthCredentials(): ApiOauthCredentials? {
         return oauthCredentials
     }
+
+    override suspend fun saveTokenTwitch(token: String) {
+
+    }
+
+    override suspend fun getTokenLoginTwitch(): String? {
+        return null
+    }
 }

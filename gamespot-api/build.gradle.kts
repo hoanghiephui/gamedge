@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import com.paulrybitskyi.gamedge.extensions.property
 import com.paulrybitskyi.gamedge.extensions.stringField
+import java.util.Properties
 
 plugins {
     id(libs.plugins.androidLibrary.get().pluginId)
@@ -26,12 +26,17 @@ plugins {
     alias(libs.plugins.daggerHilt)
     alias(libs.plugins.kotlinxSerialization)
 }
-
+val localProperties = Properties()
+val localFile = rootProject.file("local.properties")
+if (localFile.exists()) {
+    localProperties.load(localFile.inputStream())
+}
+val gameSpotId: String = localProperties.getProperty("GAMESPOT_API_KEY", "")
 android {
     namespace = "com.paulrybitskyi.gamedge.gamespot.api"
 
     defaultConfig {
-        stringField("GAMESPOT_API_KEY", property("GAMESPOT_API_KEY", ""))
+        stringField("GAMESPOT_API_KEY", gameSpotId)
     }
 
     buildFeatures {

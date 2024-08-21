@@ -86,7 +86,7 @@ class GamedgeAndroidPlugin : Plugin<Project> {
                         }
                     }
 
-                    debuggable(true)
+                    debuggable(false)
                     manifestPlaceholders["usesCleartextTraffic"] = false
 
                     isMinifyEnabled = true

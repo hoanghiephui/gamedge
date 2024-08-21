@@ -10,7 +10,7 @@ data class StreamUiState(
     val isLoading: Boolean,
     val isError: Boolean,
     val title: String,
-    val items: List<StreamItem>,
+    val items: List<StreamItem>, val countSize: Int
 )
 
 internal val StreamUiState.finiteUiState: ResultUiState
@@ -59,11 +59,11 @@ internal fun StreamUiState.disableLoading(): StreamUiState {
 internal fun StreamUiState.toSuccessState(
     data: StreamData,
 ): StreamUiState {
-    return copy(isLoading = false, items = data.items)
+    return copy(isLoading = false, items = data.items, countSize = data.items.size)
 }
 
 internal fun StreamUiState.toLoadMoreSuccessState(
     data: StreamData,
 ): StreamUiState {
-    return copy(isLoading = false, items = items + data.items)
+    return copy(isLoading = false, items = items + data.items, countSize = data.items.size)
 }

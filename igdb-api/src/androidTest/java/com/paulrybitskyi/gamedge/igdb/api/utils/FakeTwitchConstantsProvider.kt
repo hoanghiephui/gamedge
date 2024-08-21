@@ -27,4 +27,5 @@ internal class FakeTwitchConstantsProvider @Inject constructor(
     override val clientId: String = "client_id"
     override val clientSecret: String = "client_secret"
     override val apiBaseUrl: String = mockWebServer.url("/").toString()
+    override val steamTwitchUrl: String = mockWebServer.url("/").toString()
 }

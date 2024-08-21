@@ -8,27 +8,25 @@ import androidx.lifecycle.viewModelScope
 import com.android.itube.feature.twitch.state.StreamUiState
 import com.android.itube.feature.twitch.state.disableLoading
 import com.android.itube.feature.twitch.state.enableLoading
-import com.android.itube.feature.twitch.state.toEmptyState
 import com.android.itube.feature.twitch.state.toErrorState
 import com.android.itube.feature.twitch.state.toLoadMoreSuccessState
 import com.android.itube.feature.twitch.state.toSuccessState
 import com.paulrybitskyi.gamedge.common.domain.auth.datastores.AuthLocalDataStore
-import com.paulrybitskyi.gamedge.common.domain.common.entities.nextOffset
 import com.paulrybitskyi.gamedge.common.domain.common.extensions.resultOrError
 import com.paulrybitskyi.gamedge.common.domain.games.usecases.StreamUseCase
 import com.paulrybitskyi.gamedge.common.ui.base.BaseViewModel
 import com.paulrybitskyi.gamedge.common.ui.base.events.common.GeneralCommand
+import com.paulrybitskyi.gamedge.common.ui.di.qualifiers.TransitionAnimationDuration
 import com.paulrybitskyi.gamedge.core.ErrorMapper
 import com.paulrybitskyi.gamedge.core.Logger
 import com.paulrybitskyi.gamedge.core.utils.onError
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
@@ -45,8 +43,10 @@ class TwitchViewModel @Inject constructor(
     private val streamUseCase: StreamUseCase,
     private val errorMapper: ErrorMapper,
     private val logger: Logger,
+    @TransitionAnimationDuration
+    private val transitionAnimationDuration: Long,
 ) : BaseViewModel() {
-    private var gamesRefreshingJob: Job? = null
+    private var hasMoreGamesToLoad = false
 
     var isRefreshLoading by mutableStateOf(false)
         private set
@@ -97,7 +97,11 @@ class TwitchViewModel @Inject constructor(
                 delay(resultEmissionDelay)
                 emit(currentUiState.disableLoading())
             }
-            .onEach { emittedUiState -> _uiState.update { emittedUiState } }
+            .distinctUntilChanged()
+            .onEach { emittedUiState ->
+                configureNextLoad(emittedUiState)
+                _uiState.update { emittedUiState }
+            }
             .launchIn(viewModelScope)
     }
 
@@ -105,7 +109,7 @@ class TwitchViewModel @Inject constructor(
         if (isInitialLoading || isRefreshLoading) {
             return
         }
-        gamesRefreshingJob = streamUseCase.execute(isClearPage)
+        streamUseCase.execute(isClearPage)
             .resultOrError()
             .map { data ->
                 if (isClearPage) {
@@ -115,7 +119,7 @@ class TwitchViewModel @Inject constructor(
                 }
             }
             .onError {
-                logger.error(logTag, "Failed to getStreamItems", it)
+                logger.error(logTag, "Failed to refreshGames", it)
                 dispatchCommand(GeneralCommand.ShowLongToast(errorMapper.mapToMessage(it)))
                 emit(currentUiState.toErrorState())
             }
@@ -123,16 +127,22 @@ class TwitchViewModel @Inject constructor(
                 isRefreshLoading = true
                 emit(currentUiState.enableLoading())
                 // Show loading state for some time since it can be too quick
-                delay(0)
+                val time = if(isClearPage) transitionAnimationDuration else 0L
+                delay(time)
             }
             .onCompletion {
-                isRefreshLoading = false
                 // Delay disabling loading to avoid quick state changes like
                 // empty, loading, empty, success
-                delay(0)
+                val time = if(isClearPage) transitionAnimationDuration else 0L
+                delay(time)
+                isRefreshLoading = false
                 emit(currentUiState.disableLoading())
             }
-            .onEach { emittedUiState -> _uiState.update { emittedUiState } }
+            .distinctUntilChanged()
+            .onEach { emittedUiState ->
+                configureNextLoad(emittedUiState)
+                _uiState.update { emittedUiState }
+            }
             .launchIn(viewModelScope)
     }
 
@@ -140,17 +150,26 @@ class TwitchViewModel @Inject constructor(
         loadMoreGames()
     }
     private fun loadMoreGames() {
-        //if (!hasMoreGamesToLoad) return
+        if (!hasMoreGamesToLoad) return
         Log.d("AAA", "${currentUiState.items.size}")
-        viewModelScope.launch {
-            fetchNextGamesBatch()
-        }
+        fetchNextGamesBatch()
     }
 
-    private suspend fun fetchNextGamesBatch() {
-        //gamesRefreshingJob?.cancelAndJoin()
+    private fun fetchNextGamesBatch() {
         refreshGames(false)
-        //gamesRefreshingJob?.join()
+    }
+
+    private fun configureNextLoad(uiState: StreamUiState) {
+        if (!uiState.hasLoadedNewGames()) return
+
+        val paginationLimit = 20
+        val gameCount = uiState.countSize
+        Log.d("AAA", "Count: $gameCount")
+        hasMoreGamesToLoad = (paginationLimit == gameCount)
+    }
+
+    private fun StreamUiState.hasLoadedNewGames(): Boolean {
+        return (!isLoading && items.isNotEmpty())
     }
 
     private fun createEmptyUiState(): StreamUiState {
@@ -159,6 +178,7 @@ class TwitchViewModel @Inject constructor(
             isError = false,
             title = "",
             items = emptyList(),
+            countSize = 0
         )
     }
 }

@@ -16,6 +16,7 @@
 
 import com.paulrybitskyi.gamedge.extensions.property
 import com.paulrybitskyi.gamedge.extensions.stringField
+import java.util.Properties
 
 plugins {
     id(libs.plugins.androidLibrary.get().pluginId)
@@ -26,13 +27,26 @@ plugins {
     alias(libs.plugins.daggerHilt)
     alias(libs.plugins.kotlinxSerialization)
 }
+val localProperties = Properties()
+val localFile = rootProject.file("local.properties")
+if (localFile.exists()) {
+    localProperties.load(localFile.inputStream())
+}
+
+val twitchAppClientId: String = localProperties.getProperty("TWITCH_APP_CLIENT_ID", "")
+val twitchAppClientSecret: String = localProperties.getProperty("TWITCH_APP_CLIENT_SECRET", "")
+val twitchHash: String = localProperties.getProperty("TWITCH_HASH", "")
+val twitchGRAPHQL: String = localProperties.getProperty("TWITCH_GRAPHQL_ID", "")
+
 
 android {
     namespace = "com.paulrybitskyi.gamedge.igdb.api"
 
     defaultConfig {
-        stringField("TWITCH_APP_CLIENT_ID", property("TWITCH_APP_CLIENT_ID", ""))
-        stringField("TWITCH_APP_CLIENT_SECRET", property("TWITCH_APP_CLIENT_SECRET", ""))
+        stringField("TWITCH_APP_CLIENT_ID", twitchAppClientId)
+        stringField("TWITCH_APP_CLIENT_SECRET", twitchAppClientSecret)
+        stringField("TWITCH_GRAPHQL_ID", twitchGRAPHQL)
+        stringField("TWITCH_HASH", twitchHash)
     }
 
     buildFeatures {

@@ -106,7 +106,7 @@ private fun LoginScreen(
     var state by remember {
         mutableStateOf<UiState>(UiState.Init)
     }
-    LaunchedEffect(authorizationTokenTwitch, state) {
+    LaunchedEffect(authorizationTokenTwitch) {
         state = if (authorizationTokenTwitch?.isNotBlank() == true) {
             UiState.Loaded(token = authorizationTokenTwitch)
         } else {
@@ -169,14 +169,15 @@ private fun LoginScreen(
                 }
 
                 is UiState.Loaded -> {
-
                     TwitchBoard(viewModel, navigation)
                 }
 
                 UiState.Error -> {
                     LoadingScreen(stateWeb.loadingState)
                 }
-                UiState.Init -> {}
+                UiState.Init -> {
+
+                }
             }
         }
     }

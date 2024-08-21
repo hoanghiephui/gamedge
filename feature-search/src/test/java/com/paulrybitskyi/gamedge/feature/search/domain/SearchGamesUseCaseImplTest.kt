@@ -24,6 +24,7 @@ import com.google.common.truth.Truth.assertThat
 import com.paulrybitskyi.gamedge.common.domain.games.datastores.GamesDataStores
 import com.paulrybitskyi.gamedge.common.domain.games.datastores.GamesLocalDataStore
 import com.paulrybitskyi.gamedge.common.domain.games.datastores.GamesRemoteDataStore
+import com.paulrybitskyi.gamedge.common.domain.repository.StreamRepository
 import com.paulrybitskyi.gamedge.common.testing.domain.DOMAIN_ERROR_UNKNOWN
 import com.paulrybitskyi.gamedge.common.testing.domain.DOMAIN_GAMES
 import com.paulrybitskyi.gamedge.common.testing.domain.MainCoroutineRule
@@ -54,6 +55,7 @@ internal class SearchGamesUseCaseImplTest {
     @MockK private lateinit var gamesLocalDataStore: GamesLocalDataStore
     @MockK private lateinit var gamesRemoteDataStore: GamesRemoteDataStore
     @MockK private lateinit var networkStateProvider: NetworkStateProvider
+    @MockK private lateinit var streamRepository: StreamRepository
 
     private lateinit var SUT: SearchGamesUseCaseImpl
 
@@ -65,6 +67,7 @@ internal class SearchGamesUseCaseImplTest {
             gamesDataStores = GamesDataStores(
                 local = gamesLocalDataStore,
                 remote = gamesRemoteDataStore,
+                streamRepository = streamRepository
             ),
             dispatcherProvider = mainCoroutineRule.dispatcherProvider,
             networkStateProvider = networkStateProvider,

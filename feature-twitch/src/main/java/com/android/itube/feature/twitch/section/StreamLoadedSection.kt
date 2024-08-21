@@ -48,10 +48,6 @@ fun StreamLoadedSection(
         isRefreshing = sectionState.isRefreshLoading,
         onRefresh = sectionState.refresh,
     ) {
-        val reachedBottom: Boolean by remember { derivedStateOf { sectionState.lazyListState.reachedBottom() } }
-        if (reachedBottom) {
-            sectionState.onBottomReached()
-        }
         LazyVerticalStaggeredGrid(
             columns = StaggeredGridCells.Adaptive(300.dp),
             contentPadding = PaddingValues(16.dp),
@@ -73,7 +69,7 @@ private fun LazyStaggeredGridScope.exploreFeed(
 ) {
     itemsIndexed(
         items = itemVideos,
-        key = { _, t -> t.id },
+        key = { index, t -> t.id + index },
         contentType = { _, _ -> "exploreFeedItem" },
     ) { index, exploreFeedItem ->
         VideoCard(

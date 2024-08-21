@@ -28,6 +28,7 @@ import com.paulrybitskyi.gamedge.common.domain.games.datastores.GamesDataStores
 import com.paulrybitskyi.gamedge.common.domain.games.datastores.GamesLocalDataStore
 import com.paulrybitskyi.gamedge.common.domain.games.datastores.GamesRemoteDataStore
 import com.paulrybitskyi.gamedge.common.domain.games.usecases.RefreshPopularGamesUseCaseImpl
+import com.paulrybitskyi.gamedge.common.domain.repository.StreamRepository
 import com.paulrybitskyi.gamedge.common.testing.domain.DOMAIN_ERROR_UNKNOWN
 import com.paulrybitskyi.gamedge.common.testing.domain.DOMAIN_GAMES
 import com.paulrybitskyi.gamedge.common.testing.domain.FakeGamesRefreshingThrottlerKeyProvider
@@ -51,6 +52,7 @@ internal class RefreshPopularGamesUseCaseImplTest {
     @MockK private lateinit var gamesLocalDataStore: GamesLocalDataStore
     @MockK private lateinit var gamesRemoteDataStore: GamesRemoteDataStore
     @MockK private lateinit var throttler: GamesRefreshingThrottler
+    @MockK private lateinit var streamRepository: StreamRepository
 
     private lateinit var SUT: RefreshPopularGamesUseCaseImpl
 
@@ -62,6 +64,7 @@ internal class RefreshPopularGamesUseCaseImplTest {
             gamesDataStores = GamesDataStores(
                 local = gamesLocalDataStore,
                 remote = gamesRemoteDataStore,
+                streamRepository = streamRepository
             ),
             throttlerTools = GamesRefreshingThrottlerTools(
                 throttler = throttler,

@@ -19,6 +19,7 @@ package com.paulrybitskyi.gamedge.feature.info.presentation.widgets.main
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -26,12 +27,14 @@ import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.material.Scaffold
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -71,6 +74,7 @@ import com.paulrybitskyi.gamedge.feature.info.presentation.widgets.screenshots.G
 import com.paulrybitskyi.gamedge.feature.info.presentation.widgets.screenshots.GameInfoScreenshots
 import com.paulrybitskyi.gamedge.feature.info.presentation.widgets.videos.GameInfoVideoUiModel
 import com.paulrybitskyi.gamedge.feature.info.presentation.widgets.videos.GameInfoVideos
+import kotlinx.collections.immutable.toImmutableList
 import com.paulrybitskyi.gamedge.core.R as CoreR
 
 @Composable
@@ -127,7 +131,11 @@ private fun GameInfo(
     onCompanyClicked: (GameInfoCompanyUiModel) -> Unit,
     onRelatedGameClicked: (GameInfoRelatedGameUiModel) -> Unit,
 ) {
-    Scaffold { paddingValues ->
+    Scaffold(
+        containerColor = Color.Transparent,
+        contentColor = MaterialTheme.colorScheme.onBackground,
+        contentWindowInsets = WindowInsets(0, 0, 0, 0)
+    ) { paddingValues ->
         AnimatedContentContainer(
             finiteUiState = uiState.finiteUiState,
             modifier = Modifier.padding(paddingValues),
@@ -379,7 +387,7 @@ private fun LazyListScope.relatedGamesItem(
         },
     ) {
         val categoryGames = remember(model.items) {
-            model.items.mapToCategoryUiModels()
+            model.items.mapToCategoryUiModels().toImmutableList()
         }
 
         GamesCategoryPreview(

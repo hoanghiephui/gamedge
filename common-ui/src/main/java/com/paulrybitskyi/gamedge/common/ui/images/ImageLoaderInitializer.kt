@@ -19,9 +19,12 @@ package com.paulrybitskyi.gamedge.common.ui.images
 import android.content.Context
 import coil.Coil
 import coil.ImageLoader
+import coil.disk.DiskCache
 import coil.memory.MemoryCache
 import com.paulrybitskyi.hiltbinder.BindType
 import dagger.hilt.android.qualifiers.ApplicationContext
+import okhttp3.Call
+import okhttp3.OkHttpClient
 import javax.inject.Inject
 
 interface ImageLoaderInitializer {
@@ -31,14 +34,22 @@ interface ImageLoaderInitializer {
 @BindType
 internal class CoilInitializer @Inject constructor(
     @ApplicationContext private val context: Context,
+    private val okHttpCallFactory: dagger.Lazy<OkHttpClient>,
 ) : ImageLoaderInitializer {
 
     override fun init() {
         Coil.setImageLoader(
             ImageLoader.Builder(context)
+                .callFactory { okHttpCallFactory.get() }
                 .memoryCache {
                     MemoryCache.Builder(context)
                         .maxSizePercent(MEMORY_CACHE_MAX_HEAP_PERCENTAGE)
+                        .build()
+                }
+                .diskCache {
+                    DiskCache.Builder()
+                        .directory(context.cacheDir.resolve("image_cache"))
+                        .maxSizePercent(0.02)
                         .build()
                 }
                 .build(),

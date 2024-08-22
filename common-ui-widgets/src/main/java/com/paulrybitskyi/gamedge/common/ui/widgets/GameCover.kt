@@ -147,7 +147,7 @@ fun NewsResourceHeaderImage(
                 modifier = Modifier
                     .align(Alignment.Center)
                     .size(50.dp),
-                color = MaterialTheme.colorScheme.tertiary,
+                color = MaterialTheme.colorScheme.primary,
             )
         }
 

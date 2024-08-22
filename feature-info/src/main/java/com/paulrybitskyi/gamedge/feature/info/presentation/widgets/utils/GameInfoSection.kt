@@ -24,7 +24,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.material.Text
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
@@ -55,7 +55,6 @@ internal fun GameInfoSection(
                 modifier = Modifier
                     .padding(horizontal = contentPadding)
                     .padding(bottom = titleBottomPadding),
-                color = GamedgeTheme.colors.onPrimary,
                 style = GamedgeTheme.typography.h6,
             )
 

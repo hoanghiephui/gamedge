@@ -19,7 +19,8 @@ package com.paulrybitskyi.gamedge.feature.info.presentation.widgets.details
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -79,7 +80,7 @@ private fun CategorySection(title: String, value: String) {
     Text(
         text = title,
         modifier = Modifier.padding(top = GamedgeTheme.spaces.spacing_2_5),
-        color = GamedgeTheme.colors.onPrimary,
+        color = MaterialTheme.colorScheme.primary,
         style = GamedgeTheme.typography.subtitle3,
     )
     Text(

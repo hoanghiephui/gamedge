@@ -14,27 +14,25 @@
  * limitations under the License.
  */
 
-package com.paulrybitskyi.gamedge.feature.discovery.navigation
+package com.paulrybitskyi.gamedge.feature.news.navigation
 
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
-import com.paulrybitskyi.gamedge.common.ui.base.events.Route
-import com.paulrybitskyi.gamedge.feature.discovery.v2.GamesDiscoveryRoute
+import com.paulrybitskyi.gamedge.feature.news.presentation.widgets.GamingNews
 
-const val FOR_YOU_ROUTE = "for_you_route"
+const val NEWS_ROUTE = "news_route"
 
-fun NavController.navigateToForYou(navOptions: NavOptions) = navigate(FOR_YOU_ROUTE, navOptions)
+fun NavController.navigateToNews(navOptions: NavOptions) {
+    navigate(NEWS_ROUTE, navOptions)
+}
 
-fun NavGraphBuilder.forYouScreen(onRoute: (Route) -> Unit) {
+fun NavGraphBuilder.newsScreen() {
     composable(
-        route = FOR_YOU_ROUTE,
+        route = NEWS_ROUTE,
     ) {
-        GamesDiscoveryRoute(
-            modifier = Modifier,
-            onRoute = onRoute
-        )
+        GamingNews(modifier = Modifier)
     }
 }

@@ -29,10 +29,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.Icon
-import androidx.compose.material.LocalContentColor
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -112,7 +113,7 @@ private fun Video(
                             shape = CircleShape,
                         )
                         .background(
-                            color = GamedgeTheme.colors.darkScrim,
+                            color = MaterialTheme.colorScheme.onTertiary,
                             shape = CircleShape,
                         )
                         .padding(GamedgeTheme.spaces.spacing_2_0),
@@ -121,8 +122,7 @@ private fun Video(
 
             Surface(
                 modifier = Modifier.fillMaxWidth(),
-                color = GamedgeTheme.colors.primaryVariant,
-                contentColor = GamedgeTheme.colors.onSurface,
+                color = MaterialTheme.colorScheme.surface,
             ) {
                 Text(
                     text = video.title,

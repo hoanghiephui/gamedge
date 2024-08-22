@@ -43,17 +43,18 @@ import androidx.constraintlayout.compose.ConstraintLayoutScope
 import androidx.constraintlayout.compose.Dimension
 import com.paulrybitskyi.gamedge.common.ui.theme.GamedgeTheme
 import com.paulrybitskyi.gamedge.common.ui.widgets.GameCover
-import com.paulrybitskyi.gamedge.common.ui.widgets.GamedgeCard
 import com.paulrybitskyi.gamedge.common.ui.widgets.GamedgeProgressIndicator
 import com.paulrybitskyi.gamedge.common.ui.widgets.Info
 import com.paulrybitskyi.gamedge.common.ui.widgets.R
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import com.paulrybitskyi.gamedge.core.R as CoreR
 
 @Composable
 fun GamesCategoryPreview(
     title: String,
     isProgressBarVisible: Boolean,
-    games: List<GamesCategoryPreviewItemUiModel>,
+    games: ImmutableList<GamesCategoryPreviewItemUiModel>,
     onCategoryGameClicked: (GamesCategoryPreviewItemUiModel) -> Unit,
     topBarMargin: Dp = GamedgeTheme.spaces.spacing_2_0,
     isMoreButtonVisible: Boolean = true,
@@ -122,7 +123,6 @@ private fun Title(
     Text(
         text = title,
         modifier = modifier,
-        color = GamedgeTheme.colors.onPrimary,
         textAlign = TextAlign.Start,
         overflow = TextOverflow.Ellipsis,
         maxLines = 1,
@@ -154,14 +154,13 @@ private fun MoreButton(
         modifier = modifier
             .then(clickableModifier)
             .padding(GamedgeTheme.spaces.spacing_2_0),
-        color = GamedgeTheme.colors.secondary,
         style = GamedgeTheme.typography.button,
     )
 }
 
 @Composable
 private fun ConstraintLayoutScope.Content(
-    games: List<GamesCategoryPreviewItemUiModel>,
+    games: ImmutableList<GamesCategoryPreviewItemUiModel>,
     topBarBarrier: ConstraintLayoutBaseScope.HorizontalAnchor,
     infoRef: ConstrainedLayoutReference,
     itemsListRef: ConstrainedLayoutReference,
@@ -209,7 +208,7 @@ private fun EmptyState(modifier: Modifier) {
 
 @Composable
 private fun SuccessState(
-    games: List<GamesCategoryPreviewItemUiModel>,
+    games: ImmutableList<GamesCategoryPreviewItemUiModel>,
     modifier: Modifier,
     onCategoryGameClicked: (GamesCategoryPreviewItemUiModel) -> Unit,
 ) {
@@ -242,7 +241,7 @@ private fun GamesCategoryPreviewSuccessStateWithMoreButtonPreview() {
         GamesCategoryPreview(
             title = "Popular",
             isProgressBarVisible = false,
-            games = listOf(
+            games = persistentListOf(
                 GamesCategoryPreviewItemUiModel(
                     id = 1,
                     title = "Ghost of Tsushima: Director's Cut",
@@ -279,7 +278,7 @@ private fun GamesCategoryPreviewSuccessStateWithoutMoreButtonPreview() {
             title = "Popular",
             isProgressBarVisible = false,
             isMoreButtonVisible = false,
-            games = listOf(
+            games = persistentListOf(
                 GamesCategoryPreviewItemUiModel(
                     id = 1,
                     title = "Ghost of Tsushima: Director's Cut",
@@ -315,7 +314,7 @@ private fun GamesCategoryPreviewEmptyStatePreview() {
         GamesCategoryPreview(
             title = "Popular",
             isProgressBarVisible = false,
-            games = emptyList(),
+            games = persistentListOf(),
             onCategoryMoreButtonClicked = {},
             onCategoryGameClicked = {},
         )

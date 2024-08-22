@@ -19,17 +19,11 @@ package com.paulrybitskyi.gamedge.feature.news.presentation.widgets
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
@@ -42,17 +36,16 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.paulrybitskyi.commons.ktx.showShortToast
 import com.paulrybitskyi.gamedge.common.ui.CommandsHandler
 import com.paulrybitskyi.gamedge.common.ui.LocalUrlOpener
-import com.paulrybitskyi.gamedge.common.ui.NavBarColorHandler
 import com.paulrybitskyi.gamedge.common.ui.theme.GamedgeTheme
 import com.paulrybitskyi.gamedge.common.ui.widgets.AnimatedContentContainer
 import com.paulrybitskyi.gamedge.common.ui.widgets.FiniteUiState
 import com.paulrybitskyi.gamedge.common.ui.widgets.GamedgeProgressIndicator
 import com.paulrybitskyi.gamedge.common.ui.widgets.Info
 import com.paulrybitskyi.gamedge.common.ui.widgets.RefreshableContent
-import com.paulrybitskyi.gamedge.common.ui.widgets.toolbars.Toolbar
 import com.paulrybitskyi.gamedge.feature.news.R
 import com.paulrybitskyi.gamedge.feature.news.presentation.GamingNewsCommand
 import com.paulrybitskyi.gamedge.feature.news.presentation.GamingNewsViewModel
+import kotlinx.collections.immutable.persistentListOf
 import com.paulrybitskyi.gamedge.core.R as CoreR
 
 @Composable
@@ -70,8 +63,6 @@ private fun GamingNews(
 ) {
     val urlOpener = LocalUrlOpener.current
     val context = LocalContext.current
-
-    NavBarColorHandler()
     CommandsHandler(viewModel = viewModel) { command ->
         when (command) {
             is GamingNewsCommand.OpenUrl -> {
@@ -96,39 +87,28 @@ private fun GamingNews(
     onRefreshRequested: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Scaffold(
+    AnimatedContentContainer(
+        finiteUiState = uiState.finiteUiState,
         modifier = modifier,
-        topBar = {
-            Toolbar(
-                title = stringResource(R.string.gaming_news_toolbar_title),
-                contentPadding = WindowInsets.statusBars
-                    .only(WindowInsetsSides.Vertical + WindowInsetsSides.Horizontal)
-                    .asPaddingValues(),
-            )
-        },
-    ) { paddingValues ->
-        AnimatedContentContainer(
-            finiteUiState = uiState.finiteUiState,
-            modifier = Modifier.padding(paddingValues),
-        ) { finiteUiState ->
-            when (finiteUiState) {
-                FiniteUiState.Loading -> {
-                    LoadingState(modifier = Modifier.align(Alignment.Center))
-                }
-                else -> {
-                    RefreshableContent(
-                        isRefreshing = uiState.isRefreshing,
-                        modifier = Modifier.matchParentSize(),
-                        onRefreshRequested = onRefreshRequested,
-                    ) {
-                        if (finiteUiState == FiniteUiState.Empty) {
-                            EmptyState(modifier = Modifier.matchParentSize())
-                        } else {
-                            SuccessState(
-                                news = uiState.news,
-                                onNewsItemClicked = onNewsItemClicked,
-                            )
-                        }
+    ) { finiteUiState ->
+        when (finiteUiState) {
+            FiniteUiState.Loading -> {
+                LoadingState(modifier = Modifier.align(Alignment.Center))
+            }
+
+            else -> {
+                RefreshableContent(
+                    isRefreshing = uiState.isRefreshing,
+                    modifier = modifier,
+                    onRefreshRequested = onRefreshRequested,
+                ) {
+                    if (finiteUiState == FiniteUiState.Empty) {
+                        EmptyState(modifier = Modifier.matchParentSize())
+                    } else {
+                        SuccessState(
+                            news = uiState.news,
+                            onNewsItemClicked = onNewsItemClicked,
+                        )
                     }
                 }
             }
@@ -181,7 +161,7 @@ private fun SuccessState(
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun GamingNewsSuccessStatePreview() {
-    val news = listOf(
+    val news = persistentListOf(
         GamingNewsItemUiModel(
             id = 1,
             imageUrl = "",

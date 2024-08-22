@@ -16,12 +16,9 @@
 
 package com.paulrybitskyi.gamedge.common.ui.widgets
 
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.google.accompanist.swiperefresh.SwipeRefresh
-import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
-import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
-import com.paulrybitskyi.gamedge.common.ui.theme.GamedgeTheme
 
 @Composable
 fun RefreshableContent(
@@ -29,21 +26,12 @@ fun RefreshableContent(
     modifier: Modifier = Modifier,
     isSwipeEnabled: Boolean = true,
     onRefreshRequested: (() -> Unit)? = null,
-    content: @Composable () -> Unit,
+    content: @Composable BoxScope.() -> Unit,
 ) {
-    SwipeRefresh(
-        state = rememberSwipeRefreshState(isRefreshing),
-        onRefresh = onRefreshRequested ?: {},
+    PullRefresh(
         modifier = modifier,
-        swipeEnabled = isSwipeEnabled,
-        indicator = { state, refreshTrigger ->
-            SwipeRefreshIndicator(
-                state = state,
-                refreshTriggerDistance = refreshTrigger,
-                contentColor = GamedgeTheme.colors.secondary,
-                refreshingOffset = GamedgeTheme.spaces.spacing_6_0,
-            )
-        },
-        content = content,
+        onRefresh = onRefreshRequested ?: {},
+        isRefreshing = isRefreshing,
+        content = content
     )
 }

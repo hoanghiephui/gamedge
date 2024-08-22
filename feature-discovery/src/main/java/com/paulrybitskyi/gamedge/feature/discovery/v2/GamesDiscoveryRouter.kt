@@ -1,5 +1,6 @@
 package com.paulrybitskyi.gamedge.feature.discovery.v2
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -73,8 +74,7 @@ internal fun GamesDiscoveryScreen(
     val coroutineScope = rememberCoroutineScope()
     RefreshableContent(
         isRefreshing = isRefreshing,
-        modifier = modifier
-            .fillMaxSize(),
+        modifier = modifier,
         onRefreshRequested = {
             isRefreshing = true
 
@@ -107,7 +107,7 @@ private fun CategoryPreviewItems(
     ) {
         items(items = items, key = GamesDiscoveryItemUiModel::id) { item ->
             val categoryGames = remember(item.games) {
-                item.games.mapToCategoryUiModels()
+                item.games.mapToCategoryUiModels().toImmutableList()
             }
             if (categoryGames.isNotEmpty() && GamesDiscoveryCategory.POPULAR.id == item.id) {
                 val carouselState = rememberCarouselState { categoryGames.size }
@@ -123,10 +123,12 @@ private fun CategoryPreviewItems(
                     NewsResourceHeaderImage(
                         modifier = Modifier
                             .height(205.dp)
+                            .clickable {
+                                onCategoryGameClicked(categoryGames[i].mapToDiscoveryUiModel())
+                            }
                             .maskClip(MaterialTheme.shapes.large),
                         headerImageUrl = categoryGames[i].coverUrl
                     )
-
                 }
 
             } else {

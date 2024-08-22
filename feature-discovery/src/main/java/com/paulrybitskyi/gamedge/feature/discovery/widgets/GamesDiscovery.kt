@@ -153,7 +153,7 @@ private fun CategoryPreviewItems(
     ) {
         items(items = items, key = GamesDiscoveryItemUiModel::id) { item ->
             val categoryGames = remember(item.games) {
-                item.games.mapToCategoryUiModels()
+                item.games.mapToCategoryUiModels().toImmutableList()
             }
 
             GamesCategoryPreview(

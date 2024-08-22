@@ -29,7 +29,7 @@ android {
 
 dependencies {
     implementation(project(localModules.core))
-
+    implementation(project(localModules.commonApi))
     implementation(platform(libs.composeBom))
     api(libs.androidx.compose.foundation.layout)
     api(libs.androidx.compose.material.iconsExtended)

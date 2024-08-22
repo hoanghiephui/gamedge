@@ -22,23 +22,20 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Icon
-import androidx.compose.material.Text
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
-import com.paulrybitskyi.gamedge.common.ui.images.defaultImageRequest
-import com.paulrybitskyi.gamedge.common.ui.images.secondaryImage
 import com.paulrybitskyi.gamedge.common.ui.theme.GamedgeTheme
 import com.paulrybitskyi.gamedge.common.ui.widgets.GamedgeCard
-import com.paulrybitskyi.gamedge.common.ui.widgets.R as CommonUiWidgetsR
+import com.paulrybitskyi.gamedge.common.ui.widgets.NewsResourceHeaderImage
 import com.paulrybitskyi.gamedge.core.R as CoreR
 
 @Composable
@@ -63,7 +60,7 @@ internal fun GamingNewsItem(
             Text(
                 text = model.title,
                 modifier = Modifier.fillMaxWidth(),
-                color = GamedgeTheme.colors.onPrimary,
+                color = MaterialTheme.colorScheme.primary,
                 style = GamedgeTheme.typography.subtitle2,
             )
             Text(
@@ -92,12 +89,10 @@ private fun Image(
         shape = GamedgeTheme.shapes.medium,
         backgroundColor = Color.Transparent,
     ) {
-        AsyncImage(
-            model = defaultImageRequest(imageUrl) {
-                secondaryImage(CommonUiWidgetsR.drawable.game_landscape_placeholder)
-            },
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
+        NewsResourceHeaderImage(
+            modifier = Modifier
+                .height(205.dp),
+            headerImageUrl = imageUrl
         )
     }
 }

@@ -25,8 +25,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -176,8 +177,7 @@ private fun CompanyDetails(
 ) {
     Surface(
         modifier = Modifier.width(containerWidth),
-        color = GamedgeTheme.colors.primaryVariant,
-        contentColor = GamedgeTheme.colors.onSurface,
+        color = MaterialTheme.colorScheme.surface,
     ) {
         Column(modifier = Modifier.padding(GamedgeTheme.spaces.spacing_2_5)) {
             Text(

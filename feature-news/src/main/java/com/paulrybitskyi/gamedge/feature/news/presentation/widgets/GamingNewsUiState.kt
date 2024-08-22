@@ -18,12 +18,15 @@ package com.paulrybitskyi.gamedge.feature.news.presentation.widgets
 
 import androidx.compose.runtime.Immutable
 import com.paulrybitskyi.gamedge.common.ui.widgets.FiniteUiState
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 
 @Immutable
 internal data class GamingNewsUiState(
     val isLoading: Boolean = false,
     val isRefreshing: Boolean = false,
-    val news: List<GamingNewsItemUiModel> = emptyList(),
+    val news: ImmutableList<GamingNewsItemUiModel> = persistentListOf(),
 )
 
 internal val GamingNewsUiState.finiteUiState: FiniteUiState
@@ -41,7 +44,7 @@ private val GamingNewsUiState.isInSuccessState: Boolean
     get() = news.isNotEmpty()
 
 internal fun GamingNewsUiState.toEmptyState(): GamingNewsUiState {
-    return copy(isLoading = false, news = emptyList())
+    return copy(isLoading = false, news = persistentListOf())
 }
 
 internal fun GamingNewsUiState.toLoadingState(): GamingNewsUiState {
@@ -51,7 +54,7 @@ internal fun GamingNewsUiState.toLoadingState(): GamingNewsUiState {
 internal fun GamingNewsUiState.toSuccessState(
     news: List<GamingNewsItemUiModel>,
 ): GamingNewsUiState {
-    return copy(isLoading = false, news = news)
+    return copy(isLoading = false, news = news.toImmutableList())
 }
 
 internal fun GamingNewsUiState.enableRefreshing(): GamingNewsUiState {

@@ -17,30 +17,18 @@
 package com.paulrybitskyi.gamedge.feature.likes.presentation
 
 import android.content.res.Configuration
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.only
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBars
-import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.paulrybitskyi.gamedge.common.ui.CommandsHandler
-import com.paulrybitskyi.gamedge.common.ui.NavBarColorHandler
 import com.paulrybitskyi.gamedge.common.ui.RoutesHandler
 import com.paulrybitskyi.gamedge.common.ui.base.events.Route
 import com.paulrybitskyi.gamedge.common.ui.theme.GamedgeTheme
 import com.paulrybitskyi.gamedge.common.ui.widgets.games.GameUiModel
 import com.paulrybitskyi.gamedge.common.ui.widgets.games.Games
 import com.paulrybitskyi.gamedge.common.ui.widgets.games.GamesUiState
-import com.paulrybitskyi.gamedge.common.ui.widgets.toolbars.Toolbar
-import com.paulrybitskyi.gamedge.feature.likes.R
 import com.paulrybitskyi.gamedge.core.R as CoreR
 
 @Composable
@@ -61,7 +49,6 @@ private fun LikedGames(
     modifier: Modifier,
     onRoute: (Route) -> Unit,
 ) {
-    NavBarColorHandler()
     CommandsHandler(viewModel = viewModel)
     RoutesHandler(viewModel = viewModel, onRoute = onRoute)
     LikedGames(
@@ -81,26 +68,12 @@ private fun LikedGames(
     onBottomReached: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Scaffold(
+    Games(
+        uiState = uiState,
         modifier = modifier,
-        topBar = {
-            Toolbar(
-                title = stringResource(R.string.liked_games_toolbar_title),
-                contentPadding = WindowInsets.statusBars
-                    .only(WindowInsetsSides.Vertical + WindowInsetsSides.Horizontal)
-                    .asPaddingValues(),
-                rightButtonIcon = painterResource(CoreR.drawable.magnify),
-                onRightButtonClick = onSearchButtonClicked,
-            )
-        },
-    ) { paddingValues ->
-        Games(
-            uiState = uiState,
-            modifier = Modifier.padding(paddingValues),
-            onGameClicked = onGameClicked,
-            onBottomReached = onBottomReached,
-        )
-    }
+        onGameClicked = onGameClicked,
+        onBottomReached = onBottomReached,
+    )
 }
 
 @Preview

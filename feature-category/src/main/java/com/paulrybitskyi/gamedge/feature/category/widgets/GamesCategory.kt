@@ -19,22 +19,21 @@ package com.paulrybitskyi.gamedge.feature.category.widgets
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
-import androidx.compose.material.Scaffold
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -45,13 +44,14 @@ import com.paulrybitskyi.gamedge.common.ui.NavBarColorHandler
 import com.paulrybitskyi.gamedge.common.ui.RoutesHandler
 import com.paulrybitskyi.gamedge.common.ui.base.events.Route
 import com.paulrybitskyi.gamedge.common.ui.theme.GamedgeTheme
+import com.paulrybitskyi.gamedge.common.ui.v2.component.NiaTopAppBar
+import com.paulrybitskyi.gamedge.common.ui.v2.icon.NiaIcons
 import com.paulrybitskyi.gamedge.common.ui.widgets.AnimatedContentContainer
 import com.paulrybitskyi.gamedge.common.ui.widgets.FiniteUiState
 import com.paulrybitskyi.gamedge.common.ui.widgets.GameCover
 import com.paulrybitskyi.gamedge.common.ui.widgets.GamedgeProgressIndicator
 import com.paulrybitskyi.gamedge.common.ui.widgets.Info
 import com.paulrybitskyi.gamedge.common.ui.widgets.RefreshableContent
-import com.paulrybitskyi.gamedge.common.ui.widgets.toolbars.Toolbar
 import com.paulrybitskyi.gamedge.feature.category.GamesCategoryViewModel
 import com.paulrybitskyi.gamedge.feature.category.R
 import com.paulrybitskyi.gamedge.core.R as CoreR
@@ -80,6 +80,7 @@ private fun GamesCategory(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun GamesCategory(
     uiState: GamesCategoryUiState,
@@ -88,15 +89,19 @@ private fun GamesCategory(
     onBottomReached: () -> Unit,
 ) {
     Scaffold(
-        modifier = Modifier.navigationBarsPadding(),
+        containerColor = Color.Transparent,
+        contentColor = MaterialTheme.colorScheme.onBackground,
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
-            Toolbar(
+            NiaTopAppBar(
                 title = uiState.title,
-                contentPadding = WindowInsets.statusBars
-                    .only(WindowInsetsSides.Vertical + WindowInsetsSides.Horizontal)
-                    .asPaddingValues(),
-                leftButtonIcon = painterResource(CoreR.drawable.arrow_left),
-                onLeftButtonClick = onBackButtonClicked,
+                navigationIcon = NiaIcons.ArrowBack,
+                navigationIconContentDescription = uiState.title,
+                actionIconContentDescription = uiState.title,
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = Color.Transparent,
+                ),
+                onNavigationClick = onBackButtonClicked,
             )
         },
     ) { paddingValues ->
@@ -114,7 +119,7 @@ private fun GamesCategory(
                 FiniteUiState.Success -> {
                     SuccessState(
                         uiState = uiState,
-                        modifier = Modifier.matchParentSize(),
+                        modifier = Modifier,
                         onGameClicked = onGameClicked,
                         onBottomReached = onBottomReached,
                     )

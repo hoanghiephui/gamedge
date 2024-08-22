@@ -108,97 +108,113 @@ fun NiaApp(
     windowAdaptiveInfo: WindowAdaptiveInfo = currentWindowAdaptiveInfo(),
 ) {
     val currentDestination = appState.currentDestination
-    NiaNavigationSuiteScaffold(
-        navigationSuiteItems = {
-            appState.topLevelDestinations.forEach { destination ->
-                val selected = currentDestination
-                    .isTopLevelDestinationInHierarchy(destination)
-                item(
-                    selected = selected,
-                    onClick = { appState.navigateToTopLevelDestination(destination) },
-                    icon = {
-                        Icon(
-                            imageVector = destination.unselectedIcon,
-                            contentDescription = null,
-                        )
-                    },
-                    selectedIcon = {
-                        Icon(
-                            imageVector = destination.selectedIcon,
-                            contentDescription = null,
-                        )
-                    },
-                    label = { Text(stringResource(destination.iconTextId)) },
-                    modifier =
-                    Modifier
-                        .testTag("NiaNavItem"),
+    if (appState.currentTopLevelDestination != null) {
+        NiaNavigationSuiteScaffold(
+            navigationSuiteItems = {
+                appState.topLevelDestinations.forEach { destination ->
+                    val selected = currentDestination
+                        .isTopLevelDestinationInHierarchy(destination)
+                    item(
+                        selected = selected,
+                        onClick = { appState.navigateToTopLevelDestination(destination) },
+                        icon = {
+                            Icon(
+                                imageVector = destination.unselectedIcon,
+                                contentDescription = null,
+                            )
+                        },
+                        selectedIcon = {
+                            Icon(
+                                imageVector = destination.selectedIcon,
+                                contentDescription = null,
+                            )
+                        },
+                        label = { Text(stringResource(destination.iconTextId)) },
+                        modifier =
+                        Modifier
+                            .testTag("NiaNavItem"),
+                    )
+                }
+            },
+            windowAdaptiveInfo = windowAdaptiveInfo,
+        ) {
+            ContentScreen(modifier, snackbarHostState, appState, onTopAppBarActionClick)
+        }
+    } else {
+        ContentScreen(modifier, snackbarHostState, appState, onTopAppBarActionClick)
+    }
+
+}
+
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+private fun ContentScreen(
+    modifier: Modifier,
+    snackbarHostState: SnackbarHostState,
+    appState: NiaAppState,
+    onTopAppBarActionClick: () -> Unit
+) {
+    Scaffold(
+        modifier = modifier.semantics {
+            testTagsAsResourceId = true
+        },
+        containerColor = Color.Transparent,
+        contentColor = MaterialTheme.colorScheme.onBackground,
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+    ) { padding ->
+        Column(
+            Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .consumeWindowInsets(padding)
+                .windowInsetsPadding(
+                    WindowInsets.safeDrawing.only(
+                        WindowInsetsSides.Horizontal,
+                    ),
+                ),
+        ) {
+            // Show the top app bar on top level destinations.
+            val destination = appState.currentTopLevelDestination
+            val shouldShowTopAppBar = destination != null
+            if (destination != null) {
+                NiaTopAppBar(
+                    titleRes = destination.titleTextId,
+                    navigationIcon = NiaIcons.Search,
+                    navigationIconContentDescription = stringResource(
+                        id = settingsR.string.settings_toolbar_title,
+                    ),
+                    actionIcon = NiaIcons.Settings,
+                    actionIconContentDescription = stringResource(
+                        id = settingsR.string.settings_toolbar_title,
+                    ),
+                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                        containerColor = Color.Transparent,
+                    ),
+                    onActionClick = { onTopAppBarActionClick() },
+                    onNavigationClick = { appState.navigateToSearch() },
                 )
             }
-        },
-        windowAdaptiveInfo = windowAdaptiveInfo,
-    ) {
-        Scaffold(
-            modifier = modifier.semantics {
-                testTagsAsResourceId = true
-            },
-            containerColor = Color.Transparent,
-            contentColor = MaterialTheme.colorScheme.onBackground,
-            contentWindowInsets = WindowInsets(0, 0, 0, 0),
-            snackbarHost = { SnackbarHost(snackbarHostState) },
-        ) { padding ->
-            Column(
-                Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-                    .consumeWindowInsets(padding)
-                    .windowInsetsPadding(
-                        WindowInsets.safeDrawing.only(
-                            WindowInsetsSides.Horizontal,
-                        ),
-                    ),
-            ) {
-                // Show the top app bar on top level destinations.
-                val destination = appState.currentTopLevelDestination
-                val shouldShowTopAppBar = destination != null
-                if (destination != null) {
-                    NiaTopAppBar(
-                        titleRes = destination.titleTextId,
-                        navigationIcon = NiaIcons.Search,
-                        navigationIconContentDescription = stringResource(
-                            id = settingsR.string.settings_toolbar_title,
-                        ),
-                        actionIcon = NiaIcons.Settings,
-                        actionIconContentDescription = stringResource(
-                            id = settingsR.string.settings_toolbar_title,
-                        ),
-                        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                            containerColor = Color.Transparent,
-                        ),
-                        onActionClick = { onTopAppBarActionClick() },
-                        onNavigationClick = { appState.navigateToSearch() },
-                    )
-                }
 
-                Box(
-                    modifier = Modifier.consumeWindowInsets(
-                        if (shouldShowTopAppBar) {
-                            WindowInsets.safeDrawing.only(WindowInsetsSides.Top)
-                        } else {
-                            WindowInsets(0, 0, 0, 0)
-                        },
-                    ),
-                ) {
-                    NiaNavHost(
-                        appState = appState,
-                        onShowSnackbar = { message, action ->
-                            snackbarHostState.showSnackbar(
-                                message = message,
-                                actionLabel = action,
-                                duration = Short,
-                            ) == ActionPerformed
-                        },
-                    )
-                }
+            Box(
+                modifier = Modifier.consumeWindowInsets(
+                    if (shouldShowTopAppBar) {
+                        WindowInsets.safeDrawing.only(WindowInsetsSides.Top)
+                    } else {
+                        WindowInsets(0, 0, 0, 0)
+                    },
+                ),
+            ) {
+                NiaNavHost(
+                    appState = appState,
+                    onShowSnackbar = { message, action ->
+                        snackbarHostState.showSnackbar(
+                            message = message,
+                            actionLabel = action,
+                            duration = Short,
+                        ) == ActionPerformed
+                    },
+                )
             }
         }
     }

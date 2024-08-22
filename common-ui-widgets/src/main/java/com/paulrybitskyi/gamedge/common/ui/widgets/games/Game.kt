@@ -23,10 +23,11 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -81,7 +82,7 @@ private fun Details(
         Text(
             text = name,
             modifier = Modifier.padding(start = GamedgeTheme.spaces.spacing_3_0),
-            color = GamedgeTheme.colors.onPrimary,
+            color = MaterialTheme.colorScheme.primary,
             overflow = TextOverflow.Ellipsis,
             maxLines = 3,
             style = GamedgeTheme.typography.subtitle2,
@@ -113,7 +114,7 @@ private fun Details(
 
 @Composable
 private fun DetailsDescription(description: String) {
-    var maxLines by rememberSaveable { mutableStateOf(Int.MAX_VALUE) }
+    var maxLines by rememberSaveable { mutableIntStateOf(Int.MAX_VALUE) }
 
     Text(
         text = description,

@@ -33,13 +33,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.FloatingActionButton
-import androidx.compose.material.Icon
-import androidx.compose.material.Text
-import androidx.compose.material.ripple.rememberRipple
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -59,7 +60,6 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.ConstraintSet
 import androidx.constraintlayout.compose.Dimension
-import com.paulrybitskyi.gamedge.common.ui.clickable
 import com.paulrybitskyi.gamedge.common.ui.theme.GamedgeTheme
 import com.paulrybitskyi.gamedge.common.ui.theme.lightScrim
 import com.paulrybitskyi.gamedge.common.ui.theme.subtitle3
@@ -100,7 +100,7 @@ internal fun GameInfoHeader(
 ) {
     val artworks = headerInfo.artworks
     val isPageIndicatorVisible by remember(artworks) { mutableStateOf(artworks.size > 1) }
-    var selectedArtworkPage by rememberSaveable { mutableStateOf(0) }
+    var selectedArtworkPage by rememberSaveable { mutableIntStateOf(0) }
     var secondTitleText by rememberSaveable { mutableStateOf("") }
     val isSecondTitleVisible by remember {
         derivedStateOf {
@@ -205,7 +205,7 @@ internal fun GameInfoHeader(
         FloatingActionButton(
             onClick = onLikeButtonClicked,
             modifier = Modifier.layoutId(ConstraintIdLikeButton),
-            backgroundColor = GamedgeTheme.colors.secondary,
+            containerColor = GamedgeTheme.colors.secondary,
         ) {
             // Animated selector drawables are not currently supported by the Jetpack Compose.
             // https://issuetracker.google.com/issues/212418566
@@ -227,7 +227,7 @@ internal fun GameInfoHeader(
         Text(
             text = headerInfo.title,
             modifier = Modifier.layoutId(ConstraintIdFirstTitle),
-            color = GamedgeTheme.colors.onPrimary,
+            color = MaterialTheme.colorScheme.primary,
             maxLines = 1,
             onTextLayout = { textLayoutResult ->
                 if (textLayoutResult.hasVisualOverflow) {
@@ -258,7 +258,7 @@ internal fun GameInfoHeader(
         Text(
             text = headerInfo.releaseDate,
             modifier = Modifier.layoutId(ConstraintIdReleaseDate),
-            color = GamedgeTheme.colors.onSurface,
+            color = MaterialTheme.colorScheme.onSurface,
             style = GamedgeTheme.typography.subtitle3,
         )
 
@@ -266,7 +266,7 @@ internal fun GameInfoHeader(
             if (headerInfo.hasDeveloperName) {
                 Text(
                     text = checkNotNull(headerInfo.developerName),
-                    color = GamedgeTheme.colors.onSurface,
+                    color = MaterialTheme.colorScheme.onSurface,
                     style = GamedgeTheme.typography.subtitle3,
                 )
             }

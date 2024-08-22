@@ -36,8 +36,8 @@ import com.paulrybitskyi.gamedge.feature.discovery.navigation.FOR_YOU_ROUTE
 import com.paulrybitskyi.gamedge.feature.discovery.navigation.navigateToForYou
 import com.paulrybitskyi.gamedge.feature.likes.navigation.BOOKMARKS_ROUTE
 import com.paulrybitskyi.gamedge.feature.likes.navigation.navigateToBookmarks
-import com.paulrybitskyi.gamedge.feature.news.navigation.INTERESTS_ROUTE
-import com.paulrybitskyi.gamedge.feature.news.navigation.navigateToInterests
+import com.paulrybitskyi.gamedge.feature.news.navigation.NEWS_ROUTE
+import com.paulrybitskyi.gamedge.feature.news.navigation.navigateToNews
 import com.paulrybitskyi.gamedge.v2.navigation.TopLevelDestination
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
@@ -79,7 +79,7 @@ class NiaAppState(
             FOR_YOU_ROUTE -> TopLevelDestination.FOR_YOU
             TWITCH_ROUTE -> TopLevelDestination.TWITCH
             BOOKMARKS_ROUTE -> TopLevelDestination.BOOKMARKS
-            INTERESTS_ROUTE -> TopLevelDestination.INTERESTS
+            NEWS_ROUTE -> TopLevelDestination.NEWS
             else -> null
         }
 
@@ -124,7 +124,7 @@ class NiaAppState(
                 TopLevelDestination.FOR_YOU -> navController.navigateToForYou(topLevelNavOptions)
                 TopLevelDestination.TWITCH -> navController.navigateToTwitch(topLevelNavOptions)
                 TopLevelDestination.BOOKMARKS -> navController.navigateToBookmarks(topLevelNavOptions)
-                TopLevelDestination.INTERESTS -> navController.navigateToInterests(null, topLevelNavOptions)
+                TopLevelDestination.NEWS -> navController.navigateToNews(topLevelNavOptions)
             }
         }
     }

@@ -18,8 +18,10 @@ package com.paulrybitskyi.gamedge.common.ui.widgets
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.material.Card
-import androidx.compose.material.contentColorFor
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardElevation
+import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -40,15 +42,12 @@ fun GamedgeCard(
     contentColor: Color = contentColorFor(backgroundColor),
     border: BorderStroke? = null,
     elevation: Dp = DefaultElevation,
-    content: @Composable () -> Unit,
+    content:  @Composable (ColumnScope.() -> Unit),
 ) {
     Card(
         modifier = modifier,
         shape = shape,
-        backgroundColor = backgroundColor,
-        contentColor = contentColor,
         border = border,
-        elevation = elevation,
         content = content,
     )
 }
@@ -64,16 +63,13 @@ fun GamedgeCard(
     border: BorderStroke? = null,
     elevation: Dp = DefaultElevation,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
-    content: @Composable () -> Unit,
+    content:  @Composable (ColumnScope.() -> Unit),
 ) {
     Card(
         onClick = onClick,
         modifier = modifier,
         shape = shape,
-        backgroundColor = backgroundColor,
-        contentColor = contentColor,
         border = border,
-        elevation = elevation,
         interactionSource = interactionSource,
         enabled = enabled,
         content = content,

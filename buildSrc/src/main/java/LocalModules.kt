@@ -43,4 +43,5 @@ object localModules {
     const val featureSearch = ":feature-search"
     const val featureSettings = ":feature-settings"
     const val featureTwitch = ":feature-twitch"
+    const val featureStreaming = ":feature-streaming"
 }

@@ -32,7 +32,8 @@
 
         <activity
             android:name=".v2.MainActivity"
-            android:windowSoftInputMode="adjustPan"
+            android:supportsPictureInPicture="true"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
             android:exported="true">
 
             <intent-filter>

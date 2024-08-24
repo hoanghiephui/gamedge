@@ -78,4 +78,6 @@
     <string name="error_api_unknown_message">Could not perform the request! Please try again later.</string>
 
     <string name="not_connected">⚠️ You aren’t connected to the internet</string>
+    <string name="share_streaming">Check out %1$s at: https://www.twitch.tv/%2$s</string>
+    <string name="count_view">%1$s viewers</string>
 </resources>

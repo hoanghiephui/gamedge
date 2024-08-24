@@ -26,7 +26,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.android.itube.feature.twitch.R
+import com.paulrybitskyi.gamedge.core.R as coreR
 import com.android.model.StreamItem
 import com.paulrybitskyi.gamedge.common.ui.v2.component.NiaOverlayLoadingWheel
 import com.paulrybitskyi.gamedge.common.ui.widgets.NewsResourceHeaderImage
@@ -158,7 +158,7 @@ private fun VideoCard(
                 .padding(8.dp)
         ) {
             Text(
-                text = stringResource(id = R.string.count_view, videoModel.viewerCount.formattedCount()),
+                text = stringResource(id = coreR.string.count_view, videoModel.viewerCount.formattedCount()),
                 modifier = Modifier.padding(4.dp),
                 color = Color.White
             )

@@ -22,6 +22,6 @@ fun PullRefresh(
     Box(modifier.pullRefresh(state)) {
         content()
 
-        PullRefreshIndicator(isRefreshing, state, modifier.align(Alignment.TopCenter))
+        PullRefreshIndicator(isRefreshing, state, Modifier.align(Alignment.TopCenter))
     }
 }

@@ -15,6 +15,7 @@ import com.android.model.StreamItem
 import com.paulrybitskyi.gamedge.common.domain.auth.datastores.AuthLocalDataStore
 import com.paulrybitskyi.gamedge.common.domain.common.extensions.resultOrError
 import com.paulrybitskyi.gamedge.common.domain.games.usecases.StreamUseCase
+import com.paulrybitskyi.gamedge.common.domain.live.entities.StreamPlaybackAccessToken
 import com.paulrybitskyi.gamedge.common.domain.live.usecases.LiveUseCase
 import com.paulrybitskyi.gamedge.common.ui.base.BaseViewModel
 import com.paulrybitskyi.gamedge.common.ui.base.events.common.GeneralCommand
@@ -25,9 +26,11 @@ import com.paulrybitskyi.gamedge.core.utils.onError
 import com.paulrybitskyi.gamedge.igdb.api.maper.GraphMapper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
@@ -67,6 +70,12 @@ class TwitchViewModel @Inject constructor(
         get() = _uiState.value
 
     val uiState: StateFlow<StreamUiState> = _uiState.asStateFlow()
+    private val _streamingUrlState: MutableSharedFlow<StreamPlaybackAccessToken?> = MutableSharedFlow()
+    val streamingUrlState = _streamingUrlState.asSharedFlow().stateIn(
+        scope = viewModelScope,
+        initialValue = null,
+        started = SharingStarted.WhileSubscribed(5_000),
+    )
 
     val authorizationTokenTwitch = authLocalDataStore.authorizationTokenTwitch.stateIn(
         scope = viewModelScope,
@@ -78,7 +87,7 @@ class TwitchViewModel @Inject constructor(
         if (isFetchLiveStreamURLLoading) {
             return
         }
-        liveUseCase.getGraphQL(graphMapper.mapToGraphQLRequest(data))
+        liveUseCase.getGraphQL(graphMapper.mapToGraphQLRequest(data), data)
             .resultOrError()
             .onError {
                 logger.error(logTag, "Failed to GetLiveStreamURL", it)
@@ -89,8 +98,15 @@ class TwitchViewModel @Inject constructor(
                 isFetchLiveStreamURLLoading = false
             }.distinctUntilChanged()
             .onEach {
-
+                logger.info(logTag, it.streamUrl)
+                _streamingUrlState.emit(it)
             }.launchIn(viewModelScope)
+    }
+
+    fun onClearStreamUrl() {
+        viewModelScope.launch {
+            _streamingUrlState.emit(null)
+        }
     }
 
     fun onSaveToken(token: String) {

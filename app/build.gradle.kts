@@ -42,6 +42,7 @@ dependencies {
     implementation(project(localModules.featureSearch))
     implementation(project(localModules.featureSettings))
     implementation(project(localModules.featureTwitch))
+    implementation(project(localModules.featureStreaming))
 
     implementation(libs.splash)
 

@@ -105,3 +105,5 @@ sealed class Screen(val route: String) {
         }
     }
 }
+
+const val STREAMING_KEY ="streaming_data"

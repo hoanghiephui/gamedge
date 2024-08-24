@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="player_error">The live stream has stopped. Please switch to a different channel</string>
+</resources>

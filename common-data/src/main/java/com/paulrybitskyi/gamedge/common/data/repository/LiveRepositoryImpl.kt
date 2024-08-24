@@ -1,6 +1,7 @@
 package com.paulrybitskyi.gamedge.common.data.repository
 
 import com.android.model.GraphQLRequestItem
+import com.android.model.StreamItem
 import com.github.michaelbull.result.mapEither
 import com.paulrybitskyi.gamedge.common.api.ApiResult
 import com.paulrybitskyi.gamedge.common.data.common.ApiErrorMapper
@@ -24,14 +25,14 @@ internal class LiveRepositoryImpl @Inject constructor(
     private val apiErrorMapper: ApiErrorMapper,
     private val liveMapper: LiveMapper
 ) : LiveRepository {
-    override suspend fun getGraphQL(body: GraphQLRequestItem): DomainResult<StreamPlaybackAccessToken> {
-        return liveEndpoint.graphQL(body).toDataResult(body)
+    override suspend fun getGraphQL(body: GraphQLRequestItem, data: StreamItem): DomainResult<StreamPlaybackAccessToken> {
+        return liveEndpoint.graphQL(body).toDataResult(body, data)
     }
 
-    private suspend fun ApiResult<List<GraphQLResponseItem>>.toDataResult(body: GraphQLRequestItem): DomainResult<StreamPlaybackAccessToken> {
+    private suspend fun ApiResult<List<GraphQLResponseItem>>.toDataResult(body: GraphQLRequestItem, data: StreamItem): DomainResult<StreamPlaybackAccessToken> {
         return withContext(dispatcherProvider.io) {
             mapEither(
-                { response -> liveMapper.mapToDomainLive(response.first(), body) },
+                { response -> liveMapper.mapToDomainLive(response.first(), body, data) },
                 apiErrorMapper::mapToDomainError
             )
         }

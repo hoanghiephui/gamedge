@@ -31,4 +31,14 @@ object Constants {
             "&redirect_uri=http%3A%2F%2Flocalhost/oauth_authorizing" +
             "&response_type=token" +
             "&scope=${TWITCH_SCOPES.joinToString("%20")}"
+
+    const val STREAM_URL = "https://usher.ttvnw.net/api/channel/hls/%s.m3u8" +
+            "?player=twitchweb&" +
+            "&token=%s" +
+            "&sig=%s" +
+            "&allow_audio_only=true" +
+            "&allow_source=true" +
+            "&type=any" +
+            "&fast_bread=true" +
+            "&p=%s"
 }

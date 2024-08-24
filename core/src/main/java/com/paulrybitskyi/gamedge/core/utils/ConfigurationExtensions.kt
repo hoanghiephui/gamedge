@@ -16,9 +16,23 @@
 
 package com.paulrybitskyi.gamedge.core.utils
 
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
 import android.content.res.Configuration
 import android.content.res.Configuration.UI_MODE_NIGHT_MASK
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 
 val Configuration.isDarkThemeEnabled: Boolean
     get() = ((uiMode and UI_MODE_NIGHT_MASK) == UI_MODE_NIGHT_YES)
+
+fun Context.findActivity(): Activity? = when (this) {
+    is Activity -> this
+    is ContextWrapper -> baseContext.findActivity()
+    else -> null
+}
+
+fun Context.setScreenOrientation(orientation: Int) {
+    val activity = this.findActivity() ?: return
+    activity.requestedOrientation = orientation
+}

@@ -168,11 +168,7 @@ private fun ContentScreen(
                 .fillMaxSize()
                 .padding(padding)
                 .consumeWindowInsets(padding)
-                .windowInsetsPadding(
-                    WindowInsets.safeDrawing.only(
-                        WindowInsetsSides.Horizontal,
-                    ),
-                ),
+
         ) {
             // Show the top app bar on top level destinations.
             val destination = appState.currentTopLevelDestination

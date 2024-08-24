@@ -17,11 +17,14 @@
 package com.paulrybitskyi.gamedge.common.ui
 
 import android.annotation.SuppressLint
+import android.content.Context
+import android.view.OrientationEventListener
 import androidx.annotation.DimenRes
 import androidx.compose.foundation.Indication
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -29,13 +32,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.compose.LocalLifecycleOwner
 
 @Composable
 fun textSizeResource(@DimenRes id: Int): TextUnit {
@@ -98,3 +107,60 @@ fun LazyStaggeredGridState.reachedBottom(buffer: Int = 1): Boolean {
     val lastVisibleItem = this.layoutInfo.visibleItemsInfo.lastOrNull()
     return lastVisibleItem?.index != 0 && lastVisibleItem?.index == this.layoutInfo.totalItemsCount - buffer
 }
+
+@Composable
+fun KeepScreenOn() {
+    val currentView = LocalView.current
+    DisposableEffect(Unit) {
+        currentView.keepScreenOn = true
+        onDispose {
+            currentView.keepScreenOn = false
+        }
+    }
+}
+
+@Composable
+fun DeviceOrientationListener(
+    applicationContext: Context,
+    onOrientationChange: (orientation: DeviceOrientation) -> Unit
+) {
+
+    DisposableEffect(key1 = Unit) {
+        val orientationListener =
+            object : OrientationEventListener(applicationContext) {
+                override fun onOrientationChanged(orientation: Int) {
+                    if (orientation >= 350 || orientation < 10) {
+                        onOrientationChange(DeviceOrientation.Portrait(orientation))
+                    } else if (orientation in 80..159) {
+                        onOrientationChange(DeviceOrientation.ReverseLandscape(orientation))
+                    } else if (orientation in 200..289) {
+                        onOrientationChange(DeviceOrientation.Landscape(orientation))
+                    }
+                }
+            }
+        orientationListener.enable()
+
+        onDispose {
+            orientationListener.disable()
+        }
+    }
+}
+
+fun Modifier.notificationDot(): Modifier =
+    composed {
+        val tertiaryColor = Color.Red
+        drawWithContent {
+            drawContent()
+            drawCircle(
+                tertiaryColor,
+                radius = 5.dp.toPx(),
+                // This is based on the dimensions of the NavigationBar's "indicator pill";
+                // however, its parameters are private, so we must depend on them implicitly
+                // (NavigationBarTokens.ActiveIndicatorWidth = 64.dp)
+                center = center + Offset(
+                    64.dp.toPx() * .45f,
+                    32.dp.toPx() * -.45f - 6.dp.toPx(),
+                ),
+            )
+        }
+    }

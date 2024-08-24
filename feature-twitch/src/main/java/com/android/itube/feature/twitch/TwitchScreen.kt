@@ -28,6 +28,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -53,6 +54,7 @@ import com.kevinnzou.web.WebViewNavigator
 import com.kevinnzou.web.WebViewState
 import com.kevinnzou.web.rememberWebViewNavigator
 import com.kevinnzou.web.rememberWebViewState
+import com.paulrybitskyi.gamedge.common.domain.live.entities.StreamPlaybackAccessToken
 import com.paulrybitskyi.gamedge.common.ui.v2.component.NiaButton
 import com.paulrybitskyi.gamedge.common.ui.widgets.NetworkError
 import com.paulrybitskyi.gamedge.common.ui.widgets.TwitchLogo
@@ -62,22 +64,29 @@ import com.paulrybitskyi.gamedge.core.R as coreR
 
 @Composable
 internal fun TwitchRoute(
-    onTopicClick: (String) -> Unit,
+    onTopicClick: (StreamPlaybackAccessToken) -> Unit,
     viewModel: TwitchViewModel = hiltViewModel(),
 ) {
     val navigation: NavHostController = rememberNavController()
     val authorizationTokenTwitch by viewModel.authorizationTokenTwitch.collectAsStateWithLifecycle()
+    val streamingUrlState by viewModel.streamingUrlState.collectAsStateWithLifecycle()
     TwitchScreen(
         onSaveToken = {
             viewModel.onSaveToken(it)
         },
         authorizationTokenTwitch = authorizationTokenTwitch,
         viewModel = viewModel,
-        navigation = navigation
+        navigation = navigation,
     )
     LaunchedEffect(viewModel, authorizationTokenTwitch) {
         if (authorizationTokenTwitch?.isNotBlank() == true) {
             viewModel.initialLoadIfNeeded()
+        }
+    }
+    LaunchedEffect(streamingUrlState) {
+        if (streamingUrlState != null) {
+            onTopicClick(streamingUrlState!!)
+            viewModel.onClearStreamUrl()
         }
     }
 }

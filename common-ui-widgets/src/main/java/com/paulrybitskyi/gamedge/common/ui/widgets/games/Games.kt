@@ -59,7 +59,7 @@ fun Games(
             FiniteUiState.Success -> {
                 SuccessState(
                     uiState = uiState,
-                    modifier = Modifier.matchParentSize(),
+                    modifier = Modifier,
                     onGameClicked = onGameClicked,
                     onBottomReached = onBottomReached,
                 )

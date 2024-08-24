@@ -16,10 +16,22 @@
 
 package com.paulrybitskyi.gamedge.v2.navigation
 
+import android.annotation.SuppressLint
+import android.os.Bundle
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.core.net.toUri
+import androidx.core.os.bundleOf
+import androidx.navigation.NavController
+import androidx.navigation.NavDeepLinkRequest
+import androidx.navigation.NavDestination
+import androidx.navigation.NavOptions
+import androidx.navigation.Navigator
 import androidx.navigation.compose.NavHost
 import com.android.itube.feature.twitch.navigation.twitchScreen
+import com.game.feature.streaming.navigation.STREAMING_ROUTE
+import com.game.feature.streaming.navigation.twitchStreamingScreen
+import com.paulrybitskyi.gamedge.common.ui.base.events.STREAMING_KEY
 import com.paulrybitskyi.gamedge.common.ui.base.events.Screen
 import com.paulrybitskyi.gamedge.feature.category.GamesCategoryRoute
 import com.paulrybitskyi.gamedge.feature.category.navigation.categoryScreen
@@ -85,7 +97,10 @@ fun NiaNavHost(
         )
 
         twitchScreen(onTopicClick = {
-
+            val bundle = bundleOf(
+                STREAMING_KEY to it
+            )
+            navController.navigate(route = STREAMING_ROUTE, args = bundle)
         })
 
         newsScreen()
@@ -132,6 +147,32 @@ fun NiaNavHost(
                 }
             }
         })
+        twitchStreamingScreen(
+            onShowSnackbar = onShowSnackbar,
+            onBackScreen = {
+                navController.popBackStack()
+            }
+        )
 
+    }
+}
+
+@SuppressLint("RestrictedApi")
+fun NavController.navigate(
+    route: String,
+    args: Bundle,
+    navOptions: NavOptions? = null,
+    navigatorExtras: Navigator.Extras? = null
+) {
+    val routeLink =
+        NavDeepLinkRequest.Builder.fromUri(NavDestination.createRoute(route).toUri()).build()
+
+    val deepLinkMatch = graph.matchDeepLink(routeLink)
+    if (deepLinkMatch != null) {
+        val destination = deepLinkMatch.destination
+        val id = destination.id
+        navigate(id, args, navOptions, navigatorExtras)
+    } else {
+        navigate(route, navOptions, navigatorExtras)
     }
 }

@@ -15,8 +15,14 @@
  */
 
 plugins {
-    id(libs.plugins.kotlinJvm.get().pluginId)
+    id(libs.plugins.androidLibrary.get().pluginId)
+    id(libs.plugins.gamedgeAndroid.get().pluginId)
     id(libs.plugins.kotlinKapt.get().pluginId)
+    id("kotlin-parcelize")
+}
+
+android {
+    namespace = "com.paulrybitskyi.gamedge.common.domain"
 }
 
 dependencies {

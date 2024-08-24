@@ -99,7 +99,7 @@ private fun GamingNews(
             else -> {
                 RefreshableContent(
                     isRefreshing = uiState.isRefreshing,
-                    modifier = modifier,
+                    modifier = modifier.matchParentSize(),
                     onRefreshRequested = onRefreshRequested,
                 ) {
                     if (finiteUiState == FiniteUiState.Empty) {

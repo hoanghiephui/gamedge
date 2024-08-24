@@ -62,7 +62,7 @@ fun rememberStreamLoadedSectionState(
         navigation,
         items,
         onClickVideo,
-        isFetchLiveStreamURLLoading
+        isFetchLiveStreamURLLoading,
     ) {
         StreamLoadedSectionState(
             isRefreshLoading = isRefreshLoading,

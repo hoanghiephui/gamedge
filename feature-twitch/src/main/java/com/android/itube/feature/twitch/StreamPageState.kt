@@ -1,6 +1,7 @@
 package com.android.itube.feature.twitch
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -25,7 +26,7 @@ fun rememberStreamPageState(
     val uiState by pageViewModel.uiState.collectAsStateWithLifecycle()
     val isFetchLiveStreamURLLoading = pageViewModel.isFetchLiveStreamURLLoading
     val isRefreshLoading = pageViewModel.isRefreshLoading
-    val contentSectionState = when(uiState.finiteUiState) {
+    val contentSectionState = when (uiState.finiteUiState) {
         ResultUiState.Loading -> rememberStreamLoadingSectionState()
         ResultUiState.Success -> rememberStreamLoadedSectionState(
             isRefreshLoading = isRefreshLoading,

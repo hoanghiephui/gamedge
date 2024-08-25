@@ -58,6 +58,7 @@ fun AnimatedContentContainer(
 
                 finalEnterTransition with finalExitTransition
             },
+            label = "",
         ) { targetUiState ->
             Box(modifier = Modifier.fillMaxSize()) {
                 content(targetUiState)

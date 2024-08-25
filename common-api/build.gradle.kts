@@ -35,8 +35,8 @@ dependencies {
 
     implementation(libs.kotlinxSerialization)
 
-    implementation(libs.okHttpLoggingInterceptor)
-    implementation(libs.retrofit)
+    api(libs.okHttpLoggingInterceptor)
+    api(libs.retrofit)
     implementation(libs.retrofitKotlinxSerializationConverter)
 
     implementation(libs.kotlinResult)

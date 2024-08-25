@@ -51,6 +51,7 @@ dependencies {
     implementation(libs.commonsKtx)
 
     implementation(libs.coil)
+    api(libs.coilGif)
 
     implementation(libs.daggerHiltAndroid)
     kapt(libs.daggerHiltAndroidCompiler)

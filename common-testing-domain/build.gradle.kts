@@ -15,7 +15,11 @@
  */
 
 plugins {
-    id(libs.plugins.kotlinJvm.get().pluginId)
+    id(libs.plugins.androidLibrary.get().pluginId)
+    id(libs.plugins.gamedgeAndroid.get().pluginId)
+}
+android {
+    namespace = "com.paulrybitskyi.gamedge.common.testing.domain"
 }
 
 dependencies {

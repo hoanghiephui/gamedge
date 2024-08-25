@@ -16,6 +16,7 @@
 
 package com.paulrybitskyi.gamedge.common.data.auth.datastores.file
 
+import com.android.model.UserDataModel
 import com.paulrybitskyi.gamedge.common.domain.auth.entities.OauthCredentials
 import javax.inject.Inject
 
@@ -37,6 +38,35 @@ internal class ProtoAuthMapper @Inject constructor(
             accessToken = oauthCredentials.accessToken,
             tokenType = oauthCredentials.tokenType,
             tokenTtl = oauthCredentials.tokenTtl,
+        )
+    }
+
+    fun mapToProtoMyProfile(dataModel: UserDataModel): UserPreferences {
+        return UserPreferences.newBuilder()
+            .setId(dataModel.id)
+            .setType(dataModel.type)
+            .setLogin(dataModel.login)
+            .setProfileImageUrl(dataModel.profileImageUrl)
+            .setDescription(dataModel.description)
+            .setBroadcasterType(dataModel.broadcasterType)
+            .setCreatedAt(dataModel.createdAt)
+            .setDisplayName(dataModel.displayName)
+            .setViewCount(dataModel.viewCount.toLong())
+            .build()
+    }
+
+    fun mapToDomainUserDataModel(userPreferences: UserPreferences): UserDataModel {
+        return UserDataModel(
+            id = userPreferences.id,
+            login = userPreferences.login,
+            displayName = userPreferences.displayName,
+            type = userPreferences.type,
+            broadcasterType = userPreferences.broadcasterType,
+            description = userPreferences.description,
+            profileImageUrl = userPreferences.profileImageUrl,
+            offlineImageUrl = userPreferences.profileImageUrl,
+            viewCount = userPreferences.viewCount.toInt(),
+            createdAt = userPreferences.createdAt
         )
     }
 }

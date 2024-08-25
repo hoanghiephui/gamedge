@@ -29,6 +29,14 @@ message UserPreferences {
     bool should_hide_onboarding = 3;
 
     bool use_dynamic_color = 4;
-
-    // NEXT AVAILABLE ID: 5
+    string id = 5;
+    string login = 6;
+    string displayName = 7;
+    string type = 8;
+    string broadcaster_type = 9;
+    string description = 10;
+    string profile_image_url = 11;
+    int64 view_count = 12;
+    string created_at = 13;
+    // NEXT AVAILABLE ID: 14
 }

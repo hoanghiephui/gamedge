@@ -2,9 +2,13 @@ package com.paulrybitskyi.gamedge.igdb.api.stream
 
 import com.paulrybitskyi.gamedge.common.api.ApiResult
 import com.paulrybitskyi.gamedge.igdb.api.stream.model.StreamsResponse
+import com.paulrybitskyi.gamedge.igdb.api.stream.model.UserDataResponse
 
 interface StreamEndpoint {
     suspend fun getStreamItems(cursorPage: String?): ApiResult<StreamsResponse>
+    suspend fun getUserInformation(
+        userId: String?
+    ): ApiResult<UserDataResponse>
 }
 
 internal class StreamEndpointImpl(
@@ -22,4 +26,14 @@ internal class StreamEndpointImpl(
             queryParams = queryParams
         )
     }
+
+    override suspend fun getUserInformation(userId: String?): ApiResult<UserDataResponse> {
+        val queryParams = buildMap {
+            if (userId != null) {
+                put("id", userId)
+            }
+        }
+        return streamService.getUserInformation(queryParams)
+    }
+
 }

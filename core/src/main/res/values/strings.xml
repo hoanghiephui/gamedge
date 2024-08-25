@@ -80,4 +80,37 @@
     <string name="not_connected">⚠️ You aren’t connected to the internet</string>
     <string name="share_streaming">Check out %1$s at: https://www.twitch.tv/%2$s</string>
     <string name="count_view">%1$s viewers</string>
+
+    <!-- StreamView ChatBadges composable -->
+    <string name="moderator_badge_icon_description">Moderator badge</string>
+    <string name="sub_badge_icon_description">Subscriber badge</string>
+
+    <!-- StreamView TextFieldChat composable -->
+    <string name="send_a_message">Send a message</string>
+    <string name="send_chat">Send chat</string>
+    <string name="more_vert_icon_description">Show side modal</string>
+
+
+    <!-- StreamView TimeoutDialog composable -->
+    <string name="timeout_text">Timeout :</string>
+    <string name="duration_text">Duration :</string>
+    <string name="ten_seconds">10sec</string>
+    <string name="one_minute">1min</string>
+    <string name="ten_minutes">10min</string>
+    <string name="thirty_minutes">30min</string>
+    <string name="reason">Reason</string>
+    <string name="cancel">Cancel</string>
+    <string name="timeout_confirm">Timeout</string>
+
+    <!-- StreamView BanDialog composable -->
+    <string name="one_week">1 week</string>
+    <string name="two_weeks">2 weeks</string>
+    <string name="permanently">Permanently</string>
+
+    <!-- StreamView ScrollToBottom composable -->
+    <string name="arrow_drop_down_description">click to advance to bottom of chat</string>
+    <string name="scroll_to_bottom">Scroll to bottom</string>
+    <string name="undo_ban_button">Undo ban button</string>
+    <!-- StreamView ChatCard composable -->
+    <string name="moderator_deleted_comment">Moderator deleted Comment</string>
 </resources>

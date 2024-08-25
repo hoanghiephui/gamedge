@@ -16,6 +16,7 @@
 
 package com.paulrybitskyi.gamedge.common.domain.auth.datastores
 
+import com.android.model.UserDataModel
 import com.paulrybitskyi.gamedge.common.domain.auth.entities.OauthCredentials
 import kotlinx.coroutines.flow.Flow
 
@@ -24,4 +25,6 @@ interface AuthLocalDataStore {
     suspend fun getOauthCredentials(): OauthCredentials?
     suspend fun saveAuthorizationTokenTwitch(token: String)
     val authorizationTokenTwitch: Flow<String>
+    suspend fun saveMyProfile(userDataModel: UserDataModel)
+    suspend fun getMyProfile(): UserDataModel?
 }

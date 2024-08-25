@@ -115,6 +115,20 @@ class TwitchViewModel @Inject constructor(
         }
     }
 
+    fun getMyProfile() {
+        streamUseCase.getMyProfile()
+            .resultOrError()
+            .onError {
+                logger.error(logTag, "Failed to MyProfile", it)
+                dispatchCommand(GeneralCommand.ShowLongToast(errorMapper.mapToMessage(it)))
+            }.distinctUntilChanged()
+            .onEach { emittedUiState ->
+                logger.info(logTag, "My Profile ${emittedUiState.data.first().id}")
+                authLocalDataStore.saveMyProfile(emittedUiState.data.first())
+            }
+            .launchIn(viewModelScope)
+    }
+
     fun initialLoadIfNeeded(resultEmissionDelay: Long = 0L) {
         if (isInitialLoading || isRefreshLoading) {
             return

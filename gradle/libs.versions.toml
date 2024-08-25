@@ -181,6 +181,7 @@ kotlinResult = { module = "com.michael-bull.kotlin-result:kotlin-result", versio
 hiltBinder = { module = "com.paulrybitskyi:hilt-binder", version.ref = "hiltBinder" }
 hiltBinderCompiler = { module = "com.paulrybitskyi:hilt-binder-compiler", version.ref = "hiltBinder" }
 coil = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
+coilGif = { module = "io.coil-kt:coil-gif", version.ref = "coil" }
 zoomable = { module = "com.mxalbert.zoomable:zoomable", version.ref = "zoomable" }
 
 # Testing

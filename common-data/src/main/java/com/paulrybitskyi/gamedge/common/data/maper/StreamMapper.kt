@@ -18,7 +18,10 @@ package com.paulrybitskyi.gamedge.common.data.maper
 
 import com.android.model.StreamData
 import com.android.model.StreamItem
+import com.android.model.UserDataModel
+import com.android.model.UserModel
 import com.paulrybitskyi.gamedge.igdb.api.stream.model.StreamsResponse
+import com.paulrybitskyi.gamedge.igdb.api.stream.model.UserDataResponse
 import javax.inject.Inject
 
 internal class StreamMapper @Inject constructor() {
@@ -46,10 +49,33 @@ internal class StreamMapper @Inject constructor() {
             }
         )
     }
+
+    fun mapToDomainUserInfo(userDataResponse: UserDataResponse): UserModel {
+        return UserModel(
+            data = userDataResponse.data.map { data ->
+                UserDataModel(
+                    id = data.id,
+                    login = data.login,
+                    displayName = data.display_name,
+                    type = data.type,
+                    broadcasterType = data.broadcaster_type,
+                    description = data.description,
+                    profileImageUrl = data.profile_image_url,
+                    offlineImageUrl = data.offline_image_url,
+                    viewCount = data.view_count,
+                    createdAt = data.created_at
+                )
+            }
+        )
+    }
 }
 
 internal fun StreamMapper.mapToDomainStreams(streamsResponse: StreamsResponse): StreamData {
     return mapToDomainStream(streamsResponse)
+}
+
+internal fun StreamMapper.mapToDomainUserInfo(userDataResponse: UserDataResponse): UserModel {
+    return mapToDomainUserInfo(userDataResponse)
 }
 
 fun generateLinks(baseUrl: String): List<String> {

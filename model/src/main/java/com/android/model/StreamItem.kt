@@ -18,6 +18,9 @@ data class StreamItem(
 ) {
     val isLive: Boolean get() =
         "live" == type
+    val smallPreview get() = thumbnailUrl.first()
+    val mediumPreview get() = thumbnailUrl[1]
+    val largePreview get() = thumbnailUrl.last()
 }
 
 data class StreamData(

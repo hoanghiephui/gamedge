@@ -81,6 +81,7 @@ internal fun TwitchRoute(
     LaunchedEffect(viewModel, authorizationTokenTwitch) {
         if (authorizationTokenTwitch?.isNotBlank() == true) {
             viewModel.initialLoadIfNeeded()
+            viewModel.getMyProfile()//TODO phai xem laij logic
         }
     }
     LaunchedEffect(streamingUrlState) {

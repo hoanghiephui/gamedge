@@ -13,5 +13,9 @@ data class StreamPlaybackAccessToken(
     val title: String,
     val startTime: Long,
     val viewerCount: Long,
-    val thumbnailVideo: String
+    val thumbnailVideo: String,
+    val clientId: String,
+    val broadcasterId: String,
+    val userId: String,
+    val appLogin: String
 ) : Parcelable

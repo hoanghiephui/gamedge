@@ -19,6 +19,7 @@ plugins {
     id(libs.plugins.gamedgeAndroid.get().pluginId)
     id(libs.plugins.kotlinKapt.get().pluginId)
     id("kotlin-parcelize")
+    alias(libs.plugins.jetpackCompose)
 }
 
 android {
@@ -32,6 +33,28 @@ dependencies {
     implementation(libs.daggerHiltCore)
     kapt(libs.daggerHiltCoreCompiler)
     api(project(":model"))
+
+    implementation(platform(libs.composeBom))
+    implementation(libs.androidx.compose.foundation.layout)
+    implementation(libs.androidx.compose.material.iconsExtended)
+    implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.material3.adaptive)
+    implementation(libs.androidx.compose.material3.navigationSuite)
+    implementation(libs.androidx.compose.runtime)
+    implementation(libs.androidx.compose.ui.util)
+    implementation(libs.androidx.metrics)
+    implementation(libs.compose.webview)
+    implementation(libs.composeUi)
+    implementation(libs.composeTooling)
+    implementation(libs.composeFoundation)
+    implementation(libs.composeRuntime)
+    implementation(libs.composeMaterial)
+    implementation(libs.accompanistSystemUi)
+
+    implementation(libs.commonsCore)
+    implementation(libs.commonsKtx)
+
+    implementation(libs.coil)
 
     testImplementation(project(localModules.commonTestingDomain))
     testImplementation(libs.jUnit)

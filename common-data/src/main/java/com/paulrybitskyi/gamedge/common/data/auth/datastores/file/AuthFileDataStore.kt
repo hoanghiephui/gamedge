@@ -17,6 +17,7 @@
 package com.paulrybitskyi.gamedge.common.data.auth.datastores.file
 
 import androidx.datastore.core.DataStore
+import com.android.model.UserDataModel
 import com.paulrybitskyi.gamedge.common.domain.auth.datastores.AuthLocalDataStore
 import com.paulrybitskyi.gamedge.common.domain.auth.entities.OauthCredentials
 import com.paulrybitskyi.hiltbinder.BindType
@@ -30,6 +31,7 @@ import javax.inject.Singleton
 @BindType
 internal class AuthFileDataStore @Inject constructor(
     private val protoDataStore: DataStore<ProtoOauthCredentials>,
+    private val protoUserDataStore: DataStore<UserPreferences>,
     private val protoAuthMapper: ProtoAuthMapper,
 ) : AuthLocalDataStore {
 
@@ -62,4 +64,16 @@ internal class AuthFileDataStore @Inject constructor(
 
     override val authorizationTokenTwitch: Flow<String>
         get() = protoDataStore.data.map { it.authorizationToken }
+
+    override suspend fun saveMyProfile(userDataModel: UserDataModel) {
+        protoUserDataStore.updateData {
+            protoAuthMapper.mapToProtoMyProfile(userDataModel)
+        }
+    }
+
+    override suspend fun getMyProfile(): UserDataModel? {
+        return protoUserDataStore.data
+            .firstOrNull()
+            ?.let(protoAuthMapper::mapToDomainUserDataModel)
+    }
 }

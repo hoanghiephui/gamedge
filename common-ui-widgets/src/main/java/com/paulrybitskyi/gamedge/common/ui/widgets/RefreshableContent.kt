@@ -17,6 +17,7 @@
 package com.paulrybitskyi.gamedge.common.ui.widgets
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.material.pullrefresh.PullRefreshDefaults
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
@@ -32,7 +33,7 @@ fun RefreshableContent(
     modifier: Modifier = Modifier,
     isSwipeEnabled: Boolean = true,
     onRefreshRequested: (() -> Unit)? = null,
-    content: @Composable () -> Unit,
+    content: @Composable BoxScope.() -> Unit,
 ) {
     val refreshState = rememberPullRefreshState(
         refreshing = isRefreshing,
@@ -52,7 +53,6 @@ fun RefreshableContent(
             refreshing = isRefreshing,
             state = refreshState,
             modifier = Modifier.align(Alignment.TopCenter),
-            contentColor = GamedgeTheme.colors.secondary,
         )
     }
 }

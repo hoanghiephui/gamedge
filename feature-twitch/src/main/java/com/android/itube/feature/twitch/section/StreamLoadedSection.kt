@@ -31,6 +31,7 @@ import com.android.model.StreamItem
 import com.paulrybitskyi.gamedge.common.ui.v2.component.NiaOverlayLoadingWheel
 import com.paulrybitskyi.gamedge.common.ui.widgets.NewsResourceHeaderImage
 import com.paulrybitskyi.gamedge.common.ui.widgets.PullRefresh
+import com.paulrybitskyi.gamedge.common.ui.widgets.RefreshableContent
 import com.paulrybitskyi.gamedge.core.utils.formattedCount
 import kotlinx.collections.immutable.ImmutableList
 
@@ -38,10 +39,10 @@ import kotlinx.collections.immutable.ImmutableList
 fun StreamLoadedSection(
     sectionState: StreamLoadedSectionState,
 ) {
-    PullRefresh(
+    RefreshableContent(
         modifier = Modifier,
         isRefreshing = sectionState.isRefreshLoading,
-        onRefresh = sectionState.refresh,
+        onRefreshRequested = sectionState.refresh,
     ) {
         LazyVerticalStaggeredGrid(
             columns = StaggeredGridCells.Adaptive(300.dp),

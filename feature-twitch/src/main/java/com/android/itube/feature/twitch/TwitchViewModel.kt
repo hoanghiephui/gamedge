@@ -51,8 +51,6 @@ class TwitchViewModel @Inject constructor(
     private val errorMapper: ErrorMapper,
     private val logger: Logger,
     private val graphMapper: GraphMapper,
-    @TransitionAnimationDuration
-    private val transitionAnimationDuration: Long,
 ) : BaseViewModel() {
     private var hasMoreGamesToLoad = false
 
@@ -183,14 +181,11 @@ class TwitchViewModel @Inject constructor(
             .onStart {
                 isRefreshLoading = true
                 emit(currentUiState.enableLoading())
-                // Show loading state for some time since it can be too quick
-                val time = if (isClearPage) transitionAnimationDuration else 0L
-                delay(time)
             }
             .onCompletion {
                 // Delay disabling loading to avoid quick state changes like
                 // empty, loading, empty, success
-                val time = if (isClearPage) transitionAnimationDuration else 0L
+                val time = if (isClearPage) 1000L else 0L
                 delay(time)
                 isRefreshLoading = false
                 emit(currentUiState.disableLoading())

@@ -23,6 +23,8 @@ import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imeNestedScroll
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -236,7 +238,8 @@ fun ChatView(
         },
         enterChat = { enterChatModifier ->
             EnterChatColumn(
-                modifier = enterChatModifier,
+                modifier = enterChatModifier.imePadding() // padding for the bottom for the IME
+                    .imeNestedScroll(),
                 filteredRow = {
                     FilteredMentionLazyRow(
                         filteredChatListImmutable = filteredChatListImmutable,
@@ -372,7 +375,7 @@ fun ChatUIBox(
         with(chatUIScope) {
             Box(modifier = Modifier.fillMaxSize()) {
                 scrollToBottom(
-                    modifier
+                    Modifier
                         .align(Alignment.BottomCenter)
                         .padding(bottom = 80.dp)
                         .zIndex(5f)

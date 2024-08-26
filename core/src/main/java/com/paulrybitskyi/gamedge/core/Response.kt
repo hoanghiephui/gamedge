@@ -15,7 +15,7 @@ import javax.annotation.concurrent.Immutable
 
 sealed class Response<out T> {
 
-    object Loading : Response<Nothing>()
+    data object Loading : Response<Nothing>()
 
     data class Success<out T>(
         val data: T
@@ -29,7 +29,7 @@ sealed class Response<out T> {
 @Immutable
 sealed class WebSocketResponse<out T> {
 
-    object Loading : WebSocketResponse<Nothing>()
+    data object Loading : WebSocketResponse<Nothing>()
 
     data class Success<out T>(
         val data: T
@@ -58,7 +58,7 @@ sealed class WebSocketResponse<out T> {
  */
 sealed class NetworkResponse<out T> {
 
-    object Loading : NetworkResponse<Nothing>()
+    data object Loading : NetworkResponse<Nothing>()
 
     data class Success<out T>(
         val data: T
@@ -87,7 +87,7 @@ sealed class NetworkResponse<out T> {
  */
 sealed class NetworkAuthResponse<out T> {
 
-    object Loading : NetworkAuthResponse<Nothing>()
+    data object Loading : NetworkAuthResponse<Nothing>()
 
     data class Success<out T>(
         val data: T
@@ -122,7 +122,7 @@ sealed class NetworkAuthResponse<out T> {
  */
 sealed class NetworkNewUserResponse<out T> {
 
-    object Loading : NetworkNewUserResponse<Nothing>()
+    data object Loading : NetworkNewUserResponse<Nothing>()
 
 
 
@@ -161,7 +161,7 @@ sealed class NetworkNewUserResponse<out T> {
  *
  */
 sealed class UnAuthorizedResponse<out T> {
-    object Loading : UnAuthorizedResponse<Nothing>()
+    data object Loading : UnAuthorizedResponse<Nothing>()
     data class Success<out T>(
         val data: T
     ) : UnAuthorizedResponse<T>()

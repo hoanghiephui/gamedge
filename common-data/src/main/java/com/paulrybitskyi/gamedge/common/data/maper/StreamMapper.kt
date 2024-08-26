@@ -20,6 +20,8 @@ import com.android.model.StreamData
 import com.android.model.StreamItem
 import com.android.model.UserDataModel
 import com.android.model.UserModel
+import com.android.model.websockets.ChatSettings
+import com.android.model.websockets.ChatSettingsData
 import com.paulrybitskyi.gamedge.igdb.api.stream.model.StreamsResponse
 import com.paulrybitskyi.gamedge.igdb.api.stream.model.UserDataResponse
 import javax.inject.Inject
@@ -68,14 +70,22 @@ internal class StreamMapper @Inject constructor() {
             }
         )
     }
+
+    fun mapToDomainChatSetting(chatSettings: ChatSettings): List<ChatSettingsData> {
+        return chatSettings.data
+    }
 }
 
 internal fun StreamMapper.mapToDomainStreams(streamsResponse: StreamsResponse): StreamData {
     return mapToDomainStream(streamsResponse)
 }
 
-internal fun StreamMapper.mapToDomainUserInfo(userDataResponse: UserDataResponse): UserModel {
+internal fun StreamMapper.mapToDomainUserInfos(userDataResponse: UserDataResponse): UserModel {
     return mapToDomainUserInfo(userDataResponse)
+}
+
+internal fun StreamMapper.mapToDomainChatSettings(chatSettings: ChatSettings): List<ChatSettingsData> {
+    return mapToDomainChatSetting(chatSettings)
 }
 
 fun generateLinks(baseUrl: String): List<String> {

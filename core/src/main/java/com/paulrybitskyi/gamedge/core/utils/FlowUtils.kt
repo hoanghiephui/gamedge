@@ -16,10 +16,12 @@
 
 package com.paulrybitskyi.gamedge.core.utils
 
+import android.util.Log
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
 
 data class Tuple4<T1, T2, T3, T4>(
@@ -91,5 +93,27 @@ fun <T> Flow<T>.onEachError(action: (cause: Throwable) -> Unit): Flow<T> {
     return onError {
         action(it)
         throw it
+    }
+}
+
+fun <T, R : Any> Flow<T>.mapWithRetry(
+    action: suspend (T) -> R,
+    predicate: suspend (R, attempt: Int) -> Boolean
+) = map { data ->
+    var attempt = 0L
+    var shallRetry: Boolean
+    var lastValue: R? = null
+    do {
+        Log.d("mapWithRetryRetry","RETRY NUMBER -> $attempt")
+        val tr = action(data)
+        shallRetry = predicate(tr, (++attempt).toInt())
+        if (!shallRetry) lastValue = tr
+    } while (shallRetry)
+    return@map lastValue
+}
+fun replaceChannelName(original: String, newChannelName: String): String {
+    val regex = Regex("channel=([^&]+)")
+    return regex.replace(original) {
+        "channel=$newChannelName"
     }
 }

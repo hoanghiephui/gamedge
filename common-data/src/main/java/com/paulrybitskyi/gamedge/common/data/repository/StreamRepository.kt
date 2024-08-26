@@ -2,11 +2,18 @@ package com.paulrybitskyi.gamedge.common.data.repository
 
 import com.android.model.StreamData
 import com.android.model.UserModel
+import com.android.model.websockets.ChannelEmoteResponse
+import com.android.model.websockets.ChatSettings
+import com.android.model.websockets.ChatSettingsData
+import com.android.model.websockets.EmoteData
+import com.android.model.websockets.GlobalChatBadgesData
 import com.github.michaelbull.result.mapEither
 import com.paulrybitskyi.gamedge.common.api.ApiResult
 import com.paulrybitskyi.gamedge.common.data.common.ApiErrorMapper
 import com.paulrybitskyi.gamedge.common.data.maper.StreamMapper
+import com.paulrybitskyi.gamedge.common.data.maper.mapToDomainChatSettings
 import com.paulrybitskyi.gamedge.common.data.maper.mapToDomainStreams
+import com.paulrybitskyi.gamedge.common.data.maper.mapToDomainUserInfos
 import com.paulrybitskyi.gamedge.common.domain.common.DispatcherProvider
 import com.paulrybitskyi.gamedge.common.domain.common.DomainResult
 import com.paulrybitskyi.gamedge.common.domain.repository.StreamRepository
@@ -37,15 +44,54 @@ internal class StreamRepositoryImpl @Inject constructor(
 
     }
 
+    override suspend fun getChatSettings(broadcasterId: String): DomainResult<List<ChatSettingsData>> {
+        return streamEndpoint.getChatSettings(broadcasterId)
+            .toChatSettingsResult()
+
+    }
+
+    override suspend fun getGlobalEmotes(): DomainResult<EmoteData> {
+        return withContext(dispatcherProvider.io) {
+            streamEndpoint.getGlobalEmotes().mapEither(
+                { response -> response },
+                apiErrorMapper::mapToDomainError
+            )
+        }
+    }
+
+    override suspend fun getChannelEmotes(broadcasterId: String): DomainResult<ChannelEmoteResponse> {
+        return withContext(dispatcherProvider.io) {
+            streamEndpoint.getChannelEmotes(broadcasterId).mapEither(
+                { response -> response },
+                apiErrorMapper::mapToDomainError
+            )
+        }
+    }
+
+    override suspend fun getGlobalChatBadges(): DomainResult<GlobalChatBadgesData> {
+        return withContext(dispatcherProvider.io) {
+            streamEndpoint.getGlobalChatBadges().mapEither(
+                { response -> response },
+                apiErrorMapper::mapToDomainError
+            )
+        }
+    }
+
     private suspend fun ApiResult<UserDataResponse>.toUserInfoDataStoreResult(): DomainResult<UserModel> {
         return withContext(dispatcherProvider.io) {
-            mapEither(streamMapper::mapToDomainUserInfo, apiErrorMapper::mapToDomainError)
+            mapEither(streamMapper::mapToDomainUserInfos, apiErrorMapper::mapToDomainError)
         }
     }
 
     private suspend fun ApiResult<StreamsResponse>.toDataStoreResult(): DomainResult<StreamData> {
         return withContext(dispatcherProvider.io) {
             mapEither(streamMapper::mapToDomainStreams, apiErrorMapper::mapToDomainError)
+        }
+    }
+
+    private suspend fun ApiResult<ChatSettings>.toChatSettingsResult(): DomainResult<List<ChatSettingsData>> {
+        return withContext(dispatcherProvider.io) {
+            mapEither(streamMapper::mapToDomainChatSettings, apiErrorMapper::mapToDomainError)
         }
     }
 }

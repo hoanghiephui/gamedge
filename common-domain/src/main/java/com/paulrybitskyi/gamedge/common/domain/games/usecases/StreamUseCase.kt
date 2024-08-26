@@ -2,6 +2,8 @@ package com.paulrybitskyi.gamedge.common.domain.games.usecases
 
 import com.android.model.StreamData
 import com.android.model.UserModel
+import com.android.model.websockets.ChatSettingsData
+import com.android.model.websockets.EmoteData
 import com.paulrybitskyi.gamedge.common.domain.common.DispatcherProvider
 import com.paulrybitskyi.gamedge.common.domain.common.DomainResult
 import com.paulrybitskyi.gamedge.common.domain.common.extensions.onEachSuccess
@@ -16,6 +18,7 @@ import javax.inject.Singleton
 interface StreamUseCase : ObservableStreamUseCase {
     fun getUserInformation(userId: String): Flow<DomainResult<UserModel>>
     fun getMyProfile(): Flow<DomainResult<UserModel>>
+    fun getChatSettings(broadcasterId: String): Flow<DomainResult<List<ChatSettingsData>>>
 }
 
 @Singleton
@@ -42,4 +45,9 @@ internal class StreamUseCaseImpl @Inject constructor(
     override fun getMyProfile(): Flow<DomainResult<UserModel>> = flow {
         emit(gamesDataStores.streamRepository.getUserInformation())
     }.flowOn(dispatcherProvider.main)
+
+    override fun getChatSettings(broadcasterId: String): Flow<DomainResult<List<ChatSettingsData>>> = flow {
+        emit(gamesDataStores.streamRepository.getChatSettings(broadcasterId))
+    }.flowOn(dispatcherProvider.main)
+
 }

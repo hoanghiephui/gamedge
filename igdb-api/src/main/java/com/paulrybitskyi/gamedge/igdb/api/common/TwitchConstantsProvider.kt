@@ -28,6 +28,7 @@ interface TwitchConstantsProvider {
     val twitchHashChat: String
     val twitchGRAP: String
     val graphUrl: String
+    val apiBetterTtvUrl: String
 }
 
 class ProdTwitchConstantsProvider @Inject constructor() : TwitchConstantsProvider {
@@ -45,4 +46,7 @@ class ProdTwitchConstantsProvider @Inject constructor() : TwitchConstantsProvide
 
     override val graphUrl: String
         get() = Constants.TWITCH_API_LIVE_URL
+
+    override val apiBetterTtvUrl: String
+        get() = Constants.BETTER_TTV_API_URL
 }

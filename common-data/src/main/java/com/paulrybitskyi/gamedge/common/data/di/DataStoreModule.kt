@@ -20,8 +20,10 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.DataStoreFactory
 import androidx.datastore.dataStoreFile
+import com.paulrybitskyi.gamedge.common.data.UserPreferencesDataStore
 import com.paulrybitskyi.gamedge.common.data.UserPreferencesSerializer
 import com.paulrybitskyi.gamedge.common.data.auth.datastores.file.UserPreferences
+import com.paulrybitskyi.gamedge.common.domain.ChatSettingsDataStore
 import com.paulrybitskyi.gamedge.core.Dispatcher
 import com.paulrybitskyi.gamedge.core.NiaDispatchers
 import com.paulrybitskyi.gamedge.core.di.ApplicationScope
@@ -52,4 +54,12 @@ object DataStoreModule {
         ) {
             context.dataStoreFile("user_preferences.pb")
         }
+
+    @Singleton
+    @Provides
+    fun providesChatSettingsDataStore(
+        userPreferencesDataStore: UserPreferencesDataStore
+    ): ChatSettingsDataStore {
+        return userPreferencesDataStore
+    }
 }

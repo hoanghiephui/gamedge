@@ -28,7 +28,6 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -70,10 +69,9 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.common.C
 import androidx.media3.common.TrackSelectionOverride
@@ -85,6 +83,7 @@ import com.game.feature.streaming.component.QualitySelectionDialog
 import com.game.feature.streaming.component.StreamingPlayer
 import com.game.feature.streaming.component.chat.ChatView
 import com.game.feature.streaming.component.rememberStreamingPlayer
+import com.game.feature.streaming.entities.AdvancedChatSettings
 import com.game.feature.streaming.entities.FilteredChatListImmutableCollection
 import com.game.feature.streaming.entities.ForwardSlashCommandsImmutableCollection
 import com.paulrybitskyi.gamedge.common.domain.chat.EmoteListMap
@@ -111,7 +110,8 @@ import com.paulrybitskyi.gamedge.core.R as coreR
 fun StreamingScreen(
     onShowSnackbar: suspend (String, String?) -> Boolean,
     onBackScreen: () -> Unit,
-    viewModel: StreamingViewModel = hiltViewModel()
+    viewModel: StreamingViewModel = hiltViewModel(),
+    chatSettingsViewModel: ChatSettingsViewModel = hiltViewModel()
 ) {
     var showLoading by remember {
         mutableStateOf(true)
@@ -254,6 +254,37 @@ fun StreamingScreen(
     val showChatSettingsBottomModal: () -> Unit = remember(outerBottomModalState) {
         {
             showBottomSheet = true
+        }
+    }
+
+    val changeActualTextFieldValue: (String, TextRange) -> Unit = remember(viewModel) {
+        { text, textRange ->
+            viewModel.changeActualTextFieldValue(text, textRange)
+        }
+    }
+
+    val sendMessageToWebSocket: (String) -> Unit = remember(viewModel) {
+        { message ->
+            viewModel.sendMessage(message)
+            viewModel.updateMostFrequentEmoteList()
+        }
+    }
+
+    val updateAdvancedChatSettings: (AdvancedChatSettings) -> Unit = remember(viewModel) {
+        { newValue ->
+            viewModel.updateAdvancedChatSettings(newValue)
+        }
+    }
+
+    val setNoChatMode: (Boolean) -> Unit = remember(viewModel) {
+        { newValue ->
+            viewModel.setNoChatMode(newValue)
+        }
+    }
+
+    val clickedCommandAutoCompleteText: (String) -> Unit = remember(viewModel) {
+        { clickedValue ->
+            viewModel.clickedCommandAutoCompleteText(clickedValue)
         }
     }
 
@@ -417,9 +448,8 @@ fun StreamingScreen(
                         )
 
                         ChatView(
-                            modifier = Modifier.weight(1f)
-                                .imePadding() // padding for the bottom for the IME
-                                .imeNestedScroll(),
+                            modifier = Modifier
+                                .weight(1f),
                             twitchUserChat = twitchUserChat,
                             showBottomModal = {
                                 //showClickedUserBottomModal()
@@ -448,20 +478,22 @@ fun StreamingScreen(
 
                             isMod = viewModel.state.value.loggedInUserData?.mod ?: false,
                             clickedAutoCompleteText = { username ->
-                                //streamViewModel.autoTextChange(username)
+                                viewModel.autoTextChange(username)
                             },
                             showModal = {
                                 showChatSettingsBottomModal()
                             },
-                            notificationAmount = 1,//modViewViewModel.uiState.value.modViewTotalNotifications,
+                            notificationAmount = 0,//modViewViewModel.uiState.value.modViewTotalNotifications,
                             textFieldValue = viewModel.textFieldValue,
                             sendMessageToWebSocket = { message ->
-                                //sendMessageToWebSocket(message)
+                                sendMessageToWebSocket(message)
                             },
-                            noChat = viewModel.advancedChatSettingsState.value.noChatMode,
-                            deleteChatMessage = { /*messageId -> streamViewModel.deleteChatMessage(messageId)*/ },
+                            noChat = advancedChatSettingsState.noChatMode,
+                            deleteChatMessage = { messageId ->
+                                //viewModel.deleteChatMessage(messageId)TODO chưa làm tính năng mod
+                            },
                             clickedCommandAutoCompleteText = { clickedValue ->
-                                //clickedCommandAutoCompleteText(clickedValue)
+                                clickedCommandAutoCompleteText(clickedValue)
 
                             },
                             inlineContentMap = EmoteListMap(emptyMap()),//streamViewModel.inlineTextContentTest.value,
@@ -489,12 +521,12 @@ fun StreamingScreen(
                             filteredChatListImmutable = FilteredChatListImmutableCollection(emptyList()),//streamViewModel.filteredChatListImmutable.value,
                             actualTextFieldValue = viewModel.textFieldValue.value,
                             changeActualTextFieldValue = { text, textRange ->
-                                //changeActualTextFieldValue(text, textRange)
+                                changeActualTextFieldValue(text, textRange)
                             },
                             badgeListMap = EmoteListMap(emptyMap()),//chatSettingsViewModel.globalChatBadgesMap.value,
-                            usernameSize = 2f,//chatSettingsViewModel.usernameSize.value,
-                            messageSize = 2f,//chatSettingsViewModel.messageSize.value,
-                            lineHeight = 2f,//chatSettingsViewModel.lineHeight.value,
+                            usernameSize = chatSettingsViewModel.usernameSize.value,
+                            messageSize = chatSettingsViewModel.messageSize.value,
+                            lineHeight = chatSettingsViewModel.lineHeight.value,
                             useCustomUsernameColors = true,//chatSettingsViewModel.customUsernameColor.value,
                             globalTwitchEmoteContentMap = EmoteListMap(emptyMap()),//chatSettingsViewModel.globalEmoteMap.value,
                             channelTwitchEmoteContentMap = EmoteListMap(emptyMap()),//chatSettingsViewModel.inlineContentMapChannelEmoteList.value,
@@ -504,72 +536,6 @@ fun StreamingScreen(
                             lowPowerMode = viewModel.lowPowerModeActive.value,
                         )
                     }
-                    /*Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .aspectRatio(16 / 9f, true)
-                        ) {
-                            AsyncImage(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .aspectRatio(16 / 9f, true),
-                                model = viewModel.streamPlaybackAccessToken.thumbnailVideo,
-                                contentScale = ContentScale.Crop,
-                                contentDescription = "",
-                                imageLoader = LocalContext.current.imageLoader
-                            )
-                            AndroidView(
-                                factory = {
-                                    streamingPlayer.playerView
-                                }, modifier = Modifier
-                                    .pointerInput(Unit) {
-                                        detectTapGestures(onTap = {
-                                            //onSingleTap(exoPlayer)
-                                        }, onDoubleTap = { offset ->
-                                            //onDoubleTap(exoPlayer, offset)
-                                        })
-                                    }
-                                    .fillMaxWidth()
-                                    .aspectRatio(16 / 9f, true)
-                            )
-                            MenuControl(
-                                isFullscreen = isFullscreen,
-                                isVolumeOff = isVolumeOff,
-                                isPlaying = isPlaying,
-                                context = context,
-                                onBackScreen = onBackScreen,
-                                streamingPlayer = streamingPlayer,
-                                onClickFull = {
-                                    isFullscreen = !isFullscreen
-                                },
-                                onShareStreaming = {
-                                    shareStream()
-                                },
-                                onVolumeClick = {
-                                    isVolumeOff = !isVolumeOff
-                                    streamingPlayer.toggleMute(isVolumeOff)
-                                },
-                                onSetting = {
-                                    showDialogSetting = true
-                                },
-                                onClickPlayer = {
-                                    if (isPlaying) {
-                                        streamingPlayer.exoPlayer.pause()
-                                    } else {
-                                        streamingPlayer.exoPlayer.play()
-                                    }
-                                },
-                                startTime = startTime,
-                                viewerCount = viewModel.streamPlaybackAccessToken.viewerCount
-                            )
-                        }
-
-
-                    }*/
 
                     if (showBottomSheet) {
                         OrientationPortraitScreen(
@@ -578,8 +544,12 @@ fun StreamingScreen(
                                 showBottomSheet = false
                             },
                             advancedChatSettings = advancedChatSettingsState,
-                            onChangeAdvancedChatSettings = {},
-                            onChangeNoChatMode = { },
+                            onChangeAdvancedChatSettings = {
+                                updateAdvancedChatSettings(it)
+                            },
+                            onChangeNoChatMode = {
+                                setNoChatMode(it)
+                            },
                         )
                     }
                 }

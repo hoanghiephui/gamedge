@@ -32,6 +32,7 @@ internal annotation class Endpoint(val type: Type) {
         AUTH,
         GAMES,
         STREAM,
-        LIVE
+        LIVE,
+        EMOTE
     }
 }

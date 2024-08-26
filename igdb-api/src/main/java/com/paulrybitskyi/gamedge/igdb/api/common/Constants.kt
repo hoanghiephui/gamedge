@@ -21,4 +21,5 @@ internal object Constants {
     const val IGDB_API_BASE_URL = "https://api.igdb.com/v4/"
     const val TWITCH_API_STREAM_URL = "https://api.twitch.tv/helix/"
     const val TWITCH_API_LIVE_URL = "https://gql.twitch.tv/"
+    const val BETTER_TTV_API_URL = "https://api.betterttv.net/3/"
 }

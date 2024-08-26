@@ -3,7 +3,10 @@ package com.android.model.websockets
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+
+@Serializable
 data class ChatSettings(
+    @SerialName("data")
     val data: List<ChatSettingsData>
 )
 
@@ -13,20 +16,24 @@ data class ChatSettings(
  * */
 @Serializable
 data class ChatSettingsData(
+
     @SerialName("slow_mode")
     val slowMode: Boolean,
+
     @SerialName("slow_mode_wait_time")
     val slowModeWaitTime: Int?,
+
     @SerialName("follower_mode")
     val followerMode: Boolean, //
+
     @SerialName("follower_mode_duration")
     val followerModeDuration: Int?, //
+
     @SerialName("subscriber_mode")
     val subscriberMode: Boolean,
+
     @SerialName("emote_mode") //
     val emoteMode: Boolean,
-//    @SerialName("unique_chat_mode")
-//    val uniqueChatMode: Boolean
 )
 
 /**
@@ -40,3 +47,7 @@ data class UpdateChatSettings(
     val subscriber_mode: Boolean
 )
 
+data class ChatBadgePair(
+    val url:String,
+    val id:String
+)

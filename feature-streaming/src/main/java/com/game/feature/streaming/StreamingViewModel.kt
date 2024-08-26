@@ -2,6 +2,9 @@ package com.game.feature.streaming
 
 import android.content.Context
 import android.util.Log
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
@@ -9,10 +12,16 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.Placeholder
+import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import coil.compose.AsyncImage
 import com.android.model.websockets.ChatSettingsData
 import com.android.model.websockets.MessageType
 import com.game.feature.streaming.entities.AdvancedChatSettings
@@ -23,7 +32,13 @@ import com.game.feature.streaming.entities.ClickedUserNameChats
 import com.game.feature.streaming.entities.ClickedUsernameChatsWithDateSentImmutable
 import com.game.feature.streaming.entities.StreamUIState
 import com.game.feature.streaming.entities.TextParsing
+import com.paulrybitskyi.gamedge.common.domain.chat.EmoteListMap
+import com.paulrybitskyi.gamedge.common.domain.chat.EmoteNameUrl
+import com.paulrybitskyi.gamedge.common.domain.chat.EmoteNameUrlList
+import com.paulrybitskyi.gamedge.common.domain.common.extensions.resultOrError
+import com.paulrybitskyi.gamedge.common.domain.games.usecases.StreamUseCase
 import com.paulrybitskyi.gamedge.common.domain.live.entities.StreamPlaybackAccessToken
+import com.paulrybitskyi.gamedge.common.domain.repository.util.EmoteParsing
 import com.paulrybitskyi.gamedge.common.domain.websockets.MessageToken
 import com.paulrybitskyi.gamedge.common.domain.websockets.PrivateMessageType
 import com.paulrybitskyi.gamedge.common.domain.websockets.Scanner
@@ -35,15 +50,29 @@ import com.paulrybitskyi.gamedge.common.domain.websockets.TwitchUserData
 import com.paulrybitskyi.gamedge.common.domain.websockets.TwitchUserDataObjectMother
 import com.paulrybitskyi.gamedge.common.ui.base.BaseViewModel
 import com.paulrybitskyi.gamedge.common.ui.base.events.STREAMING_KEY
+import com.paulrybitskyi.gamedge.common.ui.base.events.common.GeneralCommand
 import com.paulrybitskyi.gamedge.core.Dispatcher
+import com.paulrybitskyi.gamedge.core.ErrorMapper
+import com.paulrybitskyi.gamedge.core.Logger
 import com.paulrybitskyi.gamedge.core.NiaDispatchers
 import com.paulrybitskyi.gamedge.core.Response
 import com.paulrybitskyi.gamedge.core.sharers.TextSharer
+import com.paulrybitskyi.gamedge.core.utils.mapWithRetry
+import com.paulrybitskyi.gamedge.core.utils.onError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineName
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onCompletion
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -57,6 +86,9 @@ class StreamingViewModel @Inject constructor(
     private val tokenMonitoring: TokenMonitoring = TokenMonitoring(),
     private val tokenCommand: TokenCommand = TokenCommand(),
     private val textParsing: TextParsing = TextParsing(),
+    private val streamUseCase: StreamUseCase,
+    private val errorMapper: ErrorMapper,
+    private val logger: Logger,
     @Dispatcher(NiaDispatchers.IO)
     private val ioDispatcher: CoroutineDispatcher
 ) : BaseViewModel() {
@@ -120,6 +152,63 @@ class StreamingViewModel @Inject constructor(
     private val monitoredUsers = mutableStateListOf<String>()
 
     /**
+     * updateAdvancedChatSettings is used to update the [_advancedChatSettingsState] UI state
+     *
+     * @param advancedChatSettings the new state that will now represent the [_advancedChatSettingsState] UI state
+     */
+    fun updateAdvancedChatSettings(advancedChatSettings: AdvancedChatSettings) {
+        _advancedChatSettingsState.value = advancedChatSettings
+    }
+
+    fun setNoChatMode(status: Boolean) {
+        _advancedChatSettingsState.value = _advancedChatSettingsState.value.copy(
+            noChatMode = status
+        )
+        if (status) {
+            webSocket.close()
+            listChats.clear()
+
+        } else {
+            startWebSocket(channelName.value ?: "")
+        }
+        viewModelScope.launch {
+            delay(200)
+            listChats.clear()
+        }
+    }
+
+    /**
+     * autoTextChangeCommand is function that is used to change the value of [textFieldValue] with [command]
+     *
+     * @param command  a string meant to represent the slash command that was clicked on by the user
+     * */
+    fun clickedCommandAutoCompleteText(command: String) {
+        textParsing.clickSlashCommandTextAutoChange(
+            command = command,
+        )
+    }
+
+    /**
+     * autoTextChange is function that is used to change the value of [textFieldValue] with [username]
+     *
+     * @param username  a string meant to represent the username that was clicked on by the user
+     * */
+    fun autoTextChange(username: String) {
+        textParsing.clickUsernameAutoTextChange(
+            username = username,
+        )
+    }
+
+    fun addEmoteToText(emoteText: String) {
+        textParsing.updateTextField(" $emoteText ")
+    }
+
+    fun deleteEmote() {
+        Log.d("addToken", "deleteEmote()")
+        //textParsing.deleteEmote(inlineTextContentTest.value.map)
+    }
+
+    /**
      * A list representing all the chats users have sent
      * */
     val listChats = mutableStateListOf<TwitchUserData>()
@@ -139,12 +228,21 @@ class StreamingViewModel @Inject constructor(
     fun changeOpenWarningDialog(newValue: Boolean) {
         openWarningDialog.value = newValue
     }
+
     /*****LOW POWER MODE******/
     private var _lowPowerModeActive: MutableState<Boolean> = mutableStateOf(false)
     val lowPowerModeActive: State<Boolean> = _lowPowerModeActive
-    fun changeLowPowerModeActive(newValue:Boolean){
+    fun changeLowPowerModeActive(newValue: Boolean) {
         _lowPowerModeActive.value = newValue
     }
+
+    /**
+     * A list representing all the most recent clicked emotes
+     * */
+    //todo: mutableStateOf<EmoteNameUrlList>(EmoteNameUrlList())
+    val mostFrequentEmoteList = mutableStateListOf<EmoteNameUrl>()
+    val mostFrequentEmoteListTesting = mutableStateOf(EmoteNameUrlList())
+    val temporaryMostFrequentList = mutableStateListOf<EmoteNameUrl>()
 
     init {
         viewModelScope.launch {
@@ -219,9 +317,33 @@ class StreamingViewModel @Inject constructor(
             login = login
         )
 
-        //getChatSettings(clientId, broadcasterId)
+        // getChatSettings(broadcasterId)
         listChats.clear()
 
+    }
+
+    /**
+     * getChatSettings() is a private function used by [updateChannelNameAndClientIdAndUserId] and [retryGettingChatSetting] to
+     * get the chat settings of the current channel the viewer is viewing
+     * */
+    private fun getChatSettings(
+        broadcasterId: String
+    ) {
+        streamUseCase.getChatSettings(broadcasterId = broadcasterId)
+            .resultOrError()
+            .onError {
+                logger.error(logTag, "Failed to ChatSettings", it)
+                dispatchCommand(GeneralCommand.ShowLongToast(errorMapper.mapToMessage(it)))
+            }
+            .onStart {
+
+            }
+            .distinctUntilChanged()
+            .onEach { emittedUiState ->
+                logger.info(logTag, "Chat Settings ${emittedUiState.first().slowMode}")
+
+            }
+            .launchIn(viewModelScope)
     }
 
     /**
@@ -271,6 +393,21 @@ class StreamingViewModel @Inject constructor(
             text = "",
             selection = TextRange(0)
         )
+
+    }
+
+    fun updateMostFrequentEmoteList() {
+        //Need to do some sorting between the two
+        val oldList = mostFrequentEmoteListTesting.value.list.toMutableList()
+        val oldTemporaryList = temporaryMostFrequentList.filter { !oldList.contains(it) }
+        val newList = oldList + oldTemporaryList
+        //need to do sorting and validation checks
+
+        mostFrequentEmoteListTesting.value = mostFrequentEmoteListTesting.value.copy(
+            list = newList
+        )
+        temporaryMostFrequentList.clear()
+
 
     }
 
@@ -555,6 +692,17 @@ class StreamingViewModel @Inject constructor(
             Log.d("FilterMessageCrash", "messageId-----> $messageId")
             Log.d("FilterMessageCrash", "messageId-----> ${e.message}")
         }
+
+    }
+
+    fun changeActualTextFieldValue(
+        text: String,
+        textRange: TextRange
+    ) {
+        textFieldValue.value = TextFieldValue(
+            text = text,
+            selection = textRange
+        )
 
     }
 

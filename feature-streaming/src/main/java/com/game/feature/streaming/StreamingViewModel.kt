@@ -139,6 +139,12 @@ class StreamingViewModel @Inject constructor(
     fun changeOpenWarningDialog(newValue: Boolean) {
         openWarningDialog.value = newValue
     }
+    /*****LOW POWER MODE******/
+    private var _lowPowerModeActive: MutableState<Boolean> = mutableStateOf(false)
+    val lowPowerModeActive: State<Boolean> = _lowPowerModeActive
+    fun changeLowPowerModeActive(newValue:Boolean){
+        _lowPowerModeActive.value = newValue
+    }
 
     init {
         viewModelScope.launch {

@@ -33,6 +33,7 @@
         <activity
             android:name=".v2.MainActivity"
             android:supportsPictureInPicture="true"
+            android:windowSoftInputMode="adjustResize"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
             android:exported="true">
 

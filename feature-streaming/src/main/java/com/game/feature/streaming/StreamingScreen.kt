@@ -3,7 +3,6 @@ package com.game.feature.streaming
 import android.content.Context
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.annotation.OptIn
 import androidx.compose.animation.AnimatedVisibility
@@ -16,6 +15,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,13 +23,13 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imeNestedScroll
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.VolumeOff
@@ -42,7 +42,6 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.Pause
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -73,6 +72,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.common.C
 import androidx.media3.common.TrackSelectionOverride
@@ -82,6 +83,7 @@ import coil.compose.AsyncImage
 import coil.imageLoader
 import com.game.feature.streaming.component.QualitySelectionDialog
 import com.game.feature.streaming.component.StreamingPlayer
+import com.game.feature.streaming.component.chat.ChatView
 import com.game.feature.streaming.component.rememberStreamingPlayer
 import com.game.feature.streaming.entities.FilteredChatListImmutableCollection
 import com.game.feature.streaming.entities.ForwardSlashCommandsImmutableCollection
@@ -90,7 +92,6 @@ import com.paulrybitskyi.gamedge.common.domain.chat.EmoteNameUrlEmoteTypeList
 import com.paulrybitskyi.gamedge.common.domain.chat.EmoteNameUrlList
 import com.paulrybitskyi.gamedge.common.domain.chat.IndivBetterTTVEmoteList
 import com.paulrybitskyi.gamedge.common.domain.live.entities.StreamPlaybackAccessToken
-import com.paulrybitskyi.gamedge.common.domain.websockets.TwitchUserData
 import com.paulrybitskyi.gamedge.common.ui.KeepScreenOn
 import com.paulrybitskyi.gamedge.common.ui.theme.GamedgeTheme
 import com.paulrybitskyi.gamedge.common.ui.theme.lightScrim
@@ -102,7 +103,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import okhttp3.internal.toImmutableList
 import com.paulrybitskyi.gamedge.core.R as coreR
 
 @kotlin.OptIn(ExperimentalMaterial3Api::class)
@@ -265,7 +265,7 @@ fun StreamingScreen(
         when (orientation) {
             Configuration.ORIENTATION_LANDSCAPE -> {
                 Box(modifier = Modifier.fillMaxSize()) {
-                    ChatView(
+                    /*ChatView(
                         modifier = Modifier
                             .fillMaxHeight()
                             .statusBarsPadding()
@@ -273,7 +273,7 @@ fun StreamingScreen(
                             .align(Alignment.CenterEnd)
                             .padding(start = 20.dp),
                         twitchUserChat = viewModel.listChats.toList()
-                    )
+                    )*/
                     Box(modifier = Modifier
                         .background(color = Color.Black)
                         .fillMaxHeight()
@@ -347,7 +347,9 @@ fun StreamingScreen(
                 ) {
                     Column(
                         modifier = Modifier
-                            .fillMaxSize()
+                            .fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Bottom
                     ) {
                         Box(
                             modifier = Modifier
@@ -409,17 +411,16 @@ fun StreamingScreen(
                             )
                         }
 
-                        TitleAndProfile(viewModel.streamPlaybackAccessToken)
-                        HorizontalDivider(
-                            modifier = Modifier.padding(
-                                top = 8.dp,
-                                bottom = 8.dp
-                            )
+                        TitleAndProfile(
+                            modifier = Modifier,
+                            viewModel.streamPlaybackAccessToken
                         )
 
-                        com.game.feature.streaming.component.chat.ChatView(
-                            modifier = Modifier.weight(1f),
-                            twitchUserChat = twitchUserChat.toImmutableList(),
+                        ChatView(
+                            modifier = Modifier.weight(1f)
+                                .imePadding() // padding for the bottom for the IME
+                                .imeNestedScroll(),
+                            twitchUserChat = twitchUserChat,
                             showBottomModal = {
                                 //showClickedUserBottomModal()
                             },
@@ -489,9 +490,86 @@ fun StreamingScreen(
                             actualTextFieldValue = viewModel.textFieldValue.value,
                             changeActualTextFieldValue = { text, textRange ->
                                 //changeActualTextFieldValue(text, textRange)
-                            }
+                            },
+                            badgeListMap = EmoteListMap(emptyMap()),//chatSettingsViewModel.globalChatBadgesMap.value,
+                            usernameSize = 2f,//chatSettingsViewModel.usernameSize.value,
+                            messageSize = 2f,//chatSettingsViewModel.messageSize.value,
+                            lineHeight = 2f,//chatSettingsViewModel.lineHeight.value,
+                            useCustomUsernameColors = true,//chatSettingsViewModel.customUsernameColor.value,
+                            globalTwitchEmoteContentMap = EmoteListMap(emptyMap()),//chatSettingsViewModel.globalEmoteMap.value,
+                            channelTwitchEmoteContentMap = EmoteListMap(emptyMap()),//chatSettingsViewModel.inlineContentMapChannelEmoteList.value,
+                            globalBetterTTVEmoteContentMap = EmoteListMap(emptyMap()),//chatSettingsViewModel.betterTTVGlobalInlineContentMapChannelEmoteList.value,
+                            channelBetterTTVEmoteContentMap = EmoteListMap(emptyMap()),//chatSettingsViewModel.betterTTVChannelInlineContentMapChannelEmoteList.value,
+                            sharedBetterTTVEmoteContentMap = EmoteListMap(emptyMap()),//chatSettingsViewModel.betterTTVSharedInlineContentMapChannelEmoteList.value,
+                            lowPowerMode = viewModel.lowPowerModeActive.value,
                         )
                     }
+                    /*Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .aspectRatio(16 / 9f, true)
+                        ) {
+                            AsyncImage(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .aspectRatio(16 / 9f, true),
+                                model = viewModel.streamPlaybackAccessToken.thumbnailVideo,
+                                contentScale = ContentScale.Crop,
+                                contentDescription = "",
+                                imageLoader = LocalContext.current.imageLoader
+                            )
+                            AndroidView(
+                                factory = {
+                                    streamingPlayer.playerView
+                                }, modifier = Modifier
+                                    .pointerInput(Unit) {
+                                        detectTapGestures(onTap = {
+                                            //onSingleTap(exoPlayer)
+                                        }, onDoubleTap = { offset ->
+                                            //onDoubleTap(exoPlayer, offset)
+                                        })
+                                    }
+                                    .fillMaxWidth()
+                                    .aspectRatio(16 / 9f, true)
+                            )
+                            MenuControl(
+                                isFullscreen = isFullscreen,
+                                isVolumeOff = isVolumeOff,
+                                isPlaying = isPlaying,
+                                context = context,
+                                onBackScreen = onBackScreen,
+                                streamingPlayer = streamingPlayer,
+                                onClickFull = {
+                                    isFullscreen = !isFullscreen
+                                },
+                                onShareStreaming = {
+                                    shareStream()
+                                },
+                                onVolumeClick = {
+                                    isVolumeOff = !isVolumeOff
+                                    streamingPlayer.toggleMute(isVolumeOff)
+                                },
+                                onSetting = {
+                                    showDialogSetting = true
+                                },
+                                onClickPlayer = {
+                                    if (isPlaying) {
+                                        streamingPlayer.exoPlayer.pause()
+                                    } else {
+                                        streamingPlayer.exoPlayer.play()
+                                    }
+                                },
+                                startTime = startTime,
+                                viewerCount = viewModel.streamPlaybackAccessToken.viewerCount
+                            )
+                        }
+
+
+                    }*/
 
                     if (showBottomSheet) {
                         OrientationPortraitScreen(
@@ -513,10 +591,11 @@ fun StreamingScreen(
 
 @Composable
 private fun TitleAndProfile(
+    modifier: Modifier,
     data: StreamPlaybackAccessToken
 ) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(16.dp)
     ) {
@@ -746,31 +825,6 @@ private fun MenuControl(
                 }
 
             }
-        }
-    }
-}
-
-@Composable
-private fun ChatView(
-    modifier: Modifier,
-    twitchUserChat: List<TwitchUserData>
-) {
-    val lazyColumnListState = rememberLazyListState()
-    var autoscroll by remember { mutableStateOf(true) }
-    val coroutineScope = rememberCoroutineScope()
-    LazyColumn(
-        modifier,
-        lazyColumnListState
-    ) {
-        coroutineScope.launch {
-            if (autoscroll) {
-                lazyColumnListState.scrollToItem(twitchUserChat.size)
-            }
-        }
-        items(
-            twitchUserChat,
-        ) { indivChatMessage ->
-            Log.d("SmallChatUILazyColumn", "${indivChatMessage.userType}")
         }
     }
 }

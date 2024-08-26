@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
@@ -119,7 +120,6 @@ import com.paulrybitskyi.gamedge.common.domain.websockets.MessageToken
 import com.paulrybitskyi.gamedge.common.domain.websockets.PrivateMessageType
 import com.paulrybitskyi.gamedge.common.domain.websockets.TwitchUserData
 import com.paulrybitskyi.gamedge.common.ui.rememberDraggableActions
-import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
@@ -134,6 +134,7 @@ fun ChatView(
     showTimeoutDialog: () -> Unit,
     showBanDialog: () -> Unit,
     doubleClickMessage: (String) -> Unit,
+
 
     //below is what is needed for the chat UI
     textFieldValue: MutableState<TextFieldValue>,
@@ -150,6 +151,7 @@ fun ChatView(
     inlineContentMap: EmoteListMap,
     hideSoftKeyboard: () -> Unit,
     emoteBoardGlobalList: EmoteNameUrlList,
+    badgeListMap: EmoteListMap,
     emoteBoardChannelList: EmoteNameUrlEmoteTypeList,
     emoteBoardMostFrequentList: EmoteNameUrlList,
     globalBetterTTVEmotes: IndivBetterTTVEmoteList,
@@ -165,6 +167,16 @@ fun ChatView(
 
     actualTextFieldValue: TextFieldValue,
     changeActualTextFieldValue: (String, TextRange) -> Unit,
+    usernameSize: Float,
+    messageSize: Float,
+    lineHeight: Float,
+    useCustomUsernameColors: Boolean,
+    globalTwitchEmoteContentMap: EmoteListMap,
+    channelTwitchEmoteContentMap: EmoteListMap,
+    globalBetterTTVEmoteContentMap: EmoteListMap,
+    channelBetterTTVEmoteContentMap: EmoteListMap,
+    sharedBetterTTVEmoteContentMap: EmoteListMap,
+    lowPowerMode: Boolean,
 ) {
     val lazyColumnListState = rememberLazyListState()
     var autoscroll by remember { mutableStateOf(true) }
@@ -183,7 +195,7 @@ fun ChatView(
         chatUI = { modifierChatUI ->
             ChatUILazyColumn(
                 lazyColumnListState = lazyColumnListState,
-                twitchUserChat = twitchUserChat.toImmutableList(),
+                twitchUserChat = twitchUserChat,
                 autoscroll = autoscroll,
                 showBottomModal = { showBottomModal() },
                 showTimeoutDialog = { showTimeoutDialog() },
@@ -200,7 +212,17 @@ fun ChatView(
                 modifier = modifierChatUI,
                 deleteChatMessage = { messageId -> deleteChatMessage(messageId) },
                 isMod = isMod,
-                inlineContentMap = inlineContentMap
+                inlineContentMap = inlineContentMap,
+                badgeListMap = badgeListMap,
+                usernameSize = usernameSize,
+                messageSize = messageSize,
+                lineHeight = lineHeight,
+                useCustomUsernameColors = useCustomUsernameColors,
+                globalTwitchEmoteContentMap = globalTwitchEmoteContentMap,
+                channelTwitchEmoteContentMap = channelTwitchEmoteContentMap,
+                globalBetterTTVEmoteContentMap = globalBetterTTVEmoteContentMap,
+                channelBetterTTVEmoteContentMap = channelBetterTTVEmoteContentMap,
+                sharedBetterTTVEmoteContentMap = sharedBetterTTVEmoteContentMap
 
             )
         },
@@ -226,24 +248,28 @@ fun ChatView(
                     )
                 },
                 showModStatus = {
-                    /*ShowModStatus(
+                    ShowModStatus(
                         modStatus = isMod,
                         orientationIsVertical = orientationIsVertical,
                         notificationAmount = notificationAmount,
                         showModView = {
                             showModView()
                         }
-                    )*/
+                    )
                 },
                 stylizedTextField = { boxModifier ->
                     StylizedTextField(
                         modifier = boxModifier,
+                        // textFieldValue = textFieldValue,
                         newFilterMethod = { newTextValue ->
                             newFilterMethod(newTextValue)
                         },
                         showEmoteBoard = {
                             hideSoftKeyboard()
+//                            scope.launch { //todo: this is what is causing the recomp and needs to be removed
+//                                delay(100)
                             emoteKeyBoardHeight.value = 350.dp
+                            // }
                         },
                         showKeyBoard = {
                             emoteKeyBoardHeight.value = 0.dp
@@ -255,7 +281,9 @@ fun ChatView(
                         changeActualTextFieldValue = { text, textRange ->
                             changeActualTextFieldValue(text, textRange)
                         },
-                    )
+
+
+                        )
                 },
                 showIconBasedOnTextLength = {
                     ShowIconBasedOnTextLength(
@@ -291,7 +319,8 @@ fun ChatView(
         channelBetterTTVResponse = channelBetterTTVResponse,
         sharedBetterTTVResponse = sharedBetterTTVResponse,
         userIsSub = userIsSub,
-        forwardSlashes = forwardSlashes
+        forwardSlashes = forwardSlashes,
+        lowPowerMode = lowPowerMode
     )
 }
 
@@ -307,6 +336,7 @@ fun ChatUIBox(
     scrollToBottom: @Composable ImprovedChatUI.(Modifier) -> Unit,
     enterChat: @Composable ImprovedChatUI.(Modifier) -> Unit,
     noChat: Boolean,
+    lowPowerMode: Boolean,
     clickedCommandAutoCompleteText: (String) -> Unit,
     emoteKeyBoardHeight: Dp,
     emoteBoardGlobalList: EmoteNameUrlList,
@@ -325,75 +355,89 @@ fun ChatUIBox(
     val titleFontSize = MaterialTheme.typography.headlineMedium.fontSize
     val messageFontSize = MaterialTheme.typography.headlineSmall.fontSize
     val chatScope = remember { ChatScope(titleFontSize, messageFontSize) }
+    val chatUIScope = remember { ImprovedChatUI() }
+
 
 
     //todo: add a conditional to show emoteBoard to help with recomps
 
-
-    val chatUIScope = remember { ImprovedChatUI() }
-    with(chatUIScope) {
-        Box(modifier = modifier.fillMaxSize()) {
-            scrollToBottom(
-                Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 80.dp)
-                    .zIndex(5f)
+    if (lowPowerMode) {
+        with(chatScope) {
+            NoticeMessages(
+                systemMessage = "",
+                message = "Low power mode: ACTIVE"
             )
+        }
+    } else {
+        with(chatUIScope) {
+            Box(modifier = Modifier.fillMaxSize()) {
+                scrollToBottom(
+                    modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 80.dp)
+                        .zIndex(5f)
+                )
 
-            Column(Modifier.fillMaxSize()) {
-
-                chatUI(Modifier.weight(1f))
-                enterChat(Modifier.fillMaxWidth())
-
-                if (emoteKeyBoardHeight == 350.dp) {
-
-                    EmoteBoard(
-                        modifier = Modifier.zIndex(8f),
-                        emoteBoardGlobalList,
-                        emoteBoardMostFrequentList = emoteBoardMostFrequentList,
-                        updateTextWithEmote = { newValue ->
-                            updateTextWithEmote(newValue)
-                        },
-                        emoteBoardChannelList = emoteBoardChannelList,
-                        closeEmoteBoard = {
-                            closeEmoteBoard()
-                        },
-                        deleteEmote = {
-                            deleteEmote()
-                        },
-                        updateTempararyMostFrequentEmoteList = { value ->
-                            updateTempararyMostFrequentEmoteList(value)
-                        },
-                        globalBetterTTVEmotes = globalBetterTTVEmotes,
-                        channelBetterTTVResponse = channelBetterTTVResponse,
-                        sharedBetterTTVResponse = sharedBetterTTVResponse,
-                        userIsSub = userIsSub,
-
+                Column(Modifier.fillMaxSize()) {
+                    HorizontalDivider(
+                        modifier = Modifier.padding(
+                            top = 8.dp,
+                            bottom = 8.dp
                         )
-
-                }
-            }
-            determineScrollState()
-            if (noChat) {
-                with(chatScope) {
-                    NoticeMessages(
-                        systemMessage = "",
-                        message = "You are in No Chat mode"
                     )
+                    chatUI(Modifier.weight(1f))
+                    enterChat(Modifier.fillMaxWidth())
+
+                    if (emoteKeyBoardHeight == 350.dp) {
+
+                        EmoteBoard(
+                            modifier = Modifier.zIndex(8f),
+                            emoteBoardGlobalList,
+                            emoteBoardMostFrequentList = emoteBoardMostFrequentList,
+                            updateTextWithEmote = { newValue ->
+                                updateTextWithEmote(newValue)
+                            },
+                            emoteBoardChannelList = emoteBoardChannelList,
+                            closeEmoteBoard = {
+                                closeEmoteBoard()
+                            },
+                            deleteEmote = {
+                                deleteEmote()
+                            },
+                            updateTempararyMostFrequentEmoteList = { value ->
+                                updateTempararyMostFrequentEmoteList(value)
+                            },
+                            globalBetterTTVEmotes = globalBetterTTVEmotes,
+                            channelBetterTTVResponse = channelBetterTTVResponse,
+                            sharedBetterTTVResponse = sharedBetterTTVResponse,
+                            userIsSub = userIsSub,
+
+                            )
+
+                    }
+                }
+                determineScrollState()
+                if (noChat) {
+                    with(chatScope) {
+                        NoticeMessages(
+                            systemMessage = "",
+                            message = "You are in No Chat mode"
+                        )
+                    }
+
                 }
 
+
+                ForwardSlash(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 60.dp),
+                    forwardSlashes = forwardSlashes,
+                    clickedCommandAutoCompleteText = { clickedValue ->
+                        clickedCommandAutoCompleteText(clickedValue)
+                    }
+                )
             }
-
-
-            ForwardSlash(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 60.dp),
-                forwardSlashes = forwardSlashes,
-                clickedCommandAutoCompleteText = { clickedValue ->
-                    clickedCommandAutoCompleteText(clickedValue)
-                }
-            )
         }
     }
 
@@ -446,12 +490,11 @@ fun EmoteBoard(
             end = Offset(size.width, verticalOffset)
         )
     }
-    Column() {
+    Column {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 5.dp)
-                .background(MaterialTheme.colorScheme.primary)
         ) {
             Spacer(modifier = Modifier.width(5.dp))
             Text(
@@ -478,7 +521,6 @@ fun EmoteBoard(
             // Our page content
             when (page) {
                 0 -> {
-
                     Column(
                         modifier = modifier
                     ) {
@@ -521,11 +563,9 @@ fun EmoteBoard(
                                     }
                                 }
 
-
                             )
                         }
                     }
-
 
                 }
 
@@ -533,7 +573,7 @@ fun EmoteBoard(
                     Column(
                         modifier = modifier
                     ) {
-                        Box() {
+                        Box {
                             BetterTTVEmoteBoard(
                                 globalBetterTTVResponse = globalBetterTTVEmotes,
                                 updateTextWithEmote = { value -> updateTextWithEmote(value) },
@@ -581,11 +621,9 @@ fun EmoteBoard(
 
         }
         /****END OF THE HORIZONTAL PAGER****/
-        /****END OF THE HORIZONTAL PAGER****/
     }
 
 }
-
 /**
  * - restartable
  * - skippable
@@ -609,14 +647,11 @@ fun BetterTTVEmoteBoard(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 5.dp)
-            .height(250.dp)
-            .background(MaterialTheme.colorScheme.primary),
+            .height(250.dp),
         verticalArrangement = Arrangement.spacedBy(5.dp),
         horizontalArrangement = Arrangement.spacedBy(5.dp)
     ) {
         /*****************************START OF THE Most Recent EMOTES*******************************/
-        /*****************************START OF THE Most Recent EMOTES*******************************/
-
 //        header {
 //            Column(
 //                modifier = Modifier
@@ -651,7 +686,6 @@ fun BetterTTVEmoteBoard(
 //                }
 //            )
 //        }
-        /*****************************START OF THE CHANNEL EMOTES*******************************/
         /*****************************START OF THE CHANNEL EMOTES*******************************/
         //todo: adding the channelUI
         header {
@@ -690,8 +724,6 @@ fun BetterTTVEmoteBoard(
         }
 
         /*****************************START OF THE SHARED CHANNEL EMOTES*******************************/
-
-        /*****************************START OF THE SHARED CHANNEL EMOTES*******************************/
         header {
             Column(
                 modifier = Modifier
@@ -726,9 +758,6 @@ fun BetterTTVEmoteBoard(
                 }
             )
         }
-
-
-        /*****************************START OF THE GLOBAL EMOTES*******************************/
 
 
         /*****************************START OF THE GLOBAL EMOTES*******************************/
@@ -825,8 +854,7 @@ fun EmoteBottomUI(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 5.dp, horizontal = 10.dp)
-            .background(MaterialTheme.colorScheme.primary),
+            .padding(vertical = 5.dp, horizontal = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
@@ -925,8 +953,7 @@ fun BetterTTVEmoteBottomUI(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 5.dp, horizontal = 10.dp)
-            .background(MaterialTheme.colorScheme.primary),
+            .padding(vertical = 5.dp, horizontal = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
@@ -1043,12 +1070,10 @@ fun LazyGridEmotes(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 5.dp)
-            .height(250.dp)
-            .background(MaterialTheme.colorScheme.primary),
+            .height(250.dp),
         verticalArrangement = Arrangement.spacedBy(5.dp),
         horizontalArrangement = Arrangement.spacedBy(5.dp)
     ) {
-        /*****************************START OF THE Most Recent EMOTES*******************************/
         /*****************************START OF THE Most Recent EMOTES*******************************/
         header {
             Column(
@@ -1089,8 +1114,6 @@ fun LazyGridEmotes(
             )
         }
 
-
-        /*****************************START OF THE Channel EMOTES*******************************/
 
 
         /*****************************START OF THE Channel EMOTES*******************************/
@@ -1250,7 +1273,6 @@ class ImprovedChatUI {
                     is DragInteraction.Start -> {
                         setAutoScrollFalse()
                     }
-
                     is PressInteraction.Press -> {
                         setAutoScrollFalse()
                     }
@@ -1276,7 +1298,7 @@ class ImprovedChatUI {
     @Composable
     fun ChatUILazyColumn(
         lazyColumnListState: LazyListState,
-        twitchUserChat: ImmutableList<TwitchUserData>,
+        twitchUserChat: List<TwitchUserData>,
         autoscroll: Boolean,
         showBottomModal: () -> Unit,
         showTimeoutDialog: () -> Unit,
@@ -1287,9 +1309,23 @@ class ImprovedChatUI {
         modifier: Modifier,
         isMod: Boolean,
         inlineContentMap: EmoteListMap,
+        globalTwitchEmoteContentMap: EmoteListMap,
+        channelTwitchEmoteContentMap: EmoteListMap,
+        globalBetterTTVEmoteContentMap: EmoteListMap,
+        channelBetterTTVEmoteContentMap: EmoteListMap,
+        sharedBetterTTVEmoteContentMap: EmoteListMap,
+        badgeListMap: EmoteListMap,
         fullMode: Boolean = false,
         setDragging: () -> Unit = {},
+        usernameSize: Float,
+        messageSize: Float,
+        lineHeight: Float,
+        useCustomUsernameColors: Boolean
+
     ) {
+        val twitchUserChatFilter = remember(twitchUserChat) {
+            twitchUserChat.toImmutableList().filterNotNull()
+        }
         val coroutineScope = rememberCoroutineScope()
         LazyColumn(
             modifier = modifier,
@@ -1297,7 +1333,7 @@ class ImprovedChatUI {
         ) {
             coroutineScope.launch {
                 if (autoscroll) {
-                    lazyColumnListState.scrollToItem(twitchUserChat.size)
+                    lazyColumnListState.scrollToItem(twitchUserChatFilter.size)
                 }
             }
             if (fullMode) {
@@ -1319,40 +1355,47 @@ class ImprovedChatUI {
                 }
             }
             items(
-                items = twitchUserChat,
-            ) { item ->
-                if (item != null) {
-                    Log.d("CLickingCardCheck", "${item.userType}")
-                    ChatMessages(
-                        item,
-                        showBottomModal = {
-                            showBottomModal()
-                        },
-                        updateClickedUser = { username, userId, isBanned, isMod ->
-                            updateClickedUser(
-                                username,
-                                userId,
-                                isBanned,
-                                isMod
-                            )
-                        },
-                        showTimeoutDialog = {
-                            showTimeoutDialog()
-                        },
-                        showBanDialog = {
-                            showBanDialog()
-                        },
-                        doubleClickMessage = { username ->
-                            doubleClickMessage(username)
-                        },
-                        deleteChatMessage = { messageId ->
-                            deleteChatMessage(messageId)
-                        },
-                        isMod = false,
-                        inlineContentMap = inlineContentMap
-
-                    )
-                }
+                items = twitchUserChatFilter,
+            ) { indivChatMessage ->
+                Log.d("CLickingCardCheck", "${indivChatMessage.userType}")
+                ChatMessages(
+                    indivChatMessage,
+                    showBottomModal = {
+                        showBottomModal()
+                    },
+                    updateClickedUser = { username, userId, isBanned, isMod ->
+                        updateClickedUser(
+                            username,
+                            userId,
+                            isBanned,
+                            isMod
+                        )
+                    },
+                    showTimeoutDialog = {
+                        showTimeoutDialog()
+                    },
+                    showBanDialog = {
+                        showBanDialog()
+                    },
+                    doubleClickMessage = { username ->
+                        doubleClickMessage(username)
+                    },
+                    deleteChatMessage = { messageId ->
+                        deleteChatMessage(messageId)
+                    },
+                    isMod = false,
+                    inlineContentMap = inlineContentMap,
+                    badgeListMap = badgeListMap,
+                    usernameSize = usernameSize,
+                    messageSize = messageSize,
+                    lineHeight = lineHeight,
+                    useCustomUsernameColors = useCustomUsernameColors,
+                    globalTwitchEmoteContentMap = globalTwitchEmoteContentMap,
+                    channelTwitchEmoteContentMap = channelTwitchEmoteContentMap,
+                    globalBetterTTVEmoteContentMap = globalBetterTTVEmoteContentMap,
+                    channelBetterTTVEmoteContentMap = channelBetterTTVEmoteContentMap,
+                    sharedBetterTTVEmoteContentMap = sharedBetterTTVEmoteContentMap
+                )
             }
         }
     }
@@ -1371,7 +1414,17 @@ class ImprovedChatUI {
         doubleClickMessage: (String) -> Unit,
         deleteChatMessage: (String) -> Unit,
         isMod: Boolean,
-        inlineContentMap: EmoteListMap
+        inlineContentMap: EmoteListMap,
+        globalTwitchEmoteContentMap: EmoteListMap,
+        channelTwitchEmoteContentMap: EmoteListMap,
+        globalBetterTTVEmoteContentMap: EmoteListMap,
+        channelBetterTTVEmoteContentMap: EmoteListMap,
+        sharedBetterTTVEmoteContentMap: EmoteListMap,
+        badgeListMap: EmoteListMap,
+        usernameSize: Float,
+        messageSize: Float,
+        lineHeight: Float,
+        useCustomUsernameColors: Boolean
     ) {
         val titleFontSize = MaterialTheme.typography.titleMedium.fontSize
         val messageFontSize = MaterialTheme.typography.bodyMedium.fontSize
@@ -1410,7 +1463,17 @@ class ImprovedChatUI {
                                     },
                                     offset = if (twitchChatMessage.mod != "1") dragOffset else 0f,
                                     doubleClickMessage = { username -> doubleClickMessage(username) },
-                                    inlineContentMap = inlineContentMap
+                                    inlineContentMap = inlineContentMap,
+                                    badgeListMap = badgeListMap,
+                                    usernameSize = usernameSize,
+                                    messageSize = messageSize,
+                                    lineHeight = lineHeight,
+                                    useCustomUsernameColors = useCustomUsernameColors,
+                                    globalTwitchEmoteContentMap = globalTwitchEmoteContentMap,
+                                    channelTwitchEmoteContentMap = channelTwitchEmoteContentMap,
+                                    globalBetterTTVEmoteContentMap = globalBetterTTVEmoteContentMap,
+                                    channelBetterTTVEmoteContentMap = channelBetterTTVEmoteContentMap,
+                                    sharedBetterTTVEmoteContentMap = sharedBetterTTVEmoteContentMap,
                                 )
                             },
                             quarterSwipeLeftAction = {
@@ -1460,7 +1523,17 @@ class ImprovedChatUI {
                             },
                             offset = 0f,
                             doubleClickMessage = { username -> doubleClickMessage(username) },
-                            inlineContentMap = inlineContentMap
+                            inlineContentMap = inlineContentMap,
+                            globalTwitchEmoteContentMap = globalTwitchEmoteContentMap,
+                            badgeListMap = badgeListMap,
+                            usernameSize = usernameSize,
+                            messageSize = messageSize,
+                            lineHeight = lineHeight,
+                            useCustomUsernameColors = useCustomUsernameColors,
+                            channelTwitchEmoteContentMap = channelTwitchEmoteContentMap,
+                            globalBetterTTVEmoteContentMap = globalBetterTTVEmoteContentMap,
+                            channelBetterTTVEmoteContentMap = channelBetterTTVEmoteContentMap,
+                            sharedBetterTTVEmoteContentMap = sharedBetterTTVEmoteContentMap,
                         )
                     }
                 }
@@ -1484,7 +1557,17 @@ class ImprovedChatUI {
                                         },
                                         offset = if (twitchChatMessage.mod != "1") dragOffset else 0f,
                                         doubleClickMessage = { username -> doubleClickMessage(username) },
-                                        inlineContentMap = inlineContentMap
+                                        inlineContentMap = inlineContentMap,
+                                        globalTwitchEmoteContentMap = globalTwitchEmoteContentMap,
+                                        badgeListMap = badgeListMap,
+                                        usernameSize = usernameSize,
+                                        messageSize = messageSize,
+                                        lineHeight = lineHeight,
+                                        useCustomUsernameColors = useCustomUsernameColors,
+                                        channelTwitchEmoteContentMap = channelTwitchEmoteContentMap,
+                                        globalBetterTTVEmoteContentMap = globalBetterTTVEmoteContentMap,
+                                        channelBetterTTVEmoteContentMap = channelBetterTTVEmoteContentMap,
+                                        sharedBetterTTVEmoteContentMap = sharedBetterTTVEmoteContentMap,
                                     )
                                 }
 
@@ -1537,7 +1620,17 @@ class ImprovedChatUI {
                                 },
                                 offset = 0f,
                                 doubleClickMessage = { username -> doubleClickMessage(username) },
-                                inlineContentMap = inlineContentMap
+                                inlineContentMap = inlineContentMap,
+                                globalTwitchEmoteContentMap = globalTwitchEmoteContentMap,
+                                badgeListMap = badgeListMap,
+                                usernameSize = usernameSize,
+                                messageSize = messageSize,
+                                lineHeight = lineHeight,
+                                useCustomUsernameColors = useCustomUsernameColors,
+                                channelTwitchEmoteContentMap = channelTwitchEmoteContentMap,
+                                globalBetterTTVEmoteContentMap = globalBetterTTVEmoteContentMap,
+                                channelBetterTTVEmoteContentMap = channelBetterTTVEmoteContentMap,
+                                sharedBetterTTVEmoteContentMap = sharedBetterTTVEmoteContentMap,
                             )
                         }
                     }
@@ -1594,8 +1687,6 @@ class ImprovedChatUI {
 
             }
         }
-
-
     }
 
 
@@ -1662,7 +1753,17 @@ fun ClickableCard(
     showBottomModal: () -> Unit,
     updateClickedUser: (String, String, Boolean, Boolean) -> Unit,
     doubleClickMessage: (String) -> Unit,
-    inlineContentMap: EmoteListMap
+    inlineContentMap: EmoteListMap,
+    globalTwitchEmoteContentMap: EmoteListMap,
+    channelTwitchEmoteContentMap: EmoteListMap,
+    globalBetterTTVEmoteContentMap: EmoteListMap,
+    channelBetterTTVEmoteContentMap: EmoteListMap,
+    sharedBetterTTVEmoteContentMap: EmoteListMap,
+    badgeListMap: EmoteListMap,
+    usernameSize: Float,
+    messageSize: Float,
+    lineHeight: Float,
+    useCustomUsernameColors: Boolean
 
 
 ) {
@@ -1701,9 +1802,19 @@ fun ClickableCard(
                     twitchUser = twitchUser,
                     color = color,
                     fontSize = 13.sp,
-                    inlineContentMap = inlineContentMap
+                    inlineContentMap = inlineContentMap,
+                    globalTwitchEmoteContentMap = globalTwitchEmoteContentMap,
+                    channelTwitchEmoteContentMap = channelTwitchEmoteContentMap,
+                    globalBetterTTVEmoteContentMap = globalBetterTTVEmoteContentMap,
+                    badgeListMap = badgeListMap,
+                    usernameSize = usernameSize,
+                    messageSize = messageSize,
+                    lineHeight = lineHeight,
+                    useCustomUsernameColors = useCustomUsernameColors,
+                    channelBetterTTVEmoteContentMap = channelBetterTTVEmoteContentMap,
+                    sharedBetterTTVEmoteContentMap = sharedBetterTTVEmoteContentMap,
 
-                )
+                    )
             }
             if (showIcon.value) {
                 DoubleClickSeemsGoodIcon()
@@ -1712,7 +1823,6 @@ fun ClickableCard(
     }
 
 }
-
 /**
  * - restartable
  * - skippable
@@ -1774,7 +1884,7 @@ fun HorizontalDragDetectionBox(
     halfSwipeIconResource: Painter = painterResource(id = coreR.drawable.delete_outline_24),
     quarterSwipeLeftIconResource: Painter = painterResource(id = coreR.drawable.time_out_24),
     quarterSwipeRightIconResource: Painter = painterResource(id = coreR.drawable.ban_24),
-    hideIconColor: Color = MaterialTheme.colorScheme.primary,
+    hideIconColor: Color = MaterialTheme.colorScheme.onSurface,
     showIconColor: Color = MaterialTheme.colorScheme.onPrimary,
     swipeEnabled: Boolean
 ) {
@@ -1885,7 +1995,7 @@ fun EnterChatColumn(
     modifier: Modifier,
     filteredRow: @Composable () -> Unit,
     showModStatus: @Composable () -> Unit,
-    stylizedTextField: @Composable (modifier: Modifier) -> Unit,
+    stylizedTextField: @Composable (Modifier) -> Unit,
     showIconBasedOnTextLength: @Composable () -> Unit,
 ) {
     Column(
@@ -1899,7 +2009,11 @@ fun EnterChatColumn(
             verticalAlignment = Alignment.CenterVertically
         ) {
             showModStatus()
-            stylizedTextField(Modifier.weight(2f).padding(start = 8.dp))
+            stylizedTextField(
+                Modifier
+                    .weight(2f)
+                    .padding(start = 8.dp)
+            )
             showIconBasedOnTextLength()
         }
     }
@@ -1919,8 +2033,7 @@ fun ForwardSlash(
 
     LazyColumn(
         modifier = modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.primary),
+            .fillMaxWidth(),
         reverseLayout = true
     ) {
         items(forwardSlashes.snacks) { command ->
@@ -2245,7 +2358,7 @@ fun ShowModStatus(
     Log.d("isModCheck", "isMod --> $modStatus")
     Log.d("ShowModStatusRecomp", "RECOMP")
 
-    if (BuildConfig.BUILD_TYPE == "debug") {
+    if (BuildConfig.DEBUG) {
         Box {
 
             AsyncImage(
@@ -2290,7 +2403,7 @@ fun ShowModStatus(
                     contentDescription = stringResource(coreR.string.moderator_badge_icon_description)
                 )
                 if (notificationAmount > 0) {
-                    androidx.compose.material.Text(
+                    Text(
                         "$notificationAmount",
                         modifier = Modifier
                             .align(Alignment.TopStart)
@@ -2305,6 +2418,7 @@ fun ShowModStatus(
             }
         }
     }
+
 
 
 }
@@ -2375,12 +2489,23 @@ fun TextWithChatBadges(
     twitchUser: TwitchUserData,
     color: Color,
     fontSize: TextUnit,
-    inlineContentMap: EmoteListMap
+    inlineContentMap: EmoteListMap,
+    globalTwitchEmoteContentMap: EmoteListMap,
+    channelTwitchEmoteContentMap: EmoteListMap,
+    globalBetterTTVEmoteContentMap: EmoteListMap,
+    badgeListMap: EmoteListMap,
+    usernameSize: Float,
+    messageSize: Float,
+    lineHeight: Float,
+    useCustomUsernameColors: Boolean,
+    channelBetterTTVEmoteContentMap: EmoteListMap,
+    sharedBetterTTVEmoteContentMap: EmoteListMap,
 
-) {
+    ) {
     Row(
         verticalAlignment = Alignment.CenterVertically
     ) {
+
         ChatBadges(
             username = "${twitchUser.displayName} :",
             message = " ${twitchUser.userType}",
@@ -2391,8 +2516,17 @@ fun TextWithChatBadges(
             textSize = fontSize,
             messageList = twitchUser.messageList,
             inlineContentMap = inlineContentMap,
-            badgeList = twitchUser.badges
-
+            globalTwitchEmoteContentMap = globalTwitchEmoteContentMap,
+            badgeList = twitchUser.badges,
+            badgeListMap = badgeListMap,
+            usernameSize = usernameSize,
+            messageSize = messageSize,
+            lineHeight = lineHeight,
+            useCustomUsernameColors = useCustomUsernameColors,
+            channelTwitchEmoteContentMap = channelTwitchEmoteContentMap,
+            globalBetterTTVEmoteContentMap = globalBetterTTVEmoteContentMap,
+            channelBetterTTVEmoteContentMap = channelBetterTTVEmoteContentMap,
+            sharedBetterTTVEmoteContentMap = sharedBetterTTVEmoteContentMap,
         )
 
     } // end of the row
@@ -2403,7 +2537,7 @@ fun TextWithChatBadges(
  * */
 /**
  *
- * ChatBadges is the composable that is responsible for showing the chat badges(mod or sub) beside the users username.
+ * ChatBadges is the composable that is responsible for showing the chat badges(mod,sub and global) beside the users username.
  * Also, it shows all of the normal chat messages(with their emotes)
  *
  * @param username a String representing the user that is currently sending chats
@@ -2424,37 +2558,50 @@ fun ChatBadges(
     textSize: TextUnit,
     messageList: List<MessageToken>,
     badgeList: List<String>,
-    inlineContentMap: EmoteListMap
+    inlineContentMap: EmoteListMap,
+    globalTwitchEmoteContentMap: EmoteListMap,
+    channelTwitchEmoteContentMap: EmoteListMap,
+    globalBetterTTVEmoteContentMap: EmoteListMap,
+    channelBetterTTVEmoteContentMap: EmoteListMap,
+    sharedBetterTTVEmoteContentMap: EmoteListMap,
+    badgeListMap: EmoteListMap,
+    usernameSize: Float,
+    messageSize: Float,
+    lineHeight: Float,
+    useCustomUsernameColors: Boolean
 ) {
+    val usernameColor = if (useCustomUsernameColors) color else MaterialTheme.colorScheme.onPrimary
 
-    Log.d("ChatBadgesusername", "username->$messageList")
 
+    val newMap =
+        globalTwitchEmoteContentMap.map + badgeListMap.map + channelTwitchEmoteContentMap.map + globalBetterTTVEmoteContentMap.map + channelBetterTTVEmoteContentMap.map + sharedBetterTTVEmoteContentMap.map
+
+    //subscriber
+    /***********TESTING OUT THE EMOTES MAPS*******************/
+
+
+    /***********END TESTING OUT THE EMOTES MAPS*******************/
     //moderator subscriber
     Log.d("LoggingBadges", "list -> $badgeList")
 
     val text = buildAnnotatedString {
 
         for (item in badgeList) {
-            if (inlineContentMap.map.containsKey(item)) {
-                withStyle(style = SpanStyle(fontSize = 10.sp)) {
+            if (badgeListMap.map.containsKey(item)) {
+                withStyle(style = SpanStyle(fontSize = 15.sp)) {
                     appendInlineContent(item, item)
                 }
+
             }
         }
 
-        withStyle(
-            style = SpanStyle(
-                color = color,
-                fontSize = textSize,
-                fontWeight = FontWeight.Bold
-            )
-        ) {
+        withStyle(style = SpanStyle(color = usernameColor, fontSize = usernameSize.sp)) {
             append("$username ")
         }
         //todo:below should get replaced with the new messageList
         for (messageToken in messageList) {
             if (messageToken.messageType == PrivateMessageType.MESSAGE) {
-                withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.onSurface)) {
+                withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.onSurface, fontSize = messageSize.sp)) {
                     appendInlineContent(messageToken.messageValue, "${messageToken.messageValue} ")
                 }
             } else {
@@ -2464,15 +2611,17 @@ fun ChatBadges(
 
     }
 
+
     Row {
         Text(
             text = text,
-            inlineContent = inlineContentMap.map,
+            inlineContent = newMap,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(5.dp),
             color = color,
-            fontSize = textSize
+            fontSize = textSize,
+            lineHeight = lineHeight.sp
         )
     }
 }

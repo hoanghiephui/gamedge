@@ -7,7 +7,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
 import com.paulrybitskyi.gamedge.common.ui.base.events.Route
-import com.paulrybitskyi.gamedge.feature.likes.presentation.LikedGames
+import com.paulrybitskyi.gamedge.feature.likes.presentation.LikedGamesScreen
 
 const val BOOKMARKS_ROUTE = "bookmarks_route"
 
@@ -19,7 +19,7 @@ fun NavGraphBuilder.bookmarksScreen(
     composable(
         route = BOOKMARKS_ROUTE,
     ) {
-        LikedGames(modifier = Modifier) { route ->
+        LikedGamesScreen(modifier = Modifier) { route ->
             onRoute(route)
         }
     }

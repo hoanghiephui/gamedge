@@ -6,7 +6,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.paulrybitskyi.gamedge.common.ui.base.events.Route
 import com.paulrybitskyi.gamedge.common.ui.base.events.Screen
-import com.paulrybitskyi.gamedge.feature.category.widgets.GamesCategory
+import com.paulrybitskyi.gamedge.feature.category.GamesCategoryScreen
 
 fun NavGraphBuilder.categoryScreen(
     onRoute: (Route) -> Unit,
@@ -17,7 +17,7 @@ fun NavGraphBuilder.categoryScreen(
             navArgument(Screen.GamesCategory.Parameters.CATEGORY) { type = NavType.StringType },
         ),
     ) {
-        GamesCategory { route ->
+        GamesCategoryScreen { route ->
             onRoute(route)
         }
     }

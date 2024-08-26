@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.safeDrawing
@@ -36,10 +35,10 @@ import com.paulrybitskyi.gamedge.common.ui.widgets.NewsResourceHeaderImage
 import com.paulrybitskyi.gamedge.common.ui.widgets.RefreshableContent
 import com.paulrybitskyi.gamedge.common.ui.widgets.categorypreview.GamesCategoryPreview
 import com.paulrybitskyi.gamedge.feature.discovery.GamesDiscoveryCategory
+import com.paulrybitskyi.gamedge.feature.discovery.GamesDiscoveryItemUiModel
 import com.paulrybitskyi.gamedge.feature.discovery.GamesDiscoveryViewModel
+import com.paulrybitskyi.gamedge.feature.discovery.PullRefreshIntentionalDelay
 import com.paulrybitskyi.gamedge.feature.discovery.widgets.GamesDiscoveryItemGameUiModel
-import com.paulrybitskyi.gamedge.feature.discovery.widgets.GamesDiscoveryItemUiModel
-import com.paulrybitskyi.gamedge.feature.discovery.widgets.SwipeRefreshIntentionalDelay
 import com.paulrybitskyi.gamedge.feature.discovery.widgets.mapToCategoryUiModels
 import com.paulrybitskyi.gamedge.feature.discovery.widgets.mapToDiscoveryUiModel
 import kotlinx.collections.immutable.ImmutableList
@@ -88,7 +87,7 @@ internal fun GamesDiscoveryScreen(
             isRefreshing = true
 
             coroutineScope.launch {
-                delay(SwipeRefreshIntentionalDelay)
+                delay(PullRefreshIntentionalDelay)
                 onRefreshRequested()
                 isRefreshing = false
             }

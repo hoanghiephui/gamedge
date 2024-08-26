@@ -47,6 +47,9 @@ class GamedgeProtobufPlugin : Plugin<Project> {
                         id("java") {
                             option("lite")
                         }
+                        register("kotlin") {
+                            option("lite")
+                        }
                     }
                 }
             }
@@ -55,5 +58,6 @@ class GamedgeProtobufPlugin : Plugin<Project> {
 
     private fun Project.addProtobufDependency() {
         dependencies.add("implementation", libs.protobuf.get())
+        dependencies.add("implementation", libs.protobufkotlin.lite.get())
     }
 }

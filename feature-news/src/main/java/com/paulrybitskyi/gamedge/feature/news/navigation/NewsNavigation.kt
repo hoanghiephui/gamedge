@@ -21,7 +21,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
-import com.paulrybitskyi.gamedge.feature.news.presentation.widgets.GamingNews
+import com.paulrybitskyi.gamedge.feature.news.presentation.GamingNewsScreen
 
 const val NEWS_ROUTE = "news_route"
 
@@ -33,6 +33,6 @@ fun NavGraphBuilder.newsScreen() {
     composable(
         route = NEWS_ROUTE,
     ) {
-        GamingNews(modifier = Modifier)
+        GamingNewsScreen(modifier = Modifier)
     }
 }

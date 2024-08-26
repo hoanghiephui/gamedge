@@ -35,10 +35,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.FloatingActionButton
-import androidx.compose.material.Icon
-import androidx.compose.material.Text
-import androidx.compose.material.ripple.rememberRipple
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -65,11 +64,11 @@ import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstrainScope
 import androidx.constraintlayout.compose.ConstraintSet
 import androidx.constraintlayout.compose.Dimension
+import androidx.constraintlayout.compose.ExperimentalMotionApi
 import androidx.constraintlayout.compose.MotionLayout
 import androidx.constraintlayout.compose.Transition
 import androidx.constraintlayout.compose.Visibility
 import com.paulrybitskyi.commons.ktx.statusBarHeight
-import com.paulrybitskyi.gamedge.common.ui.clickable
 import com.paulrybitskyi.gamedge.common.ui.theme.GamedgeTheme
 import com.paulrybitskyi.gamedge.common.ui.theme.darkScrim
 import com.paulrybitskyi.gamedge.common.ui.theme.lightScrim
@@ -121,6 +120,7 @@ private enum class State {
 
 // Try out this again when a new version of MotionLayout for compose
 // comes out (as of 12.06.2022, the latest is 1.1.0-alpha02).
+@OptIn(ExperimentalMotionApi::class)
 @Composable
 internal fun GameInfoAnimatableHeader(
     headerInfo: GameInfoHeaderUiModel,
@@ -274,7 +274,7 @@ internal fun GameInfoAnimatableHeader(
             modifier = Modifier
                 .layoutId(ConstraintIdLikeButton)
                 .drawOnTop(),
-            backgroundColor = GamedgeTheme.colors.secondary,
+            contentColor = GamedgeTheme.colors.secondary,
         ) {
             // Animated selector drawables are not currently supported by the Jetpack Compose.
             // https://issuetracker.google.com/issues/212418566

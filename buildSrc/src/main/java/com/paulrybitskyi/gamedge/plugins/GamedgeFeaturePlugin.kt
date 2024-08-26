@@ -29,6 +29,7 @@ class GamedgeFeaturePlugin : Plugin<Project> {
         add("implementation", libs.commonsCore.get())
         add("implementation", libs.commonsKtx.get())
         add("implementation", libs.coil.get())
+        add("implementation", libs.coilGif.get())
         add("testImplementation", project(localModules.commonTesting))
         addBundle("testImplementation", libs.bundles.testing.get())
     }

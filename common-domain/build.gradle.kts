@@ -16,11 +16,12 @@
 
 plugins {
     id(libs.plugins.androidLibrary.get().pluginId)
+    id(libs.plugins.gamedgeAndroid.get().pluginId)
     id(libs.plugins.gamedgeKotlinCoroutines.get().pluginId)
-    id(libs.plugins.gamedgeKotlinKapt.get().pluginId)
     id(libs.plugins.gamedgeJetpackCompose.get().pluginId)
     id("kotlin-parcelize")
     alias(libs.plugins.jetpackCompose)
+    id(libs.plugins.gamedgeDaggerHilt.get().pluginId)
 }
 
 android {
@@ -30,8 +31,6 @@ android {
 dependencies {
     implementation(libs.kotlinResult)
     api(libs.kotlinx.collections.immutable)
-    implementation(libs.daggerHiltCore)
-    kapt(libs.daggerHiltCoreCompiler)
     api(project(":model"))
     testImplementation(project(localModules.commonTestingDomain))
     testImplementation(libs.bundles.testing)

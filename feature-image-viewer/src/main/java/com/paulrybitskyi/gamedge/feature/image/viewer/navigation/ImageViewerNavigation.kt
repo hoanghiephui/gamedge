@@ -6,7 +6,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.paulrybitskyi.gamedge.common.ui.base.events.Route
 import com.paulrybitskyi.gamedge.common.ui.base.events.Screen
-import com.paulrybitskyi.gamedge.feature.image.viewer.ImageViewer
+import com.paulrybitskyi.gamedge.feature.image.viewer.ImageViewerScreen
 
 fun NavGraphBuilder.imageViewerScreen(
     onRoute: (Route) -> Unit,
@@ -28,7 +28,7 @@ fun NavGraphBuilder.imageViewerScreen(
             },
         ),
     ) {
-        ImageViewer { route ->
+        ImageViewerScreen { route ->
             onRoute(route)
         }
     }

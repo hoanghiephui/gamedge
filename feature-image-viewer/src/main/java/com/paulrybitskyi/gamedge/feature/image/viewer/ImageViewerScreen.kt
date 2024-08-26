@@ -23,8 +23,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -38,7 +36,6 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -56,12 +53,8 @@ import com.paulrybitskyi.gamedge.common.ui.LocalNetworkStateProvider
 import com.paulrybitskyi.gamedge.common.ui.LocalTextSharer
 import com.paulrybitskyi.gamedge.common.ui.RoutesHandler
 import com.paulrybitskyi.gamedge.common.ui.base.events.Route
-import com.paulrybitskyi.gamedge.common.ui.findWindow
 import com.paulrybitskyi.gamedge.common.ui.images.defaultImageRequest
-import com.paulrybitskyi.gamedge.common.ui.rememberWindowInsetsController
 import com.paulrybitskyi.gamedge.common.ui.theme.GamedgeTheme
-import com.paulrybitskyi.gamedge.common.ui.theme.darkScrim
-import com.paulrybitskyi.gamedge.common.ui.theme.statusBar
 import com.paulrybitskyi.gamedge.common.ui.widgets.Info
 import com.paulrybitskyi.gamedge.common.ui.widgets.toolbars.Toolbar
 import com.paulrybitskyi.gamedge.core.R as CoreR
@@ -130,7 +123,6 @@ private fun ImageViewerScreen(
             Toolbar(
                 title = uiState.toolbarTitle,
                 modifier = Modifier.align(Alignment.TopCenter),
-                backgroundColor = toolbarBackgroundColor,
                 contentColor = LocalContentColor.current,
                 elevation = 0.dp,
                 leftButtonIcon = painterResource(CoreR.drawable.arrow_left),

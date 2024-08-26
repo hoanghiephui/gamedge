@@ -6,7 +6,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.paulrybitskyi.gamedge.common.ui.base.events.Route
 import com.paulrybitskyi.gamedge.common.ui.base.events.Screen
-import com.paulrybitskyi.gamedge.feature.info.presentation.widgets.main.GameInfo
+import com.paulrybitskyi.gamedge.feature.info.presentation.GameInfoScreen
 
 fun NavGraphBuilder.gameInfoScreen(
     onRoute: (Route) -> Unit,
@@ -17,7 +17,7 @@ fun NavGraphBuilder.gameInfoScreen(
             navArgument(Screen.GameInfo.Parameters.GAME_ID) { type = NavType.IntType },
         ),
     ) {
-        GameInfo { route ->
+        GameInfoScreen { route ->
             onRoute(route)
         }
     }

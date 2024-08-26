@@ -16,11 +16,6 @@
 
 package com.paulrybitskyi.gamedge.feature.likes.presentation
 
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBars
-import androidx.compose.material.Scaffold
-import android.content.res.Configuration
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier

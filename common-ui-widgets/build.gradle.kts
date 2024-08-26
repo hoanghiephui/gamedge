@@ -17,11 +17,8 @@
 plugins {
     id(libs.plugins.androidLibrary.get().pluginId)
     id(libs.plugins.gamedgeAndroid.get().pluginId)
-    id(libs.plugins.kotlinKapt.get().pluginId)
-
-    alias(libs.plugins.jetpackCompose)
-    alias(libs.plugins.ksp)
-    alias(libs.plugins.daggerHilt)
+    id(libs.plugins.gamedgeJetpackCompose.get().pluginId)
+    id(libs.plugins.gamedgeDaggerHilt.get().pluginId)
 }
 
 android {
@@ -33,24 +30,7 @@ dependencies {
     implementation(project(localModules.core))
     implementation(project(localModules.commonUi))
 
-    implementation(platform(libs.composeBom))
-    implementation(libs.composeUi)
-    implementation(libs.composeTooling)
-    implementation(libs.composeFoundation)
-    implementation(libs.composeMaterial)
-    implementation(libs.composeRuntime)
-    implementation(libs.composeConstraintLayout)
-    implementation(libs.accompanistSwipeRefresh)
+    implementation(libs.coil)
     api(libs.lottie)
     api(libs.lottie.compose)
-    implementation(libs.coil)
-
-    implementation(libs.daggerHiltAndroid)
-    kapt(libs.daggerHiltAndroidCompiler)
-
-    implementation(libs.hiltBinder)
-    ksp(libs.hiltBinderCompiler)
-
-    testImplementation(libs.jUnit)
-    androidTestImplementation(libs.jUnitExt)
 }

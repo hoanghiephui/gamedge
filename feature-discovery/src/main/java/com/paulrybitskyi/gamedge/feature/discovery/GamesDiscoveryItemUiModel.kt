@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package com.paulrybitskyi.gamedge.feature.discovery.widgets
+package com.paulrybitskyi.gamedge.feature.discovery
 
 import androidx.compose.runtime.Immutable
+import com.paulrybitskyi.gamedge.feature.discovery.widgets.GamesDiscoveryItemGameUiModel
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 

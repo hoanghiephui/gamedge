@@ -16,7 +16,6 @@
 
 package com.paulrybitskyi.gamedge.feature.info.presentation.widgets
 
-import android.content.res.Configuration
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
@@ -24,7 +23,7 @@ import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.animation.with
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Text
@@ -40,7 +39,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import com.paulrybitskyi.gamedge.common.ui.theme.GamedgeTheme
 import com.paulrybitskyi.gamedge.feature.info.R
 import com.paulrybitskyi.gamedge.feature.info.presentation.widgets.utils.GameInfoSection
@@ -81,9 +80,9 @@ internal fun GameInfoSummary(summary: String) {
                         animationSpec = tween(AnimationDuration),
                         expandFrom = Alignment.Top,
                         initialHeight = { collapsedHeight },
-                    ) with ExitTransition.None
+                    ) togetherWith ExitTransition.None
                 } else {
-                    EnterTransition.None with shrinkVertically(
+                    EnterTransition.None togetherWith shrinkVertically(
                         animationSpec = tween(AnimationDuration),
                         shrinkTowards = Alignment.Top,
                         targetHeight = { collapsedHeight },
@@ -92,6 +91,7 @@ internal fun GameInfoSummary(summary: String) {
                     sizeAnimationSpec = { _, _ -> tween(AnimationDuration) },
                 )
             },
+            label = "GameInfoSummary",
         ) { isInExpandedState ->
             Text(
                 text = summary,
@@ -111,8 +111,7 @@ internal fun GameInfoSummary(summary: String) {
     }
 }
 
-@Preview
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@PreviewLightDark
 @Composable
 private fun GameInfoSummaryCollapsedPreview() {
     GamedgeTheme {

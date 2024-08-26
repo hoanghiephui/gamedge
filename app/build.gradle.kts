@@ -17,11 +17,8 @@
 plugins {
     id(libs.plugins.androidApplication.get().pluginId)
     id(libs.plugins.gamedgeAndroid.get().pluginId)
-    id(libs.plugins.kotlinKapt.get().pluginId)
-
-    alias(libs.plugins.jetpackCompose)
-    alias(libs.plugins.ksp)
-    alias(libs.plugins.daggerHilt)
+    id(libs.plugins.gamedgeJetpackCompose.get().pluginId)
+    id(libs.plugins.gamedgeDaggerHilt.get().pluginId)
 }
 
 dependencies {
@@ -44,36 +41,23 @@ dependencies {
     implementation(project(localModules.featureTwitch))
     implementation(project(localModules.featureStreaming))
 
+    implementation(libs.activity)
     implementation(libs.splash)
 
-    implementation(platform(libs.composeBom))
-    implementation(libs.composeUi)
-    implementation(libs.composeTooling)
-    implementation(libs.composeFoundation)
-    implementation(libs.composeMaterial)
-    implementation(libs.composeRuntime)
     implementation(libs.composeNavigation)
-    implementation(libs.accompanistNavigationAnimations)
 
     implementation(libs.commonsCore)
     implementation(libs.commonsKtx)
-
-    implementation(libs.daggerHiltAndroid)
-    kapt(libs.daggerHiltAndroidCompiler)
-
-    implementation(libs.hiltBinder)
-    ksp(libs.hiltBinderCompiler)
-
-    testImplementation(libs.jUnit)
-
-    androidTestImplementation(libs.jUnitExt)
 }
 
 val installGitHook by tasks.registering(Copy::class) {
     from(File(rootProject.rootDir, "hooks/pre-push"))
     into(File(rootProject.rootDir, ".git/hooks/"))
+
     // https://github.com/gradle/kotlin-dsl-samples/issues/1412
-    fileMode = 0b111101101 // -rwxr-xr-x
+    filePermissions {
+        unix("rwxr-xr-x")
+    }
 }
 
 tasks.getByPath(":app:preBuild").dependsOn(installGitHook)

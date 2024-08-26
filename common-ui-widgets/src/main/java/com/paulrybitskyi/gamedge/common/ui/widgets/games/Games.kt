@@ -16,8 +16,8 @@
 
 package com.paulrybitskyi.gamedge.common.ui.widgets.games
 
-import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -26,7 +26,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.unit.dp
 import com.paulrybitskyi.gamedge.common.ui.theme.GamedgeTheme
 import com.paulrybitskyi.gamedge.common.ui.widgets.AnimatedContentContainer
 import com.paulrybitskyi.gamedge.common.ui.widgets.FiniteUiState
@@ -39,6 +40,7 @@ import com.paulrybitskyi.gamedge.core.R
 fun Games(
     uiState: GamesUiState,
     modifier: Modifier = Modifier,
+    contentPadding: PaddingValues = PaddingValues(0.dp),
     onGameClicked: (GameUiModel) -> Unit,
     onBottomReached: () -> Unit,
 ) {
@@ -50,16 +52,23 @@ fun Games(
             FiniteUiState.Empty -> {
                 EmptyState(
                     uiState = uiState,
-                    modifier = Modifier.align(Alignment.Center),
+                    modifier = Modifier
+                        .padding(contentPadding)
+                        .align(Alignment.Center),
                 )
             }
             FiniteUiState.Loading -> {
-                LoadingState(modifier = Modifier.align(Alignment.Center))
+                LoadingState(
+                    modifier = Modifier
+                        .padding(contentPadding)
+                        .align(Alignment.Center),
+                )
             }
             FiniteUiState.Success -> {
                 SuccessState(
                     uiState = uiState,
                     modifier = Modifier,
+                    contentPadding = contentPadding,
                     onGameClicked = onGameClicked,
                     onBottomReached = onBottomReached,
                 )
@@ -89,6 +98,7 @@ private fun EmptyState(
 private fun SuccessState(
     uiState: GamesUiState,
     modifier: Modifier,
+    contentPadding: PaddingValues,
     onGameClicked: (GameUiModel) -> Unit,
     onBottomReached: () -> Unit,
 ) {
@@ -101,6 +111,7 @@ private fun SuccessState(
         val lastIndex = games.lastIndex
 
         LazyColumn(
+            contentPadding = contentPadding,
             verticalArrangement = Arrangement.spacedBy(GamedgeTheme.spaces.spacing_3_5),
         ) {
             itemsIndexed(
@@ -122,8 +133,7 @@ private fun SuccessState(
     }
 }
 
-@Preview
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@PreviewLightDark
 @Composable
 private fun GamesSuccessStatePreview() {
     val games = listOf(
@@ -167,8 +177,7 @@ private fun GamesSuccessStatePreview() {
     }
 }
 
-@Preview
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@PreviewLightDark
 @Composable
 private fun GamesEmptyStatePreview() {
     GamedgeTheme {
@@ -185,8 +194,7 @@ private fun GamesEmptyStatePreview() {
     }
 }
 
-@Preview
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@PreviewLightDark
 @Composable
 private fun GamesLoadingStatePreview() {
     GamedgeTheme {

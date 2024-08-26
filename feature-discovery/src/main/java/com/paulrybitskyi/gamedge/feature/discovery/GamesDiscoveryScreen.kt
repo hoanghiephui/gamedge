@@ -14,15 +14,11 @@
  * limitations under the License.
  */
 
-package com.paulrybitskyi.gamedge.feature.discovery.widgets
+package com.paulrybitskyi.gamedge.feature.discovery
 
-import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.LazyColumn
@@ -38,16 +34,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.paulrybitskyi.gamedge.common.ui.CommandsHandler
-import com.paulrybitskyi.gamedge.common.ui.NavBarColorHandler
 import com.paulrybitskyi.gamedge.common.ui.RoutesHandler
 import com.paulrybitskyi.gamedge.common.ui.base.events.Route
 import com.paulrybitskyi.gamedge.common.ui.theme.GamedgeTheme
 import com.paulrybitskyi.gamedge.common.ui.widgets.RefreshableContent
 import com.paulrybitskyi.gamedge.common.ui.widgets.categorypreview.GamesCategoryPreview
 import com.paulrybitskyi.gamedge.common.ui.widgets.toolbars.Toolbar
+import com.paulrybitskyi.gamedge.feature.discovery.widgets.GamesDiscoveryItemGameUiModel
+import com.paulrybitskyi.gamedge.feature.discovery.widgets.mapToCategoryUiModels
+import com.paulrybitskyi.gamedge.feature.discovery.widgets.mapToDiscoveryUiModel
 import com.paulrybitskyi.gamedge.feature.discovery.GamesDiscoveryCategory
 import com.paulrybitskyi.gamedge.feature.discovery.GamesDiscoveryViewModel
 import com.paulrybitskyi.gamedge.feature.discovery.R
@@ -58,16 +56,16 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import com.paulrybitskyi.gamedge.core.R as CoreR
 
-// Intentional delay to keep the swipe refresh visible
+// Intentional delay to keep the pull refresh visible
 // because as soon as it is let go, it disappears instantaneously.
-const val SwipeRefreshIntentionalDelay = 300L
+const val PullRefreshIntentionalDelay = 300L
 
 @Composable
-fun GamesDiscovery(
+fun GamesDiscoveryScreen(
     modifier: Modifier,
     onRoute: (Route) -> Unit,
 ) {
-    GamesDiscovery(
+    GamesDiscoveryScreen(
         viewModel = hiltViewModel(),
         modifier = modifier,
         onRoute = onRoute,
@@ -75,15 +73,14 @@ fun GamesDiscovery(
 }
 
 @Composable
-private fun GamesDiscovery(
+private fun GamesDiscoveryScreen(
     viewModel: GamesDiscoveryViewModel,
     modifier: Modifier,
     onRoute: (Route) -> Unit,
 ) {
-    NavBarColorHandler()
     CommandsHandler(viewModel = viewModel)
     RoutesHandler(viewModel = viewModel, onRoute = onRoute)
-    GamesDiscovery(
+    GamesDiscoveryScreen(
         items = viewModel.items.collectAsState().value,
         onCategoryMoreButtonClicked = viewModel::onCategoryMoreButtonClicked,
         onSearchButtonClicked = viewModel::onSearchButtonClicked,
@@ -94,7 +91,7 @@ private fun GamesDiscovery(
 }
 
 @Composable
-private fun GamesDiscovery(
+private fun GamesDiscoveryScreen(
     items: List<GamesDiscoveryItemUiModel>,
     onSearchButtonClicked: () -> Unit,
     onCategoryMoreButtonClicked: (category: String) -> Unit,
@@ -103,13 +100,11 @@ private fun GamesDiscovery(
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
+        contentWindowInsets = WindowInsets.statusBars,
         modifier = modifier,
         topBar = {
             Toolbar(
                 title = stringResource(R.string.games_discovery_toolbar_title),
-                contentPadding = WindowInsets.statusBars
-                    .only(WindowInsetsSides.Vertical + WindowInsetsSides.Horizontal)
-                    .asPaddingValues(),
                 rightButtonIcon = painterResource(CoreR.drawable.magnify),
                 onRightButtonClick = onSearchButtonClicked,
             )
@@ -127,7 +122,7 @@ private fun GamesDiscovery(
                 isRefreshing = true
 
                 coroutineScope.launch {
-                    delay(SwipeRefreshIntentionalDelay)
+                    delay(PullRefreshIntentionalDelay)
                     onRefreshRequested()
                     isRefreshing = false
                 }
@@ -167,10 +162,9 @@ private fun CategoryPreviewItems(
     }
 }
 
-@Preview
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@PreviewLightDark
 @Composable
-private fun GamesDiscoverySuccessStatePreview() {
+private fun GamesDiscoveryScreenSuccessStatePreview() {
     val games = listOf(
         "Ghost of Tsushima: Director's Cut",
         "Outer Wilds: Echoes of the Eye",
@@ -192,7 +186,7 @@ private fun GamesDiscoverySuccessStatePreview() {
     }
 
     GamedgeTheme {
-        GamesDiscovery(
+        GamesDiscoveryScreen(
             items = items,
             onSearchButtonClicked = {},
             onCategoryMoreButtonClicked = {},
@@ -202,10 +196,9 @@ private fun GamesDiscoverySuccessStatePreview() {
     }
 }
 
-@Preview
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@PreviewLightDark
 @Composable
-private fun GamesDiscoveryEmptyStatePreview() {
+private fun GamesDiscoveryScreenEmptyStatePreview() {
     val items = GamesDiscoveryCategory.entries.map { category ->
         GamesDiscoveryItemUiModel(
             id = category.id,
@@ -217,7 +210,7 @@ private fun GamesDiscoveryEmptyStatePreview() {
     }
 
     GamedgeTheme {
-        GamesDiscovery(
+        GamesDiscoveryScreen(
             items = items,
             onSearchButtonClicked = {},
             onCategoryMoreButtonClicked = {},

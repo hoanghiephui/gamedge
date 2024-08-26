@@ -16,6 +16,10 @@
 
 package com.paulrybitskyi.gamedge.common.ui
 
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
+import android.view.Window
 import android.annotation.SuppressLint
 import android.content.Context
 import android.view.OrientationEventListener
@@ -40,10 +44,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.window.DialogWindowProvider
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -95,16 +103,45 @@ fun OnLifecycleEvent(
     }
 }
 
-@SuppressLint("UnnecessaryComposedModifier")
+@Composable
 fun Modifier.clickable(
     indication: Indication?,
     onClick: () -> Unit,
-) = composed {
+) = this.composed {
     clickable(
         interactionSource = remember { MutableInteractionSource() },
         indication = indication,
         onClick = onClick,
     )
+}
+
+@Composable
+fun findWindow(): Window? {
+    return (LocalView.current.parent as? DialogWindowProvider)?.window
+        ?: LocalView.current.context.findWindow()
+}
+
+private tailrec fun Context.findWindow(): Window? {
+    return when (this) {
+        is Activity -> window
+        is ContextWrapper -> baseContext.findWindow()
+        else -> null
+    }
+}
+
+@Composable
+fun rememberWindowInsetsController(
+    window: Window? = findWindow(),
+): WindowInsetsControllerCompat? {
+    val view = LocalView.current
+
+    return remember(view, window) {
+        if (window != null) {
+            WindowCompat.getInsetsController(window, view)
+        } else {
+            null
+        }
+    }
 }
 
 fun LazyStaggeredGridState.reachedBottom(buffer: Int = 1): Boolean {

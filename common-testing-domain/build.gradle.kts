@@ -16,12 +16,12 @@
 
 plugins {
     id(libs.plugins.androidLibrary.get().pluginId)
+    id(libs.plugins.gamedgeKotlinCoroutines.get().pluginId)
     id(libs.plugins.gamedgeAndroid.get().pluginId)
 }
 android {
     namespace = "com.paulrybitskyi.gamedge.common.testing.domain"
 }
-
 dependencies {
     implementation(project(localModules.commonDomain))
 

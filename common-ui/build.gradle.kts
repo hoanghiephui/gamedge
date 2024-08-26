@@ -17,10 +17,8 @@
 plugins {
     id(libs.plugins.androidLibrary.get().pluginId)
     id(libs.plugins.gamedgeAndroid.get().pluginId)
-    id(libs.plugins.kotlinKapt.get().pluginId)
-
-    alias(libs.plugins.jetpackCompose)
-    alias(libs.plugins.ksp)
+    id(libs.plugins.gamedgeJetpackCompose.get().pluginId)
+    id(libs.plugins.gamedgeDaggerHilt.get().pluginId)
 }
 
 android {
@@ -29,8 +27,9 @@ android {
 
 dependencies {
     implementation(project(localModules.core))
-    implementation(project(localModules.commonApi))
-    implementation(platform(libs.composeBom))
+
+    implementation(libs.commonsCore)
+    implementation(libs.commonsKtx)
     api(libs.androidx.compose.foundation.layout)
     api(libs.androidx.compose.material.iconsExtended)
     api(libs.androidx.compose.material3)
@@ -40,25 +39,5 @@ dependencies {
     api(libs.androidx.compose.ui.util)
     api(libs.androidx.metrics)
     api(libs.compose.webview)
-    implementation(libs.composeUi)
-    implementation(libs.composeTooling)
-    implementation(libs.composeFoundation)
-    implementation(libs.composeRuntime)
-    implementation(libs.composeMaterial)
-    implementation(libs.accompanistSystemUi)
-
-    implementation(libs.commonsCore)
-    implementation(libs.commonsKtx)
-
     implementation(libs.coil)
-    api(libs.coilGif)
-
-    implementation(libs.daggerHiltAndroid)
-    kapt(libs.daggerHiltAndroidCompiler)
-
-    implementation(libs.hiltBinder)
-    ksp(libs.hiltBinderCompiler)
-
-    testImplementation(libs.jUnit)
-    androidTestImplementation(libs.jUnitExt)
 }

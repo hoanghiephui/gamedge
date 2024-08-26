@@ -14,38 +14,15 @@
  * limitations under the License.
  */
 
-import com.google.protobuf.gradle.id
-
 plugins {
     id(libs.plugins.androidLibrary.get().pluginId)
     id(libs.plugins.gamedgeAndroid.get().pluginId)
-    id(libs.plugins.kotlinKapt.get().pluginId)
-    id(libs.plugins.protobuf.get().pluginId)
-
-    alias(libs.plugins.ksp)
+    id(libs.plugins.gamedgeProtobuf.get().pluginId)
+    id(libs.plugins.gamedgeDaggerHilt.get().pluginId)
 }
 
 android {
     namespace = "com.paulrybitskyi.gamedge.common.data"
-}
-
-protobuf {
-    protoc {
-        artifact = libs.protobufCompiler.get().toString()
-    }
-
-    generateProtoTasks {
-        all().forEach { task ->
-            task.builtins {
-                id("java") {
-                    option("lite")
-                }
-                register("kotlin") {
-                    option("lite")
-                }
-            }
-        }
-    }
 }
 
 dependencies {
@@ -54,28 +31,10 @@ dependencies {
     implementation(project(localModules.igdbApi))
     implementation(project(localModules.database))
     implementation(project(":model"))
-    implementation(libs.coroutines)
-
     implementation(libs.prefsDataStore)
     implementation(libs.protoDataStore)
-    implementation(libs.protobuf)
+    implementation(libs.coroutines)
     implementation(libs.protobufkotlin.lite)
-
-    implementation(libs.kotlinResult)
-
-    implementation(libs.daggerHiltAndroid)
-    kapt(libs.daggerHiltAndroidCompiler)
-
-    implementation(libs.hiltBinder)
-    ksp(libs.hiltBinderCompiler)
-
     testImplementation(project(localModules.commonTesting))
-    testImplementation(libs.jUnit)
-    testImplementation(libs.truth)
-    testImplementation(libs.mockk)
-    testImplementation(libs.coroutinesTesting)
-    testImplementation(libs.turbine)
-
-    androidTestImplementation(libs.testRunner)
-    androidTestImplementation(libs.jUnitExt)
+    testImplementation(libs.bundles.testing)
 }

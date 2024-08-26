@@ -29,9 +29,33 @@ gradlePlugin {
             id = "com.paulrybitskyi.gamedge.android"
             implementationClass = "com.paulrybitskyi.gamedge.plugins.GamedgeAndroidPlugin"
         }
+        create("com.paulrybitskyi.gamedge.kotlin.coroutines") {
+            id = "com.paulrybitskyi.gamedge.kotlin.coroutines"
+            implementationClass = "com.paulrybitskyi.gamedge.plugins.GamedgeKotlinCoroutinesPlugin"
+        }
+        create("com.paulrybitskyi.gamedge.kotlin.kapt") {
+            id = "com.paulrybitskyi.gamedge.kotlin.kapt"
+            implementationClass = "com.paulrybitskyi.gamedge.plugins.GamedgeKotlinKaptPlugin"
+        }
         create("com.paulrybitskyi.gamedge.protobuf") {
             id = "com.paulrybitskyi.gamedge.protobuf"
             implementationClass = "com.paulrybitskyi.gamedge.plugins.GamedgeProtobufPlugin"
+        }
+        create("com.paulrybitskyi.gamedge.jetpack.compose") {
+            id = "com.paulrybitskyi.gamedge.jetpack.compose"
+            implementationClass = "com.paulrybitskyi.gamedge.plugins.GamedgeJetpackComposePlugin"
+        }
+        create("com.paulrybitskyi.gamedge.dagger.hilt") {
+            id = "com.paulrybitskyi.gamedge.dagger.hilt"
+            implementationClass = "com.paulrybitskyi.gamedge.plugins.GamedgeDaggerHiltPlugin"
+        }
+        create("com.paulrybitskyi.gamedge.kotlinx.serialization") {
+            id = "com.paulrybitskyi.gamedge.kotlinx.serialization"
+            implementationClass = "com.paulrybitskyi.gamedge.plugins.GamedgeKotlinxSerializationPlugin"
+        }
+        create("com.paulrybitskyi.gamedge.remote.api") {
+            id = "com.paulrybitskyi.gamedge.remote.api"
+            implementationClass = "com.paulrybitskyi.gamedge.plugins.GamedgeRemoteApiPlugin"
         }
         create("com.paulrybitskyi.gamedge.feature") {
             id = "com.paulrybitskyi.gamedge.feature"

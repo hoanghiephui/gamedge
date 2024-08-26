@@ -17,9 +17,7 @@
 plugins {
     id(libs.plugins.androidLibrary.get().pluginId)
     id(libs.plugins.gamedgeAndroid.get().pluginId)
-    id(libs.plugins.kotlinKapt.get().pluginId)
-
-    alias(libs.plugins.ksp)
+    id(libs.plugins.gamedgeDaggerHilt.get().pluginId)
 }
 
 android {
@@ -29,7 +27,6 @@ android {
 dependencies {
     implementation(project(localModules.commonDomain))
 
-    implementation(libs.coroutines)
     implementation(libs.kotlinxSerialization)
 
     implementation(libs.browser)
@@ -39,20 +36,6 @@ dependencies {
     implementation(libs.commonsNetwork)
     implementation(libs.commonsWindowAnims)
 
-    implementation(libs.kotlinResult)
-
-    implementation(libs.daggerHiltAndroid)
-    kapt(libs.daggerHiltAndroidCompiler)
-
-    implementation(libs.hiltBinder)
-    ksp(libs.hiltBinderCompiler)
-
     testImplementation(project(localModules.commonTesting))
-    testImplementation(libs.jUnit)
-    testImplementation(libs.truth)
-    testImplementation(libs.mockk)
-    testImplementation(libs.coroutinesTesting)
-
-    androidTestImplementation(libs.testRunner)
-    androidTestImplementation(libs.jUnitExt)
+    testImplementation(libs.bundles.testing)
 }

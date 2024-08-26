@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package com.paulrybitskyi.gamedge.feature.news.presentation.widgets
+package com.paulrybitskyi.gamedge.feature.news.presentation
 
-import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -31,7 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.paulrybitskyi.commons.ktx.showShortToast
 import com.paulrybitskyi.gamedge.common.ui.CommandsHandler
@@ -43,26 +43,27 @@ import com.paulrybitskyi.gamedge.common.ui.widgets.GamedgeProgressIndicator
 import com.paulrybitskyi.gamedge.common.ui.widgets.Info
 import com.paulrybitskyi.gamedge.common.ui.widgets.RefreshableContent
 import com.paulrybitskyi.gamedge.feature.news.R
-import com.paulrybitskyi.gamedge.feature.news.presentation.GamingNewsCommand
-import com.paulrybitskyi.gamedge.feature.news.presentation.GamingNewsViewModel
-import kotlinx.collections.immutable.persistentListOf
+import com.paulrybitskyi.gamedge.feature.news.presentation.widgets.GamingNewsItem
+import com.paulrybitskyi.gamedge.feature.news.presentation.widgets.GamingNewsItemUiModel
 import com.paulrybitskyi.gamedge.core.R as CoreR
+import kotlinx.collections.immutable.persistentListOf
 
 @Composable
-fun GamingNews(modifier: Modifier) {
-    GamingNews(
+fun GamingNewsScreen(modifier: Modifier) {
+    GamingNewsScreen(
         viewModel = hiltViewModel(),
         modifier = modifier,
     )
 }
 
 @Composable
-private fun GamingNews(
+private fun GamingNewsScreen(
     viewModel: GamingNewsViewModel,
     modifier: Modifier,
 ) {
     val urlOpener = LocalUrlOpener.current
     val context = LocalContext.current
+
     CommandsHandler(viewModel = viewModel) { command ->
         when (command) {
             is GamingNewsCommand.OpenUrl -> {
@@ -72,7 +73,7 @@ private fun GamingNews(
             }
         }
     }
-    GamingNews(
+    GamingNewsScreen(
         uiState = viewModel.uiState.collectAsState().value,
         onNewsItemClicked = viewModel::onNewsItemClicked,
         onRefreshRequested = viewModel::onRefreshRequested,
@@ -81,7 +82,7 @@ private fun GamingNews(
 }
 
 @Composable
-private fun GamingNews(
+private fun GamingNewsScreen(
     uiState: GamingNewsUiState,
     onNewsItemClicked: (GamingNewsItemUiModel) -> Unit,
     onRefreshRequested: () -> Unit,
@@ -124,7 +125,7 @@ private fun LoadingState(modifier: Modifier) {
 @Composable
 private fun EmptyState(modifier: Modifier) {
     Column(
-        // verticalScroll is to enable SwipeRefresh to work
+        // verticalScroll is to enable PullRefresh to work
         // when the screen is in empty state
         modifier = modifier.verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.Center,
@@ -157,10 +158,9 @@ private fun SuccessState(
     }
 }
 
-@Preview
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@PreviewLightDark
 @Composable
-private fun GamingNewsSuccessStatePreview() {
+private fun GamingNewsScreenSuccessStatePreview() {
     val news = persistentListOf(
         GamingNewsItemUiModel(
             id = 1,
@@ -192,7 +192,7 @@ private fun GamingNewsSuccessStatePreview() {
     )
 
     GamedgeTheme {
-        GamingNews(
+        GamingNewsScreen(
             uiState = GamingNewsUiState(
                 news = news,
             ),
@@ -202,12 +202,11 @@ private fun GamingNewsSuccessStatePreview() {
     }
 }
 
-@Preview
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@PreviewLightDark
 @Composable
-private fun GamingNewsEmptyStatePreview() {
+private fun GamingNewsScreenEmptyStatePreview() {
     GamedgeTheme {
-        GamingNews(
+        GamingNewsScreen(
             uiState = GamingNewsUiState(),
             onNewsItemClicked = {},
             onRefreshRequested = {},
@@ -215,12 +214,11 @@ private fun GamingNewsEmptyStatePreview() {
     }
 }
 
-@Preview
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@PreviewLightDark
 @Composable
-private fun GamingNewsLoadingStatePreview() {
+private fun GamingNewsScreenLoadingStatePreview() {
     GamedgeTheme {
-        GamingNews(
+        GamingNewsScreen(
             uiState = GamingNewsUiState(isLoading = true),
             onNewsItemClicked = {},
             onRefreshRequested = {},

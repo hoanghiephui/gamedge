@@ -16,17 +16,13 @@
 
 package com.paulrybitskyi.gamedge.feature.settings.presentation
 
-import android.content.res.Configuration
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.LazyColumn
@@ -41,12 +37,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.paulrybitskyi.commons.ktx.showShortToast
 import com.paulrybitskyi.gamedge.common.ui.CommandsHandler
 import com.paulrybitskyi.gamedge.common.ui.LocalUrlOpener
-import com.paulrybitskyi.gamedge.common.ui.NavBarColorHandler
 import com.paulrybitskyi.gamedge.common.ui.theme.GamedgeTheme
 import com.paulrybitskyi.gamedge.common.ui.theme.subtitle3
 import com.paulrybitskyi.gamedge.common.ui.widgets.AnimatedContentContainer
@@ -60,22 +55,21 @@ import com.paulrybitskyi.gamedge.feature.settings.domain.entities.Theme
 import com.paulrybitskyi.gamedge.core.R as CoreR
 
 @Composable
-fun Settings(modifier: Modifier) {
-    Settings(
+fun SettingsScreen(modifier: Modifier) {
+    SettingsScreen(
         viewModel = hiltViewModel(),
         modifier = modifier,
     )
 }
 
 @Composable
-private fun Settings(
+private fun SettingsScreen(
     viewModel: SettingsViewModel,
     modifier: Modifier,
 ) {
     val urlOpener = LocalUrlOpener.current
     val context = LocalContext.current
 
-    NavBarColorHandler()
     CommandsHandler(viewModel = viewModel) { command ->
         when (command) {
             is SettingsCommand.OpenUrl -> {
@@ -85,7 +79,7 @@ private fun Settings(
             }
         }
     }
-    Settings(
+    SettingsScreen(
         uiState = viewModel.uiState.collectAsState().value,
         onSettingClicked = viewModel::onSettingClicked,
         onThemePicked = viewModel::onThemePicked,
@@ -95,7 +89,7 @@ private fun Settings(
 }
 
 @Composable
-private fun Settings(
+private fun SettingsScreen(
     uiState: SettingsUiState,
     onSettingClicked: (SettingsSectionItemUiModel) -> Unit,
     onThemePicked: (Theme) -> Unit,
@@ -103,14 +97,10 @@ private fun Settings(
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
+        contentWindowInsets = WindowInsets.statusBars,
         modifier = modifier,
         topBar = {
-            Toolbar(
-                title = stringResource(R.string.settings_toolbar_title),
-                contentPadding = WindowInsets.statusBars
-                    .only(WindowInsetsSides.Vertical + WindowInsetsSides.Horizontal)
-                    .asPaddingValues(),
-            )
+            Toolbar(title = stringResource(R.string.settings_toolbar_title))
         },
     ) { paddingValues ->
         AnimatedContentContainer(
@@ -228,7 +218,7 @@ private fun SettingsSectionItem(
         )
         Text(
             text = sectionItem.description,
-            modifier = Modifier.padding(top = GamedgeTheme.spaces.spacing_0_5),
+            modifier = Modifier.padding(top = GamedgeTheme.spaces.spacing_1_0),
             style = GamedgeTheme.typography.body2,
         )
     }
@@ -293,12 +283,11 @@ private fun ThemePickerDialogOption(
     }
 }
 
-@Preview
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@PreviewLightDark
 @Composable
-private fun SettingsLoadingStatePreview() {
+private fun SettingsScreenLoadingStatePreview() {
     GamedgeTheme {
-        Settings(
+        SettingsScreen(
             uiState = SettingsUiState(
                 isLoading = false,
                 sections = emptyList(),
@@ -312,12 +301,11 @@ private fun SettingsLoadingStatePreview() {
     }
 }
 
-@Preview
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@PreviewLightDark
 @Composable
-private fun SettingsSuccessStatePreview() {
+private fun SettingsScreenSuccessStatePreview() {
     GamedgeTheme {
-        Settings(
+        SettingsScreen(
             uiState = SettingsUiState(
                 isLoading = false,
                 sections = listOf(

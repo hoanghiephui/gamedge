@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-package com.paulrybitskyi.gamedge.feature.category.widgets
+package com.paulrybitskyi.gamedge.feature.category
 
-import android.content.res.Configuration
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -37,10 +39,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.paulrybitskyi.gamedge.common.ui.CommandsHandler
-import com.paulrybitskyi.gamedge.common.ui.NavBarColorHandler
 import com.paulrybitskyi.gamedge.common.ui.RoutesHandler
 import com.paulrybitskyi.gamedge.common.ui.base.events.Route
 import com.paulrybitskyi.gamedge.common.ui.theme.GamedgeTheme
@@ -52,27 +53,25 @@ import com.paulrybitskyi.gamedge.common.ui.widgets.GameCover
 import com.paulrybitskyi.gamedge.common.ui.widgets.GamedgeProgressIndicator
 import com.paulrybitskyi.gamedge.common.ui.widgets.Info
 import com.paulrybitskyi.gamedge.common.ui.widgets.RefreshableContent
-import com.paulrybitskyi.gamedge.feature.category.GamesCategoryViewModel
-import com.paulrybitskyi.gamedge.feature.category.R
+import com.paulrybitskyi.gamedge.feature.category.widgets.rememberGamesGridConfig
 import com.paulrybitskyi.gamedge.core.R as CoreR
 
 @Composable
-fun GamesCategory(onRoute: (Route) -> Unit) {
-    GamesCategory(
+fun GamesCategoryScreen(onRoute: (Route) -> Unit) {
+    GamesCategoryScreen(
         viewModel = hiltViewModel(),
         onRoute = onRoute,
     )
 }
 
 @Composable
-private fun GamesCategory(
+private fun GamesCategoryScreen(
     viewModel: GamesCategoryViewModel,
     onRoute: (Route) -> Unit,
 ) {
-    NavBarColorHandler()
     CommandsHandler(viewModel = viewModel)
     RoutesHandler(viewModel = viewModel, onRoute = onRoute)
-    GamesCategory(
+    GamesCategoryScreen(
         uiState = viewModel.uiState.collectAsState().value,
         onBackButtonClicked = viewModel::onToolbarLeftButtonClicked,
         onGameClicked = viewModel::onGameClicked,
@@ -82,7 +81,7 @@ private fun GamesCategory(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun GamesCategory(
+private fun GamesCategoryScreen(
     uiState: GamesCategoryUiState,
     onBackButtonClicked: () -> Unit,
     onGameClicked: (GameCategoryUiModel) -> Unit,
@@ -111,15 +110,24 @@ private fun GamesCategory(
         ) { finiteUiState ->
             when (finiteUiState) {
                 FiniteUiState.Empty -> {
-                    EmptyState(modifier = Modifier.align(Alignment.Center))
+                    EmptyState(
+                        modifier = Modifier
+                            .navigationBarsPadding()
+                            .align(Alignment.Center),
+                    )
                 }
                 FiniteUiState.Loading -> {
-                    LoadingState(modifier = Modifier.align(Alignment.Center))
+                    LoadingState(
+                        modifier = Modifier
+                            .navigationBarsPadding()
+                            .align(Alignment.Center),
+                    )
                 }
                 FiniteUiState.Success -> {
                     SuccessState(
                         uiState = uiState,
                         modifier = Modifier,
+                        contentPadding = WindowInsets.navigationBars.asPaddingValues(),
                         onGameClicked = onGameClicked,
                         onBottomReached = onBottomReached,
                     )
@@ -147,6 +155,7 @@ private fun EmptyState(modifier: Modifier) {
 private fun SuccessState(
     uiState: GamesCategoryUiState,
     modifier: Modifier,
+    contentPadding: PaddingValues,
     onGameClicked: (GameCategoryUiModel) -> Unit,
     onBottomReached: () -> Unit,
 ) {
@@ -157,6 +166,7 @@ private fun SuccessState(
     ) {
         VerticalGrid(
             games = uiState.games,
+            contentPadding = contentPadding,
             onGameClicked = onGameClicked,
             onBottomReached = onBottomReached,
         )
@@ -166,6 +176,7 @@ private fun SuccessState(
 @Composable
 private fun VerticalGrid(
     games: List<GameCategoryUiModel>,
+    contentPadding: PaddingValues,
     onGameClicked: (GameCategoryUiModel) -> Unit,
     onBottomReached: () -> Unit,
 ) {
@@ -174,7 +185,10 @@ private fun VerticalGrid(
     val gridSpanCount = gridConfig.spanCount
     val lastIndex = games.lastIndex
 
-    LazyVerticalGrid(columns = GridCells.Fixed(gridConfig.spanCount)) {
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(gridConfig.spanCount),
+        contentPadding = contentPadding,
+    ) {
         itemsIndexed(items = games) { index, game ->
             if (index == lastIndex) {
                 LaunchedEffect(lastIndex) {
@@ -208,10 +222,9 @@ private fun VerticalGrid(
     }
 }
 
-@Preview
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@PreviewLightDark
 @Composable
-private fun GamesCategorySuccessStatePreview() {
+private fun GamesCategoryScreenSuccessStatePreview() {
     val games = buildList {
         repeat(15) { index ->
             add(
@@ -225,7 +238,7 @@ private fun GamesCategorySuccessStatePreview() {
     }
 
     GamedgeTheme {
-        GamesCategory(
+        GamesCategoryScreen(
             uiState = GamesCategoryUiState(
                 isLoading = false,
                 title = "Popular",
@@ -238,12 +251,11 @@ private fun GamesCategorySuccessStatePreview() {
     }
 }
 
-@Preview
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@PreviewLightDark
 @Composable
-private fun GamesCategoryEmptyStatePreview() {
+private fun GamesCategoryScreenEmptyStatePreview() {
     GamedgeTheme {
-        GamesCategory(
+        GamesCategoryScreen(
             uiState = GamesCategoryUiState(
                 isLoading = false,
                 title = "Popular",
@@ -256,12 +268,11 @@ private fun GamesCategoryEmptyStatePreview() {
     }
 }
 
-@Preview
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@PreviewLightDark
 @Composable
-private fun GamesCategoryLoadingStatePreview() {
+private fun GamesCategoryScreenLoadingStatePreview() {
     GamedgeTheme {
-        GamesCategory(
+        GamesCategoryScreen(
             uiState = GamesCategoryUiState(
                 isLoading = true,
                 title = "Popular",

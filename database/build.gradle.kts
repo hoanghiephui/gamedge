@@ -17,11 +17,10 @@
 plugins {
     id(libs.plugins.androidLibrary.get().pluginId)
     id(libs.plugins.gamedgeAndroid.get().pluginId)
-    id(libs.plugins.kotlinKapt.get().pluginId)
+    id(libs.plugins.gamedgeDaggerHilt.get().pluginId)
+    id(libs.plugins.gamedgeKotlinxSerialization.get().pluginId)
 
     alias(libs.plugins.ksp)
-    alias(libs.plugins.daggerHilt)
-    alias(libs.plugins.kotlinxSerialization)
 }
 
 android {
@@ -46,34 +45,14 @@ ksp {
 dependencies {
     implementation(project(localModules.core))
 
-    implementation(libs.coroutines)
-    implementation(libs.kotlinxSerialization)
-
     implementation(libs.room)
     implementation(libs.roomKtx)
     ksp(libs.roomCompiler)
 
-    implementation(libs.daggerHiltAndroid)
-    kapt(libs.daggerHiltAndroidCompiler)
-
-    implementation(libs.hiltBinder)
-    ksp(libs.hiltBinderCompiler)
-
     testImplementation(project(localModules.commonTesting))
-    testImplementation(libs.jUnit)
-    testImplementation(libs.truth)
-    testImplementation(libs.mockk)
-    testImplementation(libs.coroutinesTesting)
-    testImplementation(libs.turbine)
+    testImplementation(libs.bundles.testing)
 
-    androidTestImplementation(libs.testRunner)
-    androidTestImplementation(libs.jUnitExt)
-    androidTestImplementation(libs.truth)
+    androidTestImplementation(libs.bundles.testingAndroid)
     androidTestImplementation(libs.archCore)
-    androidTestImplementation(libs.coroutinesTesting)
-    androidTestImplementation(libs.turbine)
     androidTestImplementation(libs.roomTesting)
-
-    androidTestImplementation(libs.daggerHiltTesting)
-    kaptAndroidTest(libs.daggerHiltAndroidCompiler)
 }

@@ -16,17 +16,13 @@
 
 package com.paulrybitskyi.gamedge.feature.image.viewer
 
-import android.content.res.Configuration
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.LocalContentColor
@@ -42,10 +38,11 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
@@ -59,8 +56,11 @@ import com.paulrybitskyi.gamedge.common.ui.LocalNetworkStateProvider
 import com.paulrybitskyi.gamedge.common.ui.LocalTextSharer
 import com.paulrybitskyi.gamedge.common.ui.RoutesHandler
 import com.paulrybitskyi.gamedge.common.ui.base.events.Route
+import com.paulrybitskyi.gamedge.common.ui.findWindow
 import com.paulrybitskyi.gamedge.common.ui.images.defaultImageRequest
+import com.paulrybitskyi.gamedge.common.ui.rememberWindowInsetsController
 import com.paulrybitskyi.gamedge.common.ui.theme.GamedgeTheme
+import com.paulrybitskyi.gamedge.common.ui.theme.darkScrim
 import com.paulrybitskyi.gamedge.common.ui.theme.statusBar
 import com.paulrybitskyi.gamedge.common.ui.widgets.Info
 import com.paulrybitskyi.gamedge.common.ui.widgets.toolbars.Toolbar
@@ -70,17 +70,18 @@ private const val ZoomScaleMin = 0.5f
 private const val ZoomScaleMax = 5f
 private const val ZoomOverSnapScaleMin = 1f
 private const val ZoomOverSnapScaleMax = 3f
+private const val ZoomScaleInitial = 1f
 
 @Composable
-fun ImageViewer(onRoute: (Route) -> Unit) {
-    ImageViewer(
+fun ImageViewerScreen(onRoute: (Route) -> Unit) {
+    ImageViewerScreen(
         viewModel = hiltViewModel(),
         onRoute = onRoute,
     )
 }
 
 @Composable
-private fun ImageViewer(
+private fun ImageViewerScreen(
     viewModel: ImageViewerViewModel,
     onRoute: (Route) -> Unit,
 ) {
@@ -95,7 +96,7 @@ private fun ImageViewer(
         }
     }
     RoutesHandler(viewModel = viewModel, onRoute = onRoute)
-    ImageViewer(
+    ImageViewerScreen(
         uiState = viewModel.uiState.collectAsState().value,
         onBackPressed = viewModel::onBackPressed,
         onToolbarRightBtnClicked = viewModel::onToolbarRightButtonClicked,
@@ -105,7 +106,7 @@ private fun ImageViewer(
 }
 
 @Composable
-private fun ImageViewer(
+private fun ImageViewerScreen(
     uiState: ImageViewerUiState,
     onBackPressed: () -> Unit,
     onToolbarRightBtnClicked: () -> Unit,
@@ -129,10 +130,7 @@ private fun ImageViewer(
             Toolbar(
                 title = uiState.toolbarTitle,
                 modifier = Modifier.align(Alignment.TopCenter),
-                contentPadding = WindowInsets.statusBars
-                    .only(WindowInsetsSides.Vertical + WindowInsetsSides.Horizontal)
-                    .asPaddingValues(),
-                backgroundColor = GamedgeTheme.colors.statusBar,
+                backgroundColor = toolbarBackgroundColor,
                 contentColor = LocalContentColor.current,
                 elevation = 0.dp,
                 leftButtonIcon = painterResource(CoreR.drawable.arrow_left),
@@ -179,7 +177,10 @@ private fun ImageItem(
     imageUrl: String,
     onDismiss: () -> Unit,
 ) {
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center,
+    ) {
         var imageState by remember { mutableStateOf<State>(State.Empty) }
         val zoomableState = rememberZoomableState(
             minScale = ZoomScaleMin,
@@ -188,6 +189,7 @@ private fun ImageItem(
                 minSnapScale = ZoomOverSnapScaleMin,
                 maxSnapScale = ZoomOverSnapScaleMax,
             ),
+            initialScale = ZoomScaleInitial,
         )
 
         if (imageState is State.Error) {
@@ -200,9 +202,7 @@ private fun ImageItem(
                         CoreR.string.error_unknown_message
                     },
                 ),
-                modifier = Modifier
-                    .align(Alignment.Center)
-                    .padding(horizontal = GamedgeTheme.spaces.spacing_7_5),
+                modifier = Modifier.padding(horizontal = GamedgeTheme.spaces.spacing_7_5),
             )
         }
 
@@ -240,12 +240,11 @@ private fun ImageItem(
     }
 }
 
-@Preview
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@PreviewLightDark
 @Composable
-private fun ImageViewerPreview() {
+private fun ImageViewerScreenPreview() {
     GamedgeTheme {
-        ImageViewer(
+        ImageViewerScreen(
             uiState = ImageViewerUiState(
                 toolbarTitle = "Image",
                 imageUrls = emptyList(),

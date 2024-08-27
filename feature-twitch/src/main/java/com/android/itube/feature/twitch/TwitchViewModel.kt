@@ -1,21 +1,10 @@
 package com.android.itube.feature.twitch
 
 import android.util.Log
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.text.InlineTextContent
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.Placeholder
-import androidx.compose.ui.text.PlaceholderVerticalAlign
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewModelScope
-import coil.compose.AsyncImage
 import com.android.itube.feature.twitch.state.StreamUiState
 import com.android.itube.feature.twitch.state.disableLoading
 import com.android.itube.feature.twitch.state.enableLoading
@@ -24,26 +13,22 @@ import com.android.itube.feature.twitch.state.toLoadMoreSuccessState
 import com.android.itube.feature.twitch.state.toSuccessState
 import com.android.model.StreamItem
 import com.paulrybitskyi.gamedge.common.domain.auth.datastores.AuthLocalDataStore
-import com.paulrybitskyi.gamedge.common.domain.chat.EmoteListMap
-import com.paulrybitskyi.gamedge.common.domain.chat.EmoteNameUrl
-import com.paulrybitskyi.gamedge.common.domain.chat.EmoteNameUrlList
 import com.paulrybitskyi.gamedge.common.domain.common.extensions.resultOrError
 import com.paulrybitskyi.gamedge.common.domain.games.usecases.StreamUseCase
 import com.paulrybitskyi.gamedge.common.domain.live.entities.StreamPlaybackAccessToken
 import com.paulrybitskyi.gamedge.common.domain.live.usecases.LiveUseCase
-import com.paulrybitskyi.gamedge.common.domain.repository.util.EmoteParsing
+import com.paulrybitskyi.gamedge.common.domain.live.usecases.TwitchEmoteUseCase
 import com.paulrybitskyi.gamedge.common.ui.base.BaseViewModel
 import com.paulrybitskyi.gamedge.common.ui.base.events.common.GeneralCommand
 import com.paulrybitskyi.gamedge.core.ErrorMapper
 import com.paulrybitskyi.gamedge.core.Logger
-import com.paulrybitskyi.gamedge.core.Response
+import com.android.model.Response
 import com.paulrybitskyi.gamedge.core.utils.mapWithRetry
 import com.paulrybitskyi.gamedge.core.utils.onError
 import com.paulrybitskyi.gamedge.igdb.api.maper.GraphMapper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -51,7 +36,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
@@ -71,6 +55,7 @@ class TwitchViewModel @Inject constructor(
     private val errorMapper: ErrorMapper,
     private val logger: Logger,
     private val graphMapper: GraphMapper,
+    private val twitchEmoteUseCase: TwitchEmoteUseCase
 ) : BaseViewModel() {
     private var hasMoreGamesToLoad = false
 
@@ -216,6 +201,24 @@ class TwitchViewModel @Inject constructor(
                 _uiState.update { emittedUiState }
             }
             .launchIn(viewModelScope)
+    }
+
+    fun getGlobalEmote() {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                twitchEmoteUseCase.getGlobalEmotes().mapWithRetry(
+                    action = {
+                        // result is the result from getGlobalEmotes()
+                            result ->
+                        result
+                    },
+                    predicate = { result, attempt ->
+                        val repeatResult = result is Response.Failure && attempt < 3
+                        repeatResult
+                    }
+                ).collect {}
+            }
+        }
     }
 
     fun onBottomReached() {

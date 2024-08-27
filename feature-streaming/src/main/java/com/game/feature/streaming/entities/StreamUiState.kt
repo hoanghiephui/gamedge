@@ -4,7 +4,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.ui.text.input.TextFieldValue
 import com.android.model.websockets.ChatSettingsData
 import com.paulrybitskyi.gamedge.common.domain.websockets.LoggedInUserData
-import com.paulrybitskyi.gamedge.core.Response
+import com.android.model.Response
 
 data class StreamUIState(
     val chatSettings: Response<ChatSettingsData> = Response.Loading, //websocket twitchImpl

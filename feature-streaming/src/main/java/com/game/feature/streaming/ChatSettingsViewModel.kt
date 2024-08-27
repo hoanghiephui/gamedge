@@ -6,13 +6,14 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import com.paulrybitskyi.gamedge.common.domain.ChatSettingsDataStore
+import com.paulrybitskyi.gamedge.common.domain.live.usecases.TwitchEmoteUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
 @HiltViewModel
 class ChatSettingsViewModel @Inject constructor(
     private val chatSettingsDataStore: ChatSettingsDataStore,
-
+    private val twitchEmoteUseCase: TwitchEmoteUseCase,
 ) : ViewModel() {
     private val _badgeSize = mutableFloatStateOf(20f)  // Initial value
     val badgeSize: State<Float> = _badgeSize

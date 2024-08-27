@@ -5,11 +5,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -49,8 +51,8 @@ import com.paulrybitskyi.gamedge.common.ui.v2.theme.GradientColors
 import com.paulrybitskyi.gamedge.common.ui.v2.theme.LocalGradientColors
 import com.paulrybitskyi.gamedge.v2.navigation.NiaNavHost
 import com.paulrybitskyi.gamedge.v2.navigation.TopLevelDestination
-import com.paulrybitskyi.gamedge.feature.settings.R as settingsR
 import com.paulrybitskyi.gamedge.core.R as coreR
+import com.paulrybitskyi.gamedge.feature.settings.R as settingsR
 
 @Composable
 fun NiaApp(
@@ -161,7 +163,9 @@ private fun ContentScreen(
         },
         containerColor = Color.Transparent,
         contentColor = MaterialTheme.colorScheme.onBackground,
-        contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        contentWindowInsets = WindowInsets(0, 0, 0, 0)
+            .exclude(WindowInsets.navigationBars)
+            .exclude(WindowInsets.ime),
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
         Column(

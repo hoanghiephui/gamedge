@@ -23,13 +23,11 @@ import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imeNestedScroll
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
@@ -51,8 +49,14 @@ import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.Backspace
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.Autorenew
+import androidx.compose.material.icons.filled.Explore
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.LiveTv
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
@@ -60,6 +64,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -70,18 +75,17 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -122,6 +126,8 @@ import com.paulrybitskyi.gamedge.common.domain.websockets.MessageToken
 import com.paulrybitskyi.gamedge.common.domain.websockets.PrivateMessageType
 import com.paulrybitskyi.gamedge.common.domain.websockets.TwitchUserData
 import com.paulrybitskyi.gamedge.common.ui.rememberDraggableActions
+import com.paulrybitskyi.gamedge.common.ui.v2.component.NiaTab
+import com.paulrybitskyi.gamedge.common.ui.v2.component.NiaTabRow
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
@@ -195,51 +201,58 @@ fun ChatView(
             )
         },
         chatUI = { modifierChatUI ->
-            ChatUILazyColumn(
-                lazyColumnListState = lazyColumnListState,
-                twitchUserChat = twitchUserChat,
-                autoscroll = autoscroll,
-                showBottomModal = { showBottomModal() },
-                showTimeoutDialog = { showTimeoutDialog() },
-                showBanDialog = { showBanDialog() },
-                updateClickedUser = { username, userId, isBanned, isMod ->
-                    updateClickedUser(
-                        username,
-                        userId,
-                        isBanned,
-                        isMod
-                    )
-                },
-                doubleClickMessage = { username -> doubleClickMessage(username) },
-                modifier = modifierChatUI,
-                deleteChatMessage = { messageId -> deleteChatMessage(messageId) },
-                isMod = isMod,
-                inlineContentMap = inlineContentMap,
-                badgeListMap = badgeListMap,
-                usernameSize = usernameSize,
-                messageSize = messageSize,
-                lineHeight = lineHeight,
-                useCustomUsernameColors = useCustomUsernameColors,
-                globalTwitchEmoteContentMap = globalTwitchEmoteContentMap,
-                channelTwitchEmoteContentMap = channelTwitchEmoteContentMap,
-                globalBetterTTVEmoteContentMap = globalBetterTTVEmoteContentMap,
-                channelBetterTTVEmoteContentMap = channelBetterTTVEmoteContentMap,
-                sharedBetterTTVEmoteContentMap = sharedBetterTTVEmoteContentMap
+            Box(modifier = modifierChatUI.fillMaxSize()) {
+                ChatUILazyColumn(
+                    lazyColumnListState = lazyColumnListState,
+                    twitchUserChat = twitchUserChat,
+                    autoscroll = autoscroll,
+                    showBottomModal = { showBottomModal() },
+                    showTimeoutDialog = { showTimeoutDialog() },
+                    showBanDialog = { showBanDialog() },
+                    updateClickedUser = { username, userId, isBanned, isMod ->
+                        updateClickedUser(
+                            username,
+                            userId,
+                            isBanned,
+                            isMod
+                        )
+                    },
+                    doubleClickMessage = { username -> doubleClickMessage(username) },
+                    modifier = modifierChatUI,
+                    deleteChatMessage = { messageId -> deleteChatMessage(messageId) },
+                    isMod = isMod,
+                    inlineContentMap = inlineContentMap,
+                    badgeListMap = badgeListMap,
+                    usernameSize = usernameSize,
+                    messageSize = messageSize,
+                    lineHeight = lineHeight,
+                    useCustomUsernameColors = useCustomUsernameColors,
+                    globalTwitchEmoteContentMap = globalTwitchEmoteContentMap,
+                    channelTwitchEmoteContentMap = channelTwitchEmoteContentMap,
+                    globalBetterTTVEmoteContentMap = globalBetterTTVEmoteContentMap,
+                    channelBetterTTVEmoteContentMap = channelBetterTTVEmoteContentMap,
+                    sharedBetterTTVEmoteContentMap = sharedBetterTTVEmoteContentMap
 
-            )
-        },
-        scrollToBottom = { modifierBottom ->
-            ScrollToBottom(
-                scrollingPaused = !autoscroll,
-                enableAutoScroll = { autoscroll = true },
-                emoteKeyBoardHeight = emoteKeyBoardHeight.value,
-                modifier = modifierBottom
-            )
+                )
+                if (emoteKeyBoardHeight.value == 350.dp) {
+                    //fix bug
+                } else {
+                    JumpToBottom(
+                        // Only show if the scroller is not at the bottom
+                        enabled = !autoscroll,
+                        onClicked = {
+                            autoscroll = true
+                        },
+                        modifier = Modifier.align(Alignment.BottomCenter)
+                    )
+                }
+            }
         },
         enterChat = { enterChatModifier ->
             EnterChatColumn(
-                modifier = enterChatModifier.imePadding() // padding for the bottom for the IME
-                    .imeNestedScroll(),
+                modifier = enterChatModifier
+                    .navigationBarsPadding()
+                    .imePadding(),
                 filteredRow = {
                     FilteredMentionLazyRow(
                         filteredChatListImmutable = filteredChatListImmutable,
@@ -284,8 +297,6 @@ fun ChatView(
                         changeActualTextFieldValue = { text, textRange ->
                             changeActualTextFieldValue(text, textRange)
                         },
-
-
                         )
                 },
                 showIconBasedOnTextLength = {
@@ -336,7 +347,6 @@ fun ChatUIBox(
     modifier: Modifier,
     determineScrollState: @Composable ImprovedChatUI.() -> Unit,
     chatUI: @Composable ImprovedChatUI.(Modifier) -> Unit,
-    scrollToBottom: @Composable ImprovedChatUI.(Modifier) -> Unit,
     enterChat: @Composable ImprovedChatUI.(Modifier) -> Unit,
     noChat: Boolean,
     lowPowerMode: Boolean,
@@ -373,28 +383,15 @@ fun ChatUIBox(
         }
     } else {
         with(chatUIScope) {
-            Box(modifier = Modifier.fillMaxSize()) {
-                scrollToBottom(
-                    Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(bottom = 80.dp)
-                        .zIndex(5f)
-                )
-
-                Column(Modifier.fillMaxSize()) {
-                    HorizontalDivider(
-                        modifier = Modifier.padding(
-                            top = 8.dp,
-                            bottom = 8.dp
-                        )
-                    )
-                    chatUI(Modifier.weight(1f))
-                    enterChat(Modifier.fillMaxWidth())
+            Box(modifier = modifier.fillMaxSize()) {
+                Column(modifier.fillMaxSize()) {
+                    chatUI(modifier.weight(1f))//TODO
+                    enterChat(modifier.fillMaxWidth())
 
                     if (emoteKeyBoardHeight == 350.dp) {
-
                         EmoteBoard(
-                            modifier = Modifier.zIndex(8f),
+                            modifier = modifier
+                                .zIndex(8f),
                             emoteBoardGlobalList,
                             emoteBoardMostFrequentList = emoteBoardMostFrequentList,
                             updateTextWithEmote = { newValue ->
@@ -416,7 +413,6 @@ fun ChatUIBox(
                             userIsSub = userIsSub,
 
                             )
-
                     }
                 }
                 determineScrollState()
@@ -429,7 +425,6 @@ fun ChatUIBox(
                     }
 
                 }
-
 
                 ForwardSlash(
                     modifier = Modifier
@@ -456,7 +451,6 @@ fun LazyGridScope.header(
  * - restartable
  * - skippable
  * */
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun EmoteBoard(
     modifier: Modifier,
@@ -477,57 +471,48 @@ fun EmoteBoard(
     val lazyGridState = rememberLazyGridState()
     val betterTTVLazyGridState = rememberLazyGridState()
     val scope = rememberCoroutineScope()
-    val secondaryColor = MaterialTheme.colorScheme.secondary
 
-    //modifier =Modifier.weight(1f)
+    var selectedTabIndex by rememberSaveable { mutableIntStateOf(0) }
+    val titles = listOf("Twitch", "BetterTTV")
     val pagerState = rememberPagerState(pageCount = {
-        2
+        titles.size
     })
-    val underlineModifier = Modifier.drawBehind {
-        val strokeWidthPx = 1.dp.toPx()
-        val verticalOffset = size.height - 2.sp.toPx()
-        drawLine(
-            color = secondaryColor,
-            strokeWidth = strokeWidthPx,
-            start = Offset(0f, verticalOffset),
-            end = Offset(size.width, verticalOffset)
-        )
-    }
-    Column {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 5.dp)
-        ) {
-            Spacer(modifier = Modifier.width(5.dp))
-            Text(
-                "Twitch", color = MaterialTheme.colorScheme.onPrimary,
-                modifier = if (pagerState.currentPage == 0) underlineModifier else Modifier.clickable {
-                    scope.launch {
-                        pagerState.animateScrollToPage(0)
-                    }
-                },
-            )
-            Spacer(modifier = Modifier.width(25.dp))
-            Text(
-                "BetterTTV",
-                color = MaterialTheme.colorScheme.onPrimary,
-                modifier = if (pagerState.currentPage == 1) underlineModifier else Modifier.clickable {
-                    scope.launch {
-                        pagerState.animateScrollToPage(1)
-                    }
-                },
-            )
 
+    Column(
+        modifier = modifier
+            .background(Color.Transparent)
+            .navigationBarsPadding()
+            .padding()
+    ) {
+        NiaTabRow(selectedTabIndex = selectedTabIndex) {
+            titles.forEachIndexed { index, title ->
+                NiaTab(
+                    selected = selectedTabIndex == index,
+                    onClick = {
+                        selectedTabIndex = index
+                        if (index == 0) {
+                            scope.launch {
+                                pagerState.animateScrollToPage(0)
+                            }
+                        } else {
+                            scope.launch {
+                                pagerState.animateScrollToPage(1)
+                            }
+                        }
+                    },
+                    text = { Text(text = title) },
+                )
+            }
         }
-        HorizontalPager(state = pagerState) { page ->
+        HorizontalPager(state = pagerState,
+            modifier = Modifier.fillMaxSize()) { page ->
             // Our page content
             when (page) {
                 0 -> {
                     Column(
                         modifier = modifier
                     ) {
-                        Box() {
+                        Box {
                             LazyGridEmotes(
                                 lazyGridState = lazyGridState,
                                 emoteBoardGlobalList = emoteBoardGlobalList,
@@ -870,8 +855,7 @@ fun EmoteBottomUI(
                     .clickable {
                         closeEmoteBoard()
                     },
-                tint = MaterialTheme.colorScheme.onPrimary,
-                painter = painterResource(id = coreR.drawable.keyboard_arrow_down_24),
+                imageVector = Icons.Default.KeyboardArrowDown,
                 contentDescription = "click to close keyboard emote"
             )
             Spacer(modifier = Modifier.width(10.dp))
@@ -883,8 +867,7 @@ fun EmoteBottomUI(
                         Log.d("EmoteBottomUI", "RECENT")
                         scrollToMostFrequentlyUsedEmotes()
                     },
-                tint = MaterialTheme.colorScheme.onPrimary,
-                painter = painterResource(id = coreR.drawable.autorenew_24),
+                imageVector = Icons.Default.Autorenew,
                 contentDescription = "click to scroll to most recent emotes"
             )
             Spacer(modifier = Modifier.width(10.dp))
@@ -896,8 +879,7 @@ fun EmoteBottomUI(
                         scrollToChannelEmotes()
                         Log.d("EmoteBottomUI", "CHANNEL")
                     },
-                tint = MaterialTheme.colorScheme.onPrimary,
-                painter = painterResource(id = coreR.drawable.channel_emotes_24),
+                imageVector = Icons.Default.LiveTv,
                 contentDescription = "click to scroll to channel emotes"
             )
             Spacer(modifier = Modifier.width(10.dp))
@@ -909,32 +891,26 @@ fun EmoteBottomUI(
                         scrollToGlobalEmotes()
                         Log.d("EmoteBottomUI", "GLOBAL")
                     },
-                tint = MaterialTheme.colorScheme.onPrimary,
-                painter = painterResource(id = coreR.drawable.world_emotes_24),
+                imageVector = Icons.Default.Explore,
                 contentDescription = "click to scroll to gloabl emotes"
             )
 
 
         }
-        Box(modifier = Modifier
-            .clip(RoundedCornerShape(4.dp))
-            .background(Color.DarkGray)
-            .clickable {
+        IconButton(
+            modifier = Modifier
+                .padding(vertical = 5.dp, horizontal = 10.dp),
+            onClick = {
                 deleteEmote()
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
             }
-            .padding(vertical = 5.dp, horizontal = 10.dp)
-
         ) {
             Icon(
                 modifier = Modifier.size(25.dp),
-                tint = MaterialTheme.colorScheme.onPrimary,
-                painter = painterResource(id = coreR.drawable.baseline_backspace_24),
+                imageVector = Icons.AutoMirrored.Filled.Backspace,
                 contentDescription = "click to delete emote"
             )
         }
-
-
     }
 }
 
@@ -1065,8 +1041,6 @@ fun LazyGridEmotes(
     userIsSub: Boolean,
     modifier: Modifier,
 ) {
-
-
     LazyVerticalGrid(
         state = lazyGridState,
         columns = GridCells.Adaptive(minSize = 60.dp),
@@ -1087,13 +1061,10 @@ fun LazyGridEmotes(
                 Spacer(modifier = Modifier.padding(5.dp))
                 Text(
                     "Frequently Used Emotes",
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    fontSize = MaterialTheme.typography.headlineSmall.fontSize
                 ) // or any composable for your single row
                 Spacer(modifier = Modifier.padding(2.dp))
-                Divider(
+                HorizontalDivider(
                     thickness = 2.dp,
-                    color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.8f),
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.padding(5.dp))
@@ -1108,8 +1079,7 @@ fun LazyGridEmotes(
                 model = it.url,
                 contentDescription = it.name,
                 modifier = Modifier
-                    .width(60.dp)
-                    .height(60.dp)
+                    .size(50.dp)
                     .padding(5.dp)
                     .clickable {
                         updateTextWithEmote(it.name)
@@ -1129,13 +1099,10 @@ fun LazyGridEmotes(
                 Spacer(modifier = Modifier.padding(5.dp))
                 Text(
                     "Channel Emotes",
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    fontSize = MaterialTheme.typography.headlineSmall.fontSize
                 ) // or any composable for your single row
                 Spacer(modifier = Modifier.padding(2.dp))
-                Divider(
+                HorizontalDivider(
                     thickness = 2.dp,
-                    color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.8f),
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.padding(5.dp))
@@ -1147,32 +1114,28 @@ fun LazyGridEmotes(
             if (it.emoteType == EmoteTypes.SUBS && !userIsSub) {
                 Box(
                     modifier = Modifier
-                        .width(60.dp)
-                        .height(60.dp)
+                        .size(50.dp)
                 ) {
                     AsyncImage(
                         model = it.url,
                         contentDescription = it.name,
                         modifier = Modifier
-                            .width(60.dp)
-                            .height(60.dp)
+                            .size(50.dp)
                             .padding(5.dp)
                     )
                     Spacer(
                         modifier = Modifier
-                            .height(60.dp)
-                            .width(60.dp)
+                            .size(50.dp)
                             .background(Color.Black.copy(0.4f))
                     )
                     Icon(
-                        painter = painterResource(id = coreR.drawable.lock_24),
+                        imageVector = Icons.Default.Lock,
                         contentDescription = "Emote locked. Subscribe to access",
                         modifier = Modifier
                             .width(18.dp)
                             .height(18.dp)
                             .align(Alignment.BottomEnd)
                             .padding(3.dp),
-                        tint = Color.White
                     )
 
                 }
@@ -1182,8 +1145,7 @@ fun LazyGridEmotes(
                     model = it.url,
                     contentDescription = it.name,
                     modifier = Modifier
-                        .width(60.dp)
-                        .height(60.dp)
+                        .size(50.dp)
                         .padding(5.dp)
                         .clickable {
                             updateTextWithEmote(it.name)
@@ -1193,15 +1155,8 @@ fun LazyGridEmotes(
                         }
                 )
             }
-
-//            Icon(
-//                painter = rememberAsyncImagePainter(it.url),
-//                contentDescription = null,
-//                modifier = Modifier.size(42.dp),
-//                tint = Color.Unspecified
-//            )
         }
-//        /*****************************START OF THE GLOBAL EMOTES*******************************/
+        /*****************************START OF THE GLOBAL EMOTES*******************************/
         header {
             Column(
                 modifier = Modifier
@@ -1211,14 +1166,10 @@ fun LazyGridEmotes(
                 Spacer(modifier = Modifier.padding(5.dp))
                 Text(
                     "Global Emotes",
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    fontSize = MaterialTheme.typography.headlineSmall.fontSize
                 ) // or any composable for your single row
                 Spacer(modifier = Modifier.padding(2.dp))
-                Divider(
+                HorizontalDivider(
                     thickness = 2.dp,
-                    color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.8f),
-                    modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.padding(5.dp))
             }
@@ -1226,15 +1177,11 @@ fun LazyGridEmotes(
         }
 
         items(emoteBoardGlobalList.list) {
-//            Log.d("GlobalEmotesLoaded","name ->${it.name}")
-//            Log.d("GlobalEmotesLoaded","url ->${it.url}")
-//
             AsyncImage(
                 model = it.url,
                 contentDescription = it.name,
                 modifier = Modifier
-                    .width(60.dp)
-                    .height(60.dp)
+                    .size(50.dp)
                     .padding(5.dp)
                     .clickable {
                         updateTextWithEmote(it.name)
@@ -1346,7 +1293,6 @@ class ImprovedChatUI {
                         style = MaterialTheme.typography.titleMedium,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .background(MaterialTheme.colorScheme.secondary) //todo: this is what I want to change
                             .combinedClickable(
                                 onDoubleClick = {
                                     setDragging()
@@ -2001,23 +1947,27 @@ fun EnterChatColumn(
     stylizedTextField: @Composable (Modifier) -> Unit,
     showIconBasedOnTextLength: @Composable () -> Unit,
 ) {
-    Column(
-        modifier = modifier
-            .navigationBarsPadding()
-            .padding(bottom = 4.dp)
+    Surface(
+        tonalElevation = 2.dp,
+        contentColor = MaterialTheme.colorScheme.secondary
     ) {
-        filteredRow()
-        HorizontalDivider()
-        Row(
-            verticalAlignment = Alignment.CenterVertically
+        Column(
+            modifier = modifier
+                .padding(bottom = 4.dp)
         ) {
-            showModStatus()
-            stylizedTextField(
-                Modifier
-                    .weight(2f)
-                    .padding(start = 8.dp)
-            )
-            showIconBasedOnTextLength()
+            filteredRow()
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                showModStatus()
+                stylizedTextField(
+                    Modifier
+                        .weight(2f)
+                        .padding(start = 8.dp)
+                )
+                showIconBasedOnTextLength()
+            }
         }
     }
 }
@@ -2162,12 +2112,14 @@ fun FilteredMentionLazyRow(
     filteredChatListImmutable: FilteredChatListImmutableCollection,
     clickedAutoCompleteText: (String) -> Unit,
 ) {
-    LazyRow(modifier = Modifier.padding(vertical = 10.dp)) {
-        items(filteredChatListImmutable.chatList) {
-            ClickedAutoText(
-                clickedAutoCompleteText = { username -> clickedAutoCompleteText(username) },
-                username = it
-            )
+    if (filteredChatListImmutable.chatList.isNotEmpty()) {
+        LazyRow(modifier = Modifier.padding(vertical = 10.dp)) {
+            items(filteredChatListImmutable.chatList) {
+                ClickedAutoText(
+                    clickedAutoCompleteText = { username -> clickedAutoCompleteText(username) },
+                    username = it
+                )
+            }
         }
     }
 }
@@ -2236,7 +2188,6 @@ fun ShowIconBasedOnTextLength(
  * @param newFilterMethod This method will trigger where to show the [TextChatParts.FilteredMentionLazyRow] or not
  *
  * */
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun StylizedTextField(
     modifier: Modifier,

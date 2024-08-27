@@ -33,8 +33,7 @@ android {
 dependencies {
     implementation(libs.kotlinResult)
     api(libs.kotlinx.collections.immutable)
-    implementation(project(":core"))
-    implementation(libs.coil)
+    api(libs.coil)
     api(project(":model"))
     testImplementation(project(localModules.commonTestingDomain))
     testImplementation(libs.bundles.testing)

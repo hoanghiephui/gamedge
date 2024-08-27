@@ -1,4 +1,4 @@
-package com.paulrybitskyi.gamedge.common.domain.games.usecases
+package com.paulrybitskyi.gamedge.common.data.usecase
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -12,56 +12,37 @@ import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.android.model.websockets.EmoteData
+import com.android.model.Response
 import com.paulrybitskyi.gamedge.common.domain.chat.EmoteListMap
 import com.paulrybitskyi.gamedge.common.domain.chat.EmoteNameUrl
 import com.paulrybitskyi.gamedge.common.domain.chat.EmoteNameUrlEmoteTypeList
 import com.paulrybitskyi.gamedge.common.domain.chat.EmoteNameUrlList
 import com.paulrybitskyi.gamedge.common.domain.chat.IndivBetterTTVEmoteList
 import com.paulrybitskyi.gamedge.common.domain.common.DispatcherProvider
-import com.paulrybitskyi.gamedge.common.domain.common.DomainResult
-import com.paulrybitskyi.gamedge.common.domain.common.extensions.resultOrError
 import com.paulrybitskyi.gamedge.common.domain.games.datastores.GamesDataStores
+import com.paulrybitskyi.gamedge.common.domain.live.usecases.TwitchEmoteUseCase
 import com.paulrybitskyi.gamedge.common.domain.repository.util.EmoteParsing
 import com.paulrybitskyi.gamedge.core.Logger
-import com.paulrybitskyi.gamedge.core.Response
+import com.paulrybitskyi.gamedge.core.handleException
 import com.paulrybitskyi.gamedge.core.markers.Loggable
-import com.paulrybitskyi.gamedge.core.utils.onError
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.onCompletion
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.onStart
 import javax.inject.Inject
 import javax.inject.Singleton
 
-interface TwitchEmoteUseCase {
-    val emoteList: State<EmoteListMap>
-    val emoteBoardGlobalList: State<EmoteNameUrlList>
-    val emoteBoardChannelList: State<EmoteNameUrlEmoteTypeList>
-    val globalBetterTTVEmotes: State<IndivBetterTTVEmoteList>
-    val channelBetterTTVEmotes: State<IndivBetterTTVEmoteList>
-    val sharedBetterTTVEmotes: State<IndivBetterTTVEmoteList>
-    val globalChatBadges: State<EmoteListMap>
-    val combinedEmoteList: StateFlow<List<EmoteNameUrl>>
-    val channelEmoteList: StateFlow<List<EmoteNameUrl>>
-    val globalBetterTTVEmoteList: StateFlow<List<EmoteNameUrl>>
-    val channelBetterTTVEmoteList: StateFlow<List<EmoteNameUrl>>
-    val sharedBetterTTVEmoteList: StateFlow<List<EmoteNameUrl>>
-    fun getGlobalEmotes(): Flow<Response<Boolean>>
-}
-
 @Singleton
-class TwitchEmoteUseCaseImpl @Inject constructor(
+internal class TwitchEmoteUseCaseImpl @Inject constructor(
     private val gamesDataStores: GamesDataStores,
     private val dispatcherProvider: DispatcherProvider,
     private val logger: Logger,
-    private val emoteParsing: EmoteParsing = EmoteParsing()
+    private val emoteParsing: EmoteParsing
 ) : TwitchEmoteUseCase, Loggable {
+    override val logTag: String
+        get() = javaClass.simpleName
+
     private val modBadge = "https://static-cdn.jtvnw.net/badges/v1/3267646d-33f0-4b17-b3df-f923a41db1d0/1"
     private val subBadge = "https://static-cdn.jtvnw.net/badges/v1/5d9f2208-5dd8-11e7-8513-2ff4adfae661/1"
     private val feelsGood = "https://static-cdn.jtvnw.net/emoticons/v2/64138/static/light/1.0"
@@ -146,26 +127,28 @@ class TwitchEmoteUseCaseImpl @Inject constructor(
         )
     private val _emoteList: MutableState<EmoteListMap> = mutableStateOf(EmoteListMap(inlineContentMap))
 
-    override val emoteList: State<EmoteListMap> = _emoteList //this is what is shown in the chat UI(not emote box UI but chat UI )
+    override val emoteList: State<EmoteListMap> =
+        _emoteList //this is what is shown in the chat UI(not emote box UI but chat UI )
 
-    private val _globalChatBadges: MutableState<EmoteListMap> = mutableStateOf(EmoteListMap(inlineContentMapGlobalBadgeList))
+    private val _globalChatBadges: MutableState<EmoteListMap> =
+        mutableStateOf(EmoteListMap(inlineContentMapGlobalBadgeList))
 
     override val globalChatBadges: State<EmoteListMap> = _globalChatBadges
 
-    private val _emoteBoardGlobalList = mutableStateOf<EmoteNameUrlList>(EmoteNameUrlList())
-    override val emoteBoardGlobalList:State<EmoteNameUrlList> = _emoteBoardGlobalList
+    private val _emoteBoardGlobalList = mutableStateOf(EmoteNameUrlList())
+    override val emoteBoardGlobalList: State<EmoteNameUrlList> = _emoteBoardGlobalList
 
-    private val _emoteBoardChannelList = mutableStateOf<EmoteNameUrlEmoteTypeList>(EmoteNameUrlEmoteTypeList())
-    override val emoteBoardChannelList:State<EmoteNameUrlEmoteTypeList> = _emoteBoardChannelList
+    private val _emoteBoardChannelList = mutableStateOf(EmoteNameUrlEmoteTypeList())
+    override val emoteBoardChannelList: State<EmoteNameUrlEmoteTypeList> = _emoteBoardChannelList
 
     /**Below are the parameters for the global emotes*/
-    private val _globalBetterTTVEmotes = mutableStateOf<IndivBetterTTVEmoteList>(IndivBetterTTVEmoteList())
-    override val globalBetterTTVEmotes:State<IndivBetterTTVEmoteList> = _globalBetterTTVEmotes
-    private val _channelBetterTTVEmotes = mutableStateOf<IndivBetterTTVEmoteList>(IndivBetterTTVEmoteList())
-    override val channelBetterTTVEmotes:State<IndivBetterTTVEmoteList> = _channelBetterTTVEmotes
+    private val _globalBetterTTVEmotes = mutableStateOf(IndivBetterTTVEmoteList())
+    override val globalBetterTTVEmotes: State<IndivBetterTTVEmoteList> = _globalBetterTTVEmotes
+    private val _channelBetterTTVEmotes = mutableStateOf(IndivBetterTTVEmoteList())
+    override val channelBetterTTVEmotes: State<IndivBetterTTVEmoteList> = _channelBetterTTVEmotes
 
-    private val _sharedBetterTTVEmotes = mutableStateOf<IndivBetterTTVEmoteList>(IndivBetterTTVEmoteList())
-    override val sharedBetterTTVEmotes:State<IndivBetterTTVEmoteList> = _sharedBetterTTVEmotes
+    private val _sharedBetterTTVEmotes = mutableStateOf(IndivBetterTTVEmoteList())
+    override val sharedBetterTTVEmotes: State<IndivBetterTTVEmoteList> = _sharedBetterTTVEmotes
 
     //this is used to hold the list for the chat UI states
     private val _combinedEmoteList = MutableStateFlow(listOf<EmoteNameUrl>())
@@ -183,62 +166,55 @@ class TwitchEmoteUseCaseImpl @Inject constructor(
     private val _sharedBetterTTVEmoteList = MutableStateFlow(listOf<EmoteNameUrl>())
     override val sharedBetterTTVEmoteList: StateFlow<List<EmoteNameUrl>> = _sharedBetterTTVEmoteList
 
-    override val logTag: String
-        get() = javaClass.simpleName
 
     override fun getGlobalEmotes(): Flow<Response<Boolean>> = flow {
-        getGlobalEmotesFlow()
-            .resultOrError()
-            .onError {
-                logger.debug(logTag, "FAIL")
-                logger.debug(logTag, "MESSAGE --> $it")
-                emit(Response.Failure(Exception("Unable to delete message")))
+        emit(Response.Loading)
+        val response = gamesDataStores.streamRepository.getGlobalEmotes()
+        val newInnerInlineContentMap: MutableMap<String, InlineTextContent> = mutableMapOf()
+        if (response.isOk) {
+            val data = response.value.data
+            val parsedEmoteData = data.map {
+                EmoteNameUrl(it.name, it.images.url_2x)
             }
-            .onStart {
-                emit(Response.Loading)
-            }
-            .onCompletion {
-                emit(Response.Success(true))
-            }
-            .distinctUntilChanged()
-            .onEach { emittedUiState ->
-                val newInnerInlineContentMap: MutableMap<String, InlineTextContent> = mutableMapOf()
-                val data = emittedUiState.data
-                val parsedEmoteData = data.map {
-                    EmoteNameUrl(it.name, it.images.url_1x)
-                }
-                globalEmoteParsing(
-                    newInnerInlineContentMap = newInnerInlineContentMap,
-                    parsedEmoteData = parsedEmoteData,
-                    updateEmoteListMap = { item ->
-                        _emoteList.value = emoteList.value.copy(
-                            map = item
-                        )
-                    },
-                    updateEmoteList = { item ->
-                        _emoteBoardGlobalList.value = _emoteBoardGlobalList.value.copy(
-                            list = item
-                        )
-                    },
-                    createMapValueForCompose = { emoteValue, innerInlineContentMapThinger ->
-                        createMapValue(
-                            emoteValue,
-                            innerInlineContentMapThinger
-                        )
-                    },
-                    updateInlineContent = {
-                        //this is copying over inlineContentMap values to newInnerInlineContentMap
-                        inlineContentMap.forEach {
-                            newInnerInlineContentMap[it.key] = it.value
-                        }
+            _combinedEmoteList.tryEmit(parsedEmoteData)
+            //todo: this function signature is terrible, confusing  and needs to be changed
+            globalEmoteParsing(
+                newInnerInlineContentMap = newInnerInlineContentMap,
+                parsedEmoteData = parsedEmoteData,
+                updateEmoteListMap = { item ->
+                    _emoteList.value = emoteList.value.copy(
+                        map = item
+                    )
+                },
+                updateEmoteList = { item ->
+                    _emoteBoardGlobalList.value = _emoteBoardGlobalList.value.copy(
+                        list = item
+                    )
+                },
+                createMapValueForCompose = { emoteValue, innerInlineContentMapThinger ->
+                    createMapValue(
+                        emoteValue,
+                        innerInlineContentMapThinger
+                    )
+                },
+                updateInlineContent = {
+                    //this is copying over inlineContentMap values to newInnerInlineContentMap
+                    inlineContentMap.forEach {
+                        newInnerInlineContentMap[it.key] = it.value
                     }
-                )
-            }
-    }.flowOn(dispatcherProvider.main)
+                }
+            )
 
-    private fun getGlobalEmotesFlow(): Flow<DomainResult<EmoteData>> = flow {
-        emit(gamesDataStores.streamRepository.getGlobalEmotes())
-    }.flowOn(dispatcherProvider.main)
+            emit(Response.Success(true))
+        } else {
+            logger.debug(logTag, "FAIL")
+            logger.debug(logTag, "MESSAGE --> ${response.error}")
+            emit(Response.Failure(Exception("Unable to delete message")))
+        }
+    }.catch { cause ->
+        logger.debug(logTag, "caught error message --> ${cause.message}")
+        handleException(cause)
+    }
 
 
     /**
@@ -287,6 +263,5 @@ class TwitchEmoteUseCaseImpl @Inject constructor(
             emoteValue,
             innerInlineContentMap
         )
-
     }
 }

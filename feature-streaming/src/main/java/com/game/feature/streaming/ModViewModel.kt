@@ -19,7 +19,7 @@ import com.game.feature.streaming.entities.ModViewViewModelUIState
 import com.game.feature.streaming.entities.RequestIds
 import com.game.feature.streaming.entities.followerModeList
 import com.game.feature.streaming.entities.slowModeList
-import com.paulrybitskyi.gamedge.core.WebSocketResponse
+import com.android.model.WebSocketResponse
 import com.paulrybitskyi.gamedge.common.domain.live.entities.StreamPlaybackAccessToken
 import com.paulrybitskyi.gamedge.common.domain.websockets.AutoModQueueMessage
 import com.paulrybitskyi.gamedge.common.domain.websockets.TwitchEventSubscriptionWebSocket

@@ -3,15 +3,10 @@ package com.paulrybitskyi.gamedge.common.domain.repository
 import androidx.compose.runtime.State
 import com.android.model.BetterTTVChannelEmotes
 import com.android.model.IndivBetterTTVEmote
+import com.android.model.Response
 import com.android.model.websockets.ChatBadgePair
-import com.paulrybitskyi.gamedge.common.domain.chat.EmoteListMap
-import com.paulrybitskyi.gamedge.common.domain.chat.EmoteNameUrl
-import com.paulrybitskyi.gamedge.common.domain.chat.EmoteNameUrlEmoteTypeList
-import com.paulrybitskyi.gamedge.common.domain.chat.EmoteNameUrlList
 import com.paulrybitskyi.gamedge.common.domain.chat.IndivBetterTTVEmoteList
-import com.paulrybitskyi.gamedge.core.Response
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.StateFlow
 
 
 /**

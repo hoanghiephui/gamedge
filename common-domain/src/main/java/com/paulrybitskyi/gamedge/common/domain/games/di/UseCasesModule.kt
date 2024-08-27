@@ -34,8 +34,6 @@ import com.paulrybitskyi.gamedge.common.domain.games.usecases.RefreshRecentlyRel
 import com.paulrybitskyi.gamedge.common.domain.games.usecases.RefreshRecentlyReleasedGamesUseCaseImpl
 import com.paulrybitskyi.gamedge.common.domain.games.usecases.StreamUseCase
 import com.paulrybitskyi.gamedge.common.domain.games.usecases.StreamUseCaseImpl
-import com.paulrybitskyi.gamedge.common.domain.games.usecases.TwitchEmoteUseCase
-import com.paulrybitskyi.gamedge.common.domain.games.usecases.TwitchEmoteUseCaseImpl
 import com.paulrybitskyi.gamedge.common.domain.live.usecases.LiveUseCase
 import com.paulrybitskyi.gamedge.common.domain.live.usecases.LiveUseCaseImpl
 import dagger.Binds
@@ -96,9 +94,4 @@ internal interface UseCasesModule {
     fun bindLiveUseCase(
         binding: LiveUseCaseImpl
     ): LiveUseCase
-
-    @Binds
-    fun bindTwitchEmoteUseCase(
-        binding: TwitchEmoteUseCaseImpl
-    ): TwitchEmoteUseCase
 }

@@ -17,7 +17,7 @@ fun NavGraphBuilder.twitchStreamingScreen(
         route = STREAMING_ROUTE,
     ) {
         StreamingScreen(
-            onShowSnackbar,
+            onShowSnackbar = onShowSnackbar,
             onBackScreen = onBackScreen
         )
     }

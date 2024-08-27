@@ -19,6 +19,7 @@ plugins {
     id(libs.plugins.gamedgeAndroid.get().pluginId)
     id(libs.plugins.gamedgeProtobuf.get().pluginId)
     id(libs.plugins.gamedgeDaggerHilt.get().pluginId)
+    id(libs.plugins.gamedgeJetpackCompose.get().pluginId)
 }
 
 android {

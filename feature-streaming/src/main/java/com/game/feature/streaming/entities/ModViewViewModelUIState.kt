@@ -1,8 +1,8 @@
 package com.game.feature.streaming.entities
 
 import com.android.model.websockets.ChatSettingsData
-import com.paulrybitskyi.gamedge.core.Response
-import com.paulrybitskyi.gamedge.core.WebSocketResponse
+import com.android.model.Response
+import com.android.model.WebSocketResponse
 
 data class ModViewViewModelUIState(
     val showSubscriptionEventError: Response<Boolean> = Response.Loading,

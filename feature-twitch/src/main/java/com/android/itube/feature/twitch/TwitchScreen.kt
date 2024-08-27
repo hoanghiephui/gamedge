@@ -81,6 +81,7 @@ internal fun TwitchRoute(
         if (authorizationTokenTwitch?.isNotBlank() == true) {
             viewModel.initialLoadIfNeeded()
             viewModel.getMyProfile()//TODO phai xem laij logic
+            viewModel.getGlobalEmote()
         }
     }
     LaunchedEffect(streamingUrlState) {

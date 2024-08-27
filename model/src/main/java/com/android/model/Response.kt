@@ -1,4 +1,4 @@
-package com.paulrybitskyi.gamedge.core
+package com.android.model
 
 import javax.annotation.concurrent.Immutable
 

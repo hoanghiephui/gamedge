@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.unit.dp
@@ -12,8 +11,9 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.paulrybitskyi.gamedge.common.domain.chat.EmoteNameUrl
 import com.paulrybitskyi.gamedge.common.domain.chat.EmoteNameUrlEmoteType
+import javax.inject.Inject
 
-class EmoteParsing {
+class EmoteParsing @Inject constructor() {
 
      fun createMapValueForComposeChat(
          emoteValue: EmoteNameUrl,

@@ -9,8 +9,12 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
@@ -23,11 +27,10 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.imeNestedScroll
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -67,6 +70,8 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
@@ -87,9 +92,7 @@ import com.game.feature.streaming.entities.AdvancedChatSettings
 import com.game.feature.streaming.entities.FilteredChatListImmutableCollection
 import com.game.feature.streaming.entities.ForwardSlashCommandsImmutableCollection
 import com.paulrybitskyi.gamedge.common.domain.chat.EmoteListMap
-import com.paulrybitskyi.gamedge.common.domain.chat.EmoteNameUrlEmoteTypeList
 import com.paulrybitskyi.gamedge.common.domain.chat.EmoteNameUrlList
-import com.paulrybitskyi.gamedge.common.domain.chat.IndivBetterTTVEmoteList
 import com.paulrybitskyi.gamedge.common.domain.live.entities.StreamPlaybackAccessToken
 import com.paulrybitskyi.gamedge.common.ui.KeepScreenOn
 import com.paulrybitskyi.gamedge.common.ui.theme.GamedgeTheme
@@ -108,6 +111,7 @@ import com.paulrybitskyi.gamedge.core.R as coreR
 @OptIn(UnstableApi::class)
 @Composable
 fun StreamingScreen(
+    modifier: Modifier = Modifier,
     onShowSnackbar: suspend (String, String?) -> Boolean,
     onBackScreen: () -> Unit,
     viewModel: StreamingViewModel = hiltViewModel(),
@@ -136,9 +140,11 @@ fun StreamingScreen(
     val scope = rememberCoroutineScope()
     var showBottomSheet by remember { mutableStateOf(false) }
     val streamPlaybackData = viewModel.streamPlaybackAccessToken
-
+    val density = LocalDensity.current
     val advancedChatSettingsState by viewModel.advancedChatSettingsState
     val openWarningDialog by viewModel.openWarningDialog
+    val keyboardController = LocalSoftwareKeyboardController.current
+    var isVisibleTitle by remember { mutableStateOf(true) }  // State to track visibility of controls
 
     LaunchedEffect(configuration) {
         // Save any changes to the orientation value on the configuration object
@@ -291,6 +297,7 @@ fun StreamingScreen(
     KeepScreenOn()
     Box(
         modifier = Modifier
+            .background(MaterialTheme.colorScheme.background)
             .fillMaxSize()
     ) {
         when (orientation) {
@@ -363,7 +370,13 @@ fun StreamingScreen(
                                 }
                             },
                             startTime = startTime,
-                            viewerCount = viewModel.streamPlaybackAccessToken.viewerCount
+                            viewerCount = viewModel.streamPlaybackAccessToken.viewerCount,
+                            onHideTitle = {
+                                isVisibleTitle = false
+                            },
+                            onShowTitle = {
+                                isVisibleTitle = true
+                            }
                         )
                     }
 
@@ -377,13 +390,13 @@ fun StreamingScreen(
                         .statusBarsPadding()
                 ) {
                     Column(
-                        modifier = Modifier
+                        modifier = modifier
                             .fillMaxSize(),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Bottom
                     ) {
                         Box(
-                            modifier = Modifier
+                            modifier = modifier
                                 .fillMaxWidth()
                                 .aspectRatio(16 / 9f, true)
                         ) {
@@ -438,18 +451,38 @@ fun StreamingScreen(
                                     }
                                 },
                                 startTime = startTime,
-                                viewerCount = viewModel.streamPlaybackAccessToken.viewerCount
+                                viewerCount = viewModel.streamPlaybackAccessToken.viewerCount,
+                                onHideTitle = {
+                                    isVisibleTitle = false
+                                },
+                                onShowTitle = {
+                                    isVisibleTitle = true
+                                }
+                            )
+                        }
+                        AnimatedVisibility(
+                            modifier = modifier,
+                            visible = isVisibleTitle,
+                            enter = slideInVertically {
+                                // Slide in from 40 dp from the top.
+                                with(density) { -40.dp.roundToPx() }
+                            } + expandVertically(
+                                // Expand from the top.
+                                expandFrom = Alignment.Top
+                            ) + fadeIn(
+                                // Fade in with the initial alpha of 0.3f.
+                                initialAlpha = 0.3f
+                            ),
+                            exit = slideOutVertically() + shrinkVertically() + fadeOut()
+                        ) {
+                            TitleAndProfile(
+                                modifier = modifier,
+                                viewModel.streamPlaybackAccessToken
                             )
                         }
 
-                        TitleAndProfile(
-                            modifier = Modifier,
-                            viewModel.streamPlaybackAccessToken
-                        )
-
                         ChatView(
-                            modifier = Modifier
-                                .weight(1f),
+                            modifier = modifier,
                             twitchUserChat = twitchUserChat,
                             showBottomModal = {
                                 //showClickedUserBottomModal()
@@ -496,14 +529,14 @@ fun StreamingScreen(
                                 clickedCommandAutoCompleteText(clickedValue)
 
                             },
-                            inlineContentMap = EmoteListMap(emptyMap()),//streamViewModel.inlineTextContentTest.value,
+                            inlineContentMap = viewModel.inlineTextContentTest.value,
                             hideSoftKeyboard = {
-
+                                keyboardController?.hide()
                             },
-                            emoteBoardGlobalList = EmoteNameUrlList(),//streamViewModel.globalEmoteUrlList.value,
+                            emoteBoardGlobalList = viewModel.globalEmoteUrlList.value,
                             //todo: this is what I need to change
                             updateTextWithEmote = { newValue -> /*updateTextWithEmote(newValue)*/ },
-                            emoteBoardChannelList = EmoteNameUrlEmoteTypeList(),//streamViewModel.channelEmoteUrlList.value,
+                            emoteBoardChannelList = viewModel.channelEmoteUrlList.value,
                             emoteBoardMostFrequentList = EmoteNameUrlList(),//streamViewModel.mostFrequentEmoteListTesting.value,
                             deleteEmote = {
                                 //deleteEmote() // this needs to be changed
@@ -513,9 +546,9 @@ fun StreamingScreen(
                                 //clearModViewNotifications()
                             },
                             updateTempararyMostFrequentEmoteList = { value -> /*updateMostFrequentEmoteList(value)*/ },
-                            globalBetterTTVEmotes = IndivBetterTTVEmoteList(),//streamViewModel.globalBetterTTVEmotes.value,
-                            channelBetterTTVResponse = IndivBetterTTVEmoteList(),//streamViewModel.channelBetterTTVEmote.value,
-                            sharedBetterTTVResponse = IndivBetterTTVEmoteList(),//streamViewModel.sharedChannelBetterTTVEmote.value,
+                            globalBetterTTVEmotes = viewModel.globalBetterTTVEmotes.value,
+                            channelBetterTTVResponse = viewModel.channelBetterTTVEmote.value,
+                            sharedBetterTTVResponse = viewModel.sharedChannelBetterTTVEmote.value,
                             userIsSub = viewModel.state.value.loggedInUserData?.sub ?: false,
                             forwardSlashes = ForwardSlashCommandsImmutableCollection(emptyList()),//streamViewModel.forwardSlashCommandImmutable.value,
                             filteredChatListImmutable = FilteredChatListImmutableCollection(emptyList()),//streamViewModel.filteredChatListImmutable.value,
@@ -527,7 +560,7 @@ fun StreamingScreen(
                             usernameSize = chatSettingsViewModel.usernameSize.value,
                             messageSize = chatSettingsViewModel.messageSize.value,
                             lineHeight = chatSettingsViewModel.lineHeight.value,
-                            useCustomUsernameColors = true,//chatSettingsViewModel.customUsernameColor.value,
+                            useCustomUsernameColors = chatSettingsViewModel.customUsernameColor.value,
                             globalTwitchEmoteContentMap = EmoteListMap(emptyMap()),//chatSettingsViewModel.globalEmoteMap.value,
                             channelTwitchEmoteContentMap = EmoteListMap(emptyMap()),//chatSettingsViewModel.inlineContentMapChannelEmoteList.value,
                             globalBetterTTVEmoteContentMap = EmoteListMap(emptyMap()),//chatSettingsViewModel.betterTTVGlobalInlineContentMapChannelEmoteList.value,
@@ -567,6 +600,7 @@ private fun TitleAndProfile(
     Row(
         modifier = modifier
             .fillMaxWidth()
+            .wrapContentHeight()
             .padding(16.dp)
     ) {
         AsyncImage(
@@ -607,7 +641,9 @@ private fun MenuControl(
     onClickFull: () -> Unit,
     onClickPlayer: () -> Unit,
     startTime: Long,
-    viewerCount: Long
+    viewerCount: Long,
+    onHideTitle: () -> Unit,
+    onShowTitle: () -> Unit,
 ) {
     var isVisible by remember { mutableStateOf(true) }  // State to track visibility of controls
     // State for rotation animation
@@ -620,6 +656,7 @@ private fun MenuControl(
     LaunchedEffect(Unit) {
         delay(5000)
         isVisible = false
+        onHideTitle()
     }
     var startTimeString by remember {
         mutableStateOf(OnlineSince.getOnlineSince(startTime))
@@ -646,13 +683,17 @@ private fun MenuControl(
             .statusBarsPadding()
             .fillMaxSize()
             .pointerInput(Unit) {
-                detectTapGestures(onTap = {
-                    isVisible = true
-                    coroutineScope.launch {
-                        delay(5000)
-                        isVisible = false
+                detectTapGestures(
+                    onTap = {
+                        isVisible = true
+                        onShowTitle()
+                        coroutineScope.launch {
+                            delay(5000)
+                            isVisible = false
+                            onHideTitle()
+                        }
                     }
-                })
+                )
             }
     ) {
         AnimatedVisibility(

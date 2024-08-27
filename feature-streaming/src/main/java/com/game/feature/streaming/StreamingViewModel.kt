@@ -2,9 +2,6 @@ package com.game.feature.streaming
 
 import android.content.Context
 import android.util.Log
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
@@ -12,16 +9,11 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.Placeholder
-import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import coil.compose.AsyncImage
+import com.android.model.IndivBetterTTVEmote
 import com.android.model.websockets.ChatSettingsData
 import com.android.model.websockets.MessageType
 import com.game.feature.streaming.entities.AdvancedChatSettings
@@ -32,13 +24,12 @@ import com.game.feature.streaming.entities.ClickedUserNameChats
 import com.game.feature.streaming.entities.ClickedUsernameChatsWithDateSentImmutable
 import com.game.feature.streaming.entities.StreamUIState
 import com.game.feature.streaming.entities.TextParsing
-import com.paulrybitskyi.gamedge.common.domain.chat.EmoteListMap
 import com.paulrybitskyi.gamedge.common.domain.chat.EmoteNameUrl
 import com.paulrybitskyi.gamedge.common.domain.chat.EmoteNameUrlList
 import com.paulrybitskyi.gamedge.common.domain.common.extensions.resultOrError
 import com.paulrybitskyi.gamedge.common.domain.games.usecases.StreamUseCase
 import com.paulrybitskyi.gamedge.common.domain.live.entities.StreamPlaybackAccessToken
-import com.paulrybitskyi.gamedge.common.domain.repository.util.EmoteParsing
+import com.paulrybitskyi.gamedge.common.domain.live.usecases.TwitchEmoteUseCase
 import com.paulrybitskyi.gamedge.common.domain.websockets.MessageToken
 import com.paulrybitskyi.gamedge.common.domain.websockets.PrivateMessageType
 import com.paulrybitskyi.gamedge.common.domain.websockets.Scanner
@@ -55,22 +46,17 @@ import com.paulrybitskyi.gamedge.core.Dispatcher
 import com.paulrybitskyi.gamedge.core.ErrorMapper
 import com.paulrybitskyi.gamedge.core.Logger
 import com.paulrybitskyi.gamedge.core.NiaDispatchers
-import com.paulrybitskyi.gamedge.core.Response
+import com.android.model.Response
 import com.paulrybitskyi.gamedge.core.sharers.TextSharer
-import com.paulrybitskyi.gamedge.core.utils.mapWithRetry
 import com.paulrybitskyi.gamedge.core.utils.onError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineName
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
@@ -90,7 +76,8 @@ class StreamingViewModel @Inject constructor(
     private val errorMapper: ErrorMapper,
     private val logger: Logger,
     @Dispatcher(NiaDispatchers.IO)
-    private val ioDispatcher: CoroutineDispatcher
+    private val ioDispatcher: CoroutineDispatcher,
+    private val twitchEmoteUseCase: TwitchEmoteUseCase
 ) : BaseViewModel() {
     val streamPlaybackAccessToken: StreamPlaybackAccessToken =
         checkNotNull(savedStateHandle[STREAMING_KEY])
@@ -104,6 +91,19 @@ class StreamingViewModel @Inject constructor(
 
     private var _uiState: MutableState<StreamUIState> = mutableStateOf(StreamUIState())
     val state: State<StreamUIState> = _uiState
+
+    /********THIS IS ALL THE EMOTE RELATED CALLS**************************************/
+    val inlineTextContentTest = twitchEmoteUseCase.emoteList
+    val globalEmoteUrlList = twitchEmoteUseCase.emoteBoardGlobalList
+    val channelEmoteUrlList = twitchEmoteUseCase.emoteBoardChannelList
+    val badgeListMap = twitchEmoteUseCase.globalChatBadges
+
+    private val _globalBetterTTVEmotes: MutableState<Response<List<IndivBetterTTVEmote>>> =
+        mutableStateOf(Response.Loading)
+
+    val globalBetterTTVEmotes = twitchEmoteUseCase.globalBetterTTVEmotes
+    val channelBetterTTVEmote = twitchEmoteUseCase.channelBetterTTVEmotes
+    val sharedChannelBetterTTVEmote = twitchEmoteUseCase.sharedBetterTTVEmotes
 
     /**
      * The name of the channel that this chat is connecting to

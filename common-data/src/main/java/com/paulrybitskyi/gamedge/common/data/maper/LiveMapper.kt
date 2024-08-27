@@ -41,8 +41,8 @@ internal class LiveMapper @Inject constructor(
             viewerCount = data.viewerCount,
             thumbnailVideo = data.largePreview,
             clientId = twitchConstantsProvider.clientId,
-            broadcasterId = data.id,
-            userId = userDataModel?.id ?: "",
+            broadcasterId = data.userId,//data của người live
+            userId = userDataModel?.id ?: "",//data của người login app
             appLogin = userDataModel?.login ?: ""
         )
     }

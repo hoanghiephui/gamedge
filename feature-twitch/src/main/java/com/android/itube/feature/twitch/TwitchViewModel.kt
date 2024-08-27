@@ -221,6 +221,28 @@ class TwitchViewModel @Inject constructor(
         }
     }
 
+    fun getChannelEmotes(
+        broadcasterId: String
+    ) {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                twitchEmoteUseCase.getChannelEmotes(
+                    broadcasterId
+                ).mapWithRetry(
+                    action = {
+                        // result is the result from getChannelEmotes()
+                            result ->
+                        result
+                    },
+                    predicate = { result, attempt ->
+                        val repeatResult = result is Response.Failure && attempt < 3
+                        repeatResult
+                    }
+                ).collect {}
+            }
+        }
+    }
+
     fun onBottomReached() {
         loadMoreGames()
     }

@@ -294,6 +294,12 @@ fun StreamingScreen(
         }
     }
 
+    val updateTextWithEmote: (String) -> Unit = remember(viewModel) {
+        {
+            viewModel.addEmoteToText(it)
+        }
+    }
+
     KeepScreenOn()
     Box(
         modifier = Modifier
@@ -535,7 +541,7 @@ fun StreamingScreen(
                             },
                             emoteBoardGlobalList = viewModel.globalEmoteUrlList.value,
                             //todo: this is what I need to change
-                            updateTextWithEmote = { newValue -> /*updateTextWithEmote(newValue)*/ },
+                            updateTextWithEmote = { newValue -> updateTextWithEmote(newValue) },
                             emoteBoardChannelList = viewModel.channelEmoteUrlList.value,
                             emoteBoardMostFrequentList = EmoteNameUrlList(),//streamViewModel.mostFrequentEmoteListTesting.value,
                             deleteEmote = {

@@ -3,8 +3,10 @@ package com.game.feature.streaming.component.chat
 import android.os.Build
 import android.util.Log
 import androidx.compose.animation.core.Animatable
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.Orientation
@@ -16,7 +18,7 @@ import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.absoluteOffset
@@ -28,6 +30,8 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
@@ -58,7 +62,13 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.LiveTv
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.outlined.AlternateEmail
+import androidx.compose.material.icons.outlined.Duo
+import androidx.compose.material.icons.outlined.InsertPhoto
+import androidx.compose.material.icons.outlined.Mood
+import androidx.compose.material.icons.outlined.Place
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -118,6 +128,7 @@ import com.game.feature.streaming.entities.ForwardSlashCommandsImmutableCollecti
 import com.paulrybitskyi.gamedge.common.api.BuildConfig
 import com.paulrybitskyi.gamedge.common.domain.chat.EmoteListMap
 import com.paulrybitskyi.gamedge.common.domain.chat.EmoteNameUrl
+import com.paulrybitskyi.gamedge.common.domain.chat.EmoteNameUrlEmoteType
 import com.paulrybitskyi.gamedge.common.domain.chat.EmoteNameUrlEmoteTypeList
 import com.paulrybitskyi.gamedge.common.domain.chat.EmoteNameUrlList
 import com.paulrybitskyi.gamedge.common.domain.chat.EmoteTypes
@@ -128,6 +139,7 @@ import com.paulrybitskyi.gamedge.common.domain.websockets.TwitchUserData
 import com.paulrybitskyi.gamedge.common.ui.rememberDraggableActions
 import com.paulrybitskyi.gamedge.common.ui.v2.component.NiaTab
 import com.paulrybitskyi.gamedge.common.ui.v2.component.NiaTabRow
+import com.paulrybitskyi.gamedge.common.ui.widgets.InputSelectorButton
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
@@ -250,9 +262,7 @@ fun ChatView(
         },
         enterChat = { enterChatModifier ->
             EnterChatColumn(
-                modifier = enterChatModifier
-                    .navigationBarsPadding()
-                    .imePadding(),
+                modifier = enterChatModifier,
                 filteredRow = {
                     FilteredMentionLazyRow(
                         filteredChatListImmutable = filteredChatListImmutable,
@@ -297,7 +307,7 @@ fun ChatView(
                         changeActualTextFieldValue = { text, textRange ->
                             changeActualTextFieldValue(text, textRange)
                         },
-                        )
+                    )
                 },
                 showIconBasedOnTextLength = {
                     ShowIconBasedOnTextLength(
@@ -371,7 +381,6 @@ fun ChatUIBox(
     val chatUIScope = remember { ImprovedChatUI() }
 
 
-
     //todo: add a conditional to show emoteBoard to help with recomps
 
     if (lowPowerMode) {
@@ -383,10 +392,18 @@ fun ChatUIBox(
         }
     } else {
         with(chatUIScope) {
+            val modifierChatUI = if (emoteKeyBoardHeight == 350.dp) {
+                modifier.fillMaxWidth()
+            } else {
+                modifier
+                    .fillMaxWidth()
+                    .navigationBarsPadding()
+                    .imePadding()
+            }
             Box(modifier = modifier.fillMaxSize()) {
                 Column(modifier.fillMaxSize()) {
                     chatUI(modifier.weight(1f))//TODO
-                    enterChat(modifier.fillMaxWidth())
+                    enterChat(modifierChatUI)
 
                     if (emoteKeyBoardHeight == 350.dp) {
                         EmoteBoard(
@@ -479,10 +496,10 @@ fun EmoteBoard(
     })
 
     Column(
-        modifier = modifier
+        modifier = Modifier
+            .wrapContentSize()
             .background(Color.Transparent)
             .navigationBarsPadding()
-            .padding()
     ) {
         NiaTabRow(selectedTabIndex = selectedTabIndex) {
             titles.forEachIndexed { index, title ->
@@ -504,8 +521,10 @@ fun EmoteBoard(
                 )
             }
         }
-        HorizontalPager(state = pagerState,
-            modifier = Modifier.fillMaxSize()) { page ->
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier.wrapContentSize()
+        ) { page ->
             // Our page content
             when (page) {
                 0 -> {
@@ -531,7 +550,16 @@ fun EmoteBoard(
                                 userIsSub = userIsSub
 
                             )
-                            EmoteBottomUI(
+                            UserInputSelector(
+                                modifier = Modifier.align(Alignment.BottomCenter),
+                                onSelectorChange = {  },
+                                sendMessageEnabled = true,
+                                onMessageSent = {
+
+                                },
+                                currentInputSelector = InputSelector.NONE
+                            )
+                            /*EmoteBottomUI(
                                 modifier = Modifier.align(Alignment.BottomCenter),
                                 closeEmoteBoard = { closeEmoteBoard() },
                                 deleteEmote = { deleteEmote() },
@@ -551,7 +579,7 @@ fun EmoteBoard(
                                     }
                                 }
 
-                            )
+                            )*/
                         }
                     }
 
@@ -568,15 +596,13 @@ fun EmoteBoard(
                                 channelBetterTTVResponse = channelBetterTTVResponse,
                                 sharedBetterTTVResponse = sharedBetterTTVResponse,
                                 betterTTVLazyGridState = betterTTVLazyGridState,
-                                modifier = Modifier.padding(bottom = 50.dp),
-
-                                )
+                                modifier = Modifier.padding(bottom = 50.dp)
+                            )
                             BetterTTVEmoteBottomUI(
                                 closeEmoteBoard = { closeEmoteBoard() },
                                 deleteEmote = { deleteEmote() },
                                 scrollToGlobalEmotes = {
                                     scope.launch {
-//
                                         betterTTVLazyGridState.scrollToItem(channelBetterTTVResponse.list.size + 2 + emoteBoardMostFrequentList.list.size + sharedBetterTTVResponse.list.size)
                                     }
                                 },
@@ -599,11 +625,7 @@ fun EmoteBoard(
                             )
 
                         }
-
-
                     }
-
-
                 }
             }
 
@@ -612,6 +634,7 @@ fun EmoteBoard(
     }
 
 }
+
 /**
  * - restartable
  * - skippable
@@ -627,8 +650,6 @@ fun BetterTTVEmoteBoard(
 
 ) {
     Log.d("BetterTTVEmoteBoardRELOAD", "RELOAD")
-
-
     LazyVerticalGrid(
         state = betterTTVLazyGridState,
         columns = GridCells.Adaptive(minSize = 60.dp),
@@ -685,13 +706,10 @@ fun BetterTTVEmoteBoard(
                 Spacer(modifier = Modifier.padding(5.dp))
                 Text(
                     "Channel Emotes",
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    fontSize = MaterialTheme.typography.headlineSmall.fontSize
                 ) // or any composable for your single row
                 Spacer(modifier = Modifier.padding(2.dp))
-                Divider(
+                HorizontalDivider(
                     thickness = 2.dp,
-                    color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.8f),
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.padding(5.dp))
@@ -721,13 +739,10 @@ fun BetterTTVEmoteBoard(
                 Spacer(modifier = Modifier.padding(5.dp))
                 Text(
                     "Shared Emotes",
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    fontSize = MaterialTheme.typography.headlineSmall.fontSize
                 ) // or any composable for your single row
                 Spacer(modifier = Modifier.padding(2.dp))
-                Divider(
+                HorizontalDivider(
                     thickness = 2.dp,
-                    color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.8f),
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.padding(5.dp))
@@ -757,14 +772,11 @@ fun BetterTTVEmoteBoard(
             ) {
                 Spacer(modifier = Modifier.padding(5.dp))
                 Text(
-                    "Global Emotes",
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    fontSize = MaterialTheme.typography.headlineSmall.fontSize
+                    "Global Emotes"
                 ) // or any composable for your single row
                 Spacer(modifier = Modifier.padding(2.dp))
-                Divider(
+                HorizontalDivider(
                     thickness = 2.dp,
-                    color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.8f),
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.padding(5.dp))
@@ -783,8 +795,6 @@ fun BetterTTVEmoteBoard(
                 }
             )
         }
-
-
     }
 }
 
@@ -823,6 +833,81 @@ fun GifLoadingAnimation(
                 updateTextWithEmote(emoteName)
             }
     )
+}
+
+@Composable
+private fun UserInputSelector(
+    onSelectorChange: (InputSelector) -> Unit,
+    sendMessageEnabled: Boolean,
+    onMessageSent: () -> Unit,
+    currentInputSelector: InputSelector,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .height(72.dp)
+            .wrapContentHeight()
+            .padding(start = 16.dp, end = 16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        InputSelectorButton(
+            onClick = { onSelectorChange(InputSelector.EMOJI) },
+            icon = Icons.Outlined.Mood,
+            selected = currentInputSelector == InputSelector.EMOJI,
+            description = ""
+        )
+        InputSelectorButton(
+            onClick = { onSelectorChange(InputSelector.DM) },
+            icon = Icons.Outlined.AlternateEmail,
+            selected = currentInputSelector == InputSelector.DM,
+            description = ""
+        )
+        InputSelectorButton(
+            onClick = { onSelectorChange(InputSelector.PICTURE) },
+            icon = Icons.Outlined.InsertPhoto,
+            selected = currentInputSelector == InputSelector.PICTURE,
+            description = ""
+        )
+        InputSelectorButton(
+            onClick = { onSelectorChange(InputSelector.MAP) },
+            icon = Icons.Outlined.Place,
+            selected = currentInputSelector == InputSelector.MAP,
+            description = ""
+        )
+
+        val border = if (!sendMessageEnabled) {
+            BorderStroke(
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
+            )
+        } else {
+            null
+        }
+        Spacer(modifier = Modifier.weight(1f))
+
+        val disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
+
+        val buttonColors = ButtonDefaults.buttonColors(
+            disabledContainerColor = Color.Transparent,
+            disabledContentColor = disabledContentColor
+        )
+
+        // Send button
+        Button(
+            modifier = Modifier.height(36.dp),
+            enabled = sendMessageEnabled,
+            onClick = onMessageSent,
+            colors = buttonColors,
+            border = border,
+            contentPadding = PaddingValues(0.dp)
+        ) {
+            Icon(
+                modifier = Modifier.size(25.dp),
+                imageVector = Icons.AutoMirrored.Filled.Backspace,
+                contentDescription = "click to delete emote"
+            )
+        }
+    }
 }
 
 /**
@@ -945,8 +1030,7 @@ fun BetterTTVEmoteBottomUI(
                     .clickable {
                         closeEmoteBoard()
                     },
-                tint = MaterialTheme.colorScheme.onPrimary,
-                painter = painterResource(id = coreR.drawable.keyboard_arrow_down_24),
+                imageVector = Icons.Default.KeyboardArrowDown,
                 contentDescription = "click to close keyboard emote"
             )
             Spacer(modifier = Modifier.width(10.dp))
@@ -1028,7 +1112,6 @@ fun BetterTTVEmoteBottomUI(
  * - restartable
  * - skippable
  * */
-@OptIn(ExperimentalLayoutApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun LazyGridEmotes(
     emoteBoardGlobalList: EmoteNameUrlList,
@@ -1036,7 +1119,6 @@ fun LazyGridEmotes(
     emoteBoardMostFrequentList: EmoteNameUrlList,
     updateTempararyMostFrequentEmoteList: (EmoteNameUrl) -> Unit,
     updateTextWithEmote: (String) -> Unit,
-
     lazyGridState: LazyGridState,
     userIsSub: Boolean,
     modifier: Modifier,
@@ -1052,95 +1134,150 @@ fun LazyGridEmotes(
         horizontalArrangement = Arrangement.spacedBy(5.dp)
     ) {
         /*****************************START OF THE Most Recent EMOTES*******************************/
-        header {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 5.dp)
-            ) {
-                Spacer(modifier = Modifier.padding(5.dp))
-                Text(
-                    "Frequently Used Emotes",
-                ) // or any composable for your single row
-                Spacer(modifier = Modifier.padding(2.dp))
-                HorizontalDivider(
-                    thickness = 2.dp,
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Spacer(modifier = Modifier.padding(5.dp))
+        if (emoteBoardMostFrequentList.list.isNotEmpty()) {
+            header {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 5.dp)
+                ) {
+                    Spacer(modifier = Modifier.padding(5.dp))
+                    Text(
+                        "Frequently Used Emotes",
+                    ) // or any composable for your single row
+                    Spacer(modifier = Modifier.padding(2.dp))
+                    HorizontalDivider(
+                        thickness = 2.dp,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(modifier = Modifier.padding(5.dp))
+                }
+
             }
 
-        }
-
-        items(
-            emoteBoardMostFrequentList.list,
-        ) {
-            AsyncImage(
-                model = it.url,
-                contentDescription = it.name,
-                modifier = Modifier
-                    .size(50.dp)
-                    .padding(5.dp)
-                    .clickable {
-                        updateTextWithEmote(it.name)
-                    }
-            )
-        }
-
-
-
-        /*****************************START OF THE Channel EMOTES*******************************/
-        header {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 5.dp)
+            items(
+                items = emoteBoardMostFrequentList.list,
+                key = EmoteNameUrl::id
             ) {
-                Spacer(modifier = Modifier.padding(5.dp))
-                Text(
-                    "Channel Emotes",
-                ) // or any composable for your single row
-                Spacer(modifier = Modifier.padding(2.dp))
-                HorizontalDivider(
-                    thickness = 2.dp,
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Spacer(modifier = Modifier.padding(5.dp))
-            }
-
-        }
-//
-        items(emoteBoardChannelList.list) {
-            if (it.emoteType == EmoteTypes.SUBS && !userIsSub) {
-                Box(
+                AsyncImage(
+                    model = it.url,
+                    contentDescription = it.name,
                     modifier = Modifier
                         .size(50.dp)
+                        .padding(5.dp)
+                        .clickable {
+                            updateTextWithEmote(it.name)
+                        }
+                )
+            }
+        }
+
+        /*****************************START OF THE Channel EMOTES*******************************/
+        if (emoteBoardChannelList.list.isNotEmpty()) {
+            header {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 5.dp)
                 ) {
+                    Spacer(modifier = Modifier.padding(5.dp))
+                    Text(
+                        "Channel Emotes",
+                    ) // or any composable for your single row
+                    Spacer(modifier = Modifier.padding(2.dp))
+                    HorizontalDivider(
+                        thickness = 2.dp,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(modifier = Modifier.padding(5.dp))
+                }
+
+            }
+
+            items(
+                items = emoteBoardChannelList.list,
+                key = EmoteNameUrlEmoteType::id,
+            ) {
+                if (it.emoteType == EmoteTypes.SUBS && !userIsSub) {
+                    Box(
+                        modifier = Modifier
+                            .size(50.dp)
+                    ) {
+                        AsyncImage(
+                            model = it.url,
+                            contentDescription = it.name,
+                            modifier = Modifier
+                                .size(50.dp)
+                                .padding(5.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                                .border(1.dp, MaterialTheme.colorScheme.secondary, RoundedCornerShape(8.dp))
+                        )
+                        Spacer(
+                            modifier = Modifier
+                                .size(50.dp)
+                                .background(
+                                    Color.Black.copy(0.4f),
+                                    RoundedCornerShape(8.dp)
+                                )
+                        )
+                        Icon(
+                            imageVector = Icons.Default.Lock,
+                            contentDescription = "Emote locked. Subscribe to access",
+                            tint = Color.White,
+                            modifier = Modifier
+                                .padding(
+                                    end = 14.dp,
+                                    bottom = 5.dp
+                                )
+                                .size(18.dp)
+                                .align(Alignment.BottomEnd),
+                        )
+
+                    }
+
+                } else {
                     AsyncImage(
                         model = it.url,
                         contentDescription = it.name,
                         modifier = Modifier
                             .size(50.dp)
                             .padding(5.dp)
+                            .clickable {
+                                updateTextWithEmote(it.name)
+                                updateTempararyMostFrequentEmoteList(
+                                    EmoteNameUrl(it.id, it.name, it.url)
+                                )
+                            }
                     )
-                    Spacer(
-                        modifier = Modifier
-                            .size(50.dp)
-                            .background(Color.Black.copy(0.4f))
-                    )
-                    Icon(
-                        imageVector = Icons.Default.Lock,
-                        contentDescription = "Emote locked. Subscribe to access",
-                        modifier = Modifier
-                            .width(18.dp)
-                            .height(18.dp)
-                            .align(Alignment.BottomEnd)
-                            .padding(3.dp),
-                    )
+                }
+            }
+        }
 
+        /*****************************START OF THE GLOBAL EMOTES*******************************/
+        if (emoteBoardGlobalList.list.isNotEmpty()) {
+            header {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 5.dp)
+                ) {
+                    Spacer(modifier = Modifier.padding(5.dp))
+                    Text(
+                        "Global Emotes",
+                    ) // or any composable for your single row
+                    Spacer(modifier = Modifier.padding(2.dp))
+                    HorizontalDivider(
+                        thickness = 2.dp,
+                    )
+                    Spacer(modifier = Modifier.padding(5.dp))
                 }
 
-            } else {
+            }
+
+            items(
+                items = emoteBoardGlobalList.list,
+                key = EmoteNameUrl::id
+            ) {
                 AsyncImage(
                     model = it.url,
                     contentDescription = it.name,
@@ -1150,46 +1287,11 @@ fun LazyGridEmotes(
                         .clickable {
                             updateTextWithEmote(it.name)
                             updateTempararyMostFrequentEmoteList(
-                                EmoteNameUrl(it.name, it.url)
+                                EmoteNameUrl(it.id, it.name, it.url)
                             )
                         }
                 )
             }
-        }
-        /*****************************START OF THE GLOBAL EMOTES*******************************/
-        header {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 5.dp)
-            ) {
-                Spacer(modifier = Modifier.padding(5.dp))
-                Text(
-                    "Global Emotes",
-                ) // or any composable for your single row
-                Spacer(modifier = Modifier.padding(2.dp))
-                HorizontalDivider(
-                    thickness = 2.dp,
-                )
-                Spacer(modifier = Modifier.padding(5.dp))
-            }
-
-        }
-
-        items(emoteBoardGlobalList.list) {
-            AsyncImage(
-                model = it.url,
-                contentDescription = it.name,
-                modifier = Modifier
-                    .size(50.dp)
-                    .padding(5.dp)
-                    .clickable {
-                        updateTextWithEmote(it.name)
-                        updateTempararyMostFrequentEmoteList(
-                            EmoteNameUrl(it.name, it.url)
-                        )
-                    }
-            )
         }
     }
 }
@@ -1223,6 +1325,7 @@ class ImprovedChatUI {
                     is DragInteraction.Start -> {
                         setAutoScrollFalse()
                     }
+
                     is PressInteraction.Press -> {
                         setAutoScrollFalse()
                     }
@@ -1772,6 +1875,7 @@ fun ClickableCard(
     }
 
 }
+
 /**
  * - restartable
  * - skippable
@@ -2374,7 +2478,6 @@ fun ShowModStatus(
     }
 
 
-
 }
 
 /**
@@ -2565,7 +2668,6 @@ fun ChatBadges(
 
     }
 
-
     Row {
         Text(
             text = text,
@@ -2578,4 +2680,12 @@ fun ChatBadges(
             lineHeight = lineHeight.sp
         )
     }
+}
+
+enum class InputSelector {
+    NONE,
+    MAP,
+    DM,
+    EMOJI,
+    PICTURE
 }

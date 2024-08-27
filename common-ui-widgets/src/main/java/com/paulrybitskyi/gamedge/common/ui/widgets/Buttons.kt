@@ -1,12 +1,18 @@
 package com.paulrybitskyi.gamedge.common.ui.widgets
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.Modifier
@@ -100,5 +106,41 @@ class ButtonScope(
         {
             Text(text = text, color = textColor, fontSize = textSize)
         }
+    }
+}
+
+@Composable
+fun InputSelectorButton(
+    onClick: () -> Unit,
+    icon: ImageVector,
+    description: String,
+    selected: Boolean,
+    modifier: Modifier = Modifier
+) {
+    val backgroundModifier = if (selected) {
+        Modifier.background(
+            color = LocalContentColor.current,
+            shape = RoundedCornerShape(14.dp)
+        )
+    } else {
+        Modifier
+    }
+    IconButton(
+        onClick = onClick,
+        modifier = modifier.then(backgroundModifier)
+    ) {
+        val tint = if (selected) {
+            contentColorFor(backgroundColor = LocalContentColor.current)
+        } else {
+            LocalContentColor.current
+        }
+        Icon(
+            icon,
+            tint = tint,
+            modifier = Modifier
+                .padding(8.dp)
+                .size(56.dp),
+            contentDescription = description
+        )
     }
 }

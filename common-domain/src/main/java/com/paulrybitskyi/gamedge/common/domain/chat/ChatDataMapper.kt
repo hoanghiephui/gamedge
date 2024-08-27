@@ -3,6 +3,8 @@ package com.paulrybitskyi.gamedge.common.domain.chat
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.runtime.Immutable
 import com.android.model.IndivBetterTTVEmote
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 
 /**
  * EmoteNameUrl represents a single Twitch Emote from the Twitch servers. Each instance of this class is a unique Emote
@@ -11,8 +13,9 @@ import com.android.model.IndivBetterTTVEmote
  * @param url the url that is hosted on the twitch servers and is what we use to load the image
  * */
 data class EmoteNameUrl(
-    val name:String,
-    val url:String,
+    val id: String,
+    val name: String,
+    val url: String,
 )
 
 /**
@@ -24,9 +27,10 @@ data class EmoteNameUrl(
  * @param emoteType a [EmoteTypes] used to represent the type of emote that it is
  * */
 data class EmoteNameUrlEmoteType(
-    val name:String,
-    val url:String,
-    val emoteType:EmoteTypes
+    val id: String,
+    val name: String,
+    val url: String,
+    val emoteType: EmoteTypes
 )
 
 /**
@@ -38,17 +42,17 @@ enum class EmoteTypes {
 
 @Immutable
 data class EmoteNameUrlList(
-    val list:List<EmoteNameUrl> = listOf()
+    val list: ImmutableList<EmoteNameUrl> = persistentListOf()
 )
 
 @Immutable
 data class EmoteListMap(
-    val map:Map<String, InlineTextContent>
+    val map: Map<String, InlineTextContent>
 )
 
 @Immutable
 data class EmoteNameUrlEmoteTypeList(
-    val list:List<EmoteNameUrlEmoteType> = listOf()
+    val list: ImmutableList<EmoteNameUrlEmoteType> = persistentListOf()
 )
 
 /**
@@ -56,7 +60,7 @@ data class EmoteNameUrlEmoteTypeList(
  * */
 @Immutable
 data class EmoteNameUrlNumberList(
-    val list:List<EmoteNameUrlNumber> = listOf()
+    val list: ImmutableList<EmoteNameUrlNumber> = persistentListOf()
 )
 
 /**
@@ -64,7 +68,7 @@ data class EmoteNameUrlNumberList(
  * */
 @Immutable
 data class IndivBetterTTVEmoteList(
-    val list: List<IndivBetterTTVEmote> = listOf()
+    val list: ImmutableList<IndivBetterTTVEmote> = persistentListOf()
 )
 
 /**
@@ -76,7 +80,7 @@ data class IndivBetterTTVEmoteList(
  * @param timesClicked the number of times this emote was clicked inside of the Twitch emote board
  * */
 data class EmoteNameUrlNumber(
-    val name:String,
-    val url:String,
-    val timesClicked:Int
+    val name: String,
+    val url: String,
+    val timesClicked: Int
 )

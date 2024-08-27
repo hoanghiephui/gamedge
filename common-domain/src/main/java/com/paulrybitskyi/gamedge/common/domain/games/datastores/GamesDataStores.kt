@@ -17,6 +17,7 @@
 package com.paulrybitskyi.gamedge.common.domain.games.datastores
 
 import com.paulrybitskyi.gamedge.common.domain.live.LiveRepository
+import com.paulrybitskyi.gamedge.common.domain.live.TvEmoteRepository
 import com.paulrybitskyi.gamedge.common.domain.repository.StreamRepository
 import javax.inject.Inject
 
@@ -24,5 +25,6 @@ class GamesDataStores @Inject constructor(
     val local: GamesLocalDataStore,
     val remote: GamesRemoteDataStore,
     val streamRepository: StreamRepository,
-    val liveRepository: LiveRepository
+    val liveRepository: LiveRepository,
+    val tvEmoteRepository: TvEmoteRepository
 )

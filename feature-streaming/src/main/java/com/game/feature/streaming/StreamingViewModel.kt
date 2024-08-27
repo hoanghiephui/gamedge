@@ -14,6 +14,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.android.model.IndivBetterTTVEmote
+import com.android.model.Response
 import com.android.model.websockets.ChatSettingsData
 import com.android.model.websockets.MessageType
 import com.game.feature.streaming.entities.AdvancedChatSettings
@@ -46,10 +47,10 @@ import com.paulrybitskyi.gamedge.core.Dispatcher
 import com.paulrybitskyi.gamedge.core.ErrorMapper
 import com.paulrybitskyi.gamedge.core.Logger
 import com.paulrybitskyi.gamedge.core.NiaDispatchers
-import com.android.model.Response
 import com.paulrybitskyi.gamedge.core.sharers.TextSharer
 import com.paulrybitskyi.gamedge.core.utils.onError
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.delay
@@ -57,6 +58,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
@@ -404,11 +406,25 @@ class StreamingViewModel @Inject constructor(
         //need to do sorting and validation checks
 
         mostFrequentEmoteListTesting.value = mostFrequentEmoteListTesting.value.copy(
-            list = newList
+            list = newList.toImmutableList()
         )
         temporaryMostFrequentList.clear()
+    }
 
-
+    fun getBetterTTVGlobalEmotes() {
+        twitchEmoteUseCase.getBetterTTVGlobalEmotes()
+            .resultOrError()
+            .onError {
+                _globalBetterTTVEmotes.value = Response.Failure(Exception("Failed"))
+            }
+            .onStart {
+                _globalBetterTTVEmotes.value = Response.Loading
+            }
+            .distinctUntilChanged()
+            .onEach { emittedUiState ->
+                //_globalBetterTTVEmotes.value = emittedUiState
+            }
+            .launchIn(viewModelScope)
     }
 
     /**
@@ -421,9 +437,7 @@ class StreamingViewModel @Inject constructor(
         isMod: Boolean,
         addMessageToListChats: (TwitchUserData) -> Unit,
         messageTokenList: List<MessageToken>
-
     ) {
-
         tokenMonitoring.runMonitorToken(
             tokenCommand = tokenCommand,
             chatMessage = chatMessage, isMod = isMod,
@@ -433,7 +447,6 @@ class StreamingViewModel @Inject constructor(
             },
             unbanUserSlashTest = { userId ->
                 //unBanUserSlashCommand(userId)
-
             },
             getUserId = { conditional ->
                 listChats.find { conditional(it) }?.userId

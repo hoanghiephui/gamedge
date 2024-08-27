@@ -12,6 +12,7 @@ interface BetterTTVEmoteEndpoint {
 internal class BetterTTVEmoteEndpointImpl(
     private val betterTTVEmoteService: BetterTTVEmoteService
 ) : BetterTTVEmoteEndpoint {
+
     override suspend fun getGlobalEmotes(): ApiResult<List<IndivBetterTTVEmote>> {
         return betterTTVEmoteService.getGlobalEmotes()
     }

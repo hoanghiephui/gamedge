@@ -38,6 +38,7 @@ fun rememberStreamPageState(
             onBottomReached = { pageViewModel.onBottomReached() },
             onClickVideo = { items, index ->
                 pageViewModel.getLiveStreamURL(items[index])
+                pageViewModel.getChannelEmotes(broadcasterId =  items[index].userId)
             },
             isFetchLiveStreamURLLoading = isFetchLiveStreamURLLoading
         )

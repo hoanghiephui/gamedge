@@ -56,7 +56,7 @@ data class ChannelEmote(
     @SerialName("theme_mode")
     val theme_mode: List<String>,
     @SerialName("emote_type")
-    val emote_type:String
+    val emote_type: String
 )
 
 @Serializable
@@ -80,7 +80,7 @@ data class GlobalBadgesSet(
     @SerialName("set_id")
     val set_id: String,
     @SerialName("versions")
-    val versions: List<GlobalBadgesVersion>
+    val versions: List<GlobalBadgesVersion> = emptyList()
 )
 
 @Serializable
@@ -98,7 +98,7 @@ data class GlobalBadgesVersion(
     @SerialName("description")
     val description: String,
     @SerialName("click_action")
-    val click_action: String,
+    val click_action: String? = null,
     @SerialName("click_url")
-    val click_url: String
+    val click_url: String? = null
 )

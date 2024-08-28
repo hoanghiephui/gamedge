@@ -1,8 +1,10 @@
 package com.paulrybitskyi.gamedge.common.domain.live.usecases
 
 import androidx.compose.runtime.State
+import com.android.model.BetterTTVChannelEmotes
 import com.android.model.IndivBetterTTVEmote
 import com.android.model.Response
+import com.android.model.websockets.ChatBadgePair
 import com.paulrybitskyi.gamedge.common.domain.chat.EmoteListMap
 import com.paulrybitskyi.gamedge.common.domain.chat.EmoteNameUrl
 import com.paulrybitskyi.gamedge.common.domain.chat.EmoteNameUrlEmoteTypeList
@@ -39,6 +41,10 @@ interface TwitchEmoteUseCase {
     ): Flow<Response<Boolean>>
 
     fun getBetterTTVGlobalEmotes(): Flow<DomainResult<List<IndivBetterTTVEmote>>>
+
+    fun getGlobalChatBadges(): Flow<DomainResult<List<ChatBadgePair>>>
+
+    fun getBetterTTVChannelEmotes(broadcasterId: String): Flow<Response<BetterTTVChannelEmotes>>
 }
 
 

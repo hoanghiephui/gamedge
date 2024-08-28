@@ -190,8 +190,8 @@ class TwitchViewModel @Inject constructor(
             .onCompletion {
                 // Delay disabling loading to avoid quick state changes like
                 // empty, loading, empty, success
-                val time = if (isClearPage) 1000L else 0L
-                delay(time)
+                //val time = if (isClearPage) 1000L else 0L
+                //delay(time)
                 isRefreshLoading = false
                 emit(currentUiState.disableLoading())
             }

@@ -17,8 +17,11 @@
 package com.paulrybitskyi.gamedge.common.ui.images
 
 import android.content.Context
+import android.os.Build
 import coil.Coil
 import coil.ImageLoader
+import coil.decode.GifDecoder
+import coil.decode.ImageDecoderDecoder
 import coil.disk.DiskCache
 import coil.memory.MemoryCache
 import com.paulrybitskyi.hiltbinder.BindType
@@ -41,6 +44,13 @@ internal class CoilInitializer @Inject constructor(
         Coil.setImageLoader(
             ImageLoader.Builder(context)
                 .callFactory { okHttpCallFactory.get() }
+                .components {
+                    if (Build.VERSION.SDK_INT >= 28) {
+                        add(ImageDecoderDecoder.Factory())
+                    } else {
+                        add(GifDecoder.Factory())
+                    }
+                }
                 .memoryCache {
                     MemoryCache.Builder(context)
                         .maxSizePercent(MEMORY_CACHE_MAX_HEAP_PERCENTAGE)

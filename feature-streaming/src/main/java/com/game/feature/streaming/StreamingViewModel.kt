@@ -53,12 +53,12 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineName
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
@@ -205,9 +205,16 @@ class StreamingViewModel @Inject constructor(
         textParsing.updateTextField(" $emoteText ")
     }
 
+    fun updateTemporaryMostFrequentList(clickedItem: EmoteNameUrl) {
+        if (!temporaryMostFrequentList.contains(clickedItem)) {
+            temporaryMostFrequentList.add(clickedItem)
+        }
+        Log.d("updateTemporaryMostFrequentList", "list ->${temporaryMostFrequentList.toList()}")
+    }
+
     fun deleteEmote() {
         Log.d("addToken", "deleteEmote()")
-        //textParsing.deleteEmote(inlineTextContentTest.value.map)
+        textParsing.deleteEmote(inlineTextContentTest.value.map)
     }
 
     /**
@@ -245,6 +252,9 @@ class StreamingViewModel @Inject constructor(
     val mostFrequentEmoteList = mutableStateListOf<EmoteNameUrl>()
     val mostFrequentEmoteListTesting = mutableStateOf(EmoteNameUrlList())
     val temporaryMostFrequentList = mutableStateListOf<EmoteNameUrl>()
+    val filteredChatListImmutable = textParsing.filteredChatListImmutable
+
+    val forwardSlashCommandImmutable = textParsing.forwardSlashCommandsState
 
     init {
         viewModelScope.launch {
@@ -425,6 +435,14 @@ class StreamingViewModel @Inject constructor(
                 //_globalBetterTTVEmotes.value = emittedUiState
             }
             .launchIn(viewModelScope)
+    }
+
+    fun getBetterTTVChannelEmotes(broadcasterId: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            twitchEmoteUseCase.getBetterTTVChannelEmotes(broadcasterId).collect {
+
+            }
+        }
     }
 
     /**
@@ -722,5 +740,6 @@ class StreamingViewModel @Inject constructor(
     override fun onCleared() {
         super.onCleared()
         webSocket.close()
+        clearAllChatters()
     }
 }

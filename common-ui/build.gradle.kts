@@ -40,4 +40,5 @@ dependencies {
     api(libs.androidx.metrics)
     api(libs.compose.webview)
     implementation(libs.coil)
+    implementation(libs.coilGif)
 }

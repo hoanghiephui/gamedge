@@ -89,10 +89,7 @@ import com.game.feature.streaming.component.StreamingPlayer
 import com.game.feature.streaming.component.chat.ChatView
 import com.game.feature.streaming.component.rememberStreamingPlayer
 import com.game.feature.streaming.entities.AdvancedChatSettings
-import com.game.feature.streaming.entities.FilteredChatListImmutableCollection
-import com.game.feature.streaming.entities.ForwardSlashCommandsImmutableCollection
-import com.paulrybitskyi.gamedge.common.domain.chat.EmoteListMap
-import com.paulrybitskyi.gamedge.common.domain.chat.EmoteNameUrlList
+import com.paulrybitskyi.gamedge.common.domain.chat.EmoteNameUrl
 import com.paulrybitskyi.gamedge.common.domain.live.entities.StreamPlaybackAccessToken
 import com.paulrybitskyi.gamedge.common.ui.KeepScreenOn
 import com.paulrybitskyi.gamedge.common.ui.theme.GamedgeTheme
@@ -137,7 +134,6 @@ fun StreamingScreen(
     val startTime = viewModel.streamPlaybackAccessToken.startTime
     val twitchUserChat = viewModel.listChats.toList()
     val outerBottomModalState = rememberModalBottomSheetState()
-    val scope = rememberCoroutineScope()
     var showBottomSheet by remember { mutableStateOf(false) }
     val streamPlaybackData = viewModel.streamPlaybackAccessToken
     val density = LocalDensity.current
@@ -160,7 +156,14 @@ fun StreamingScreen(
             userId = streamPlaybackData.userId,
             login = streamPlaybackData.appLogin
         )
+        viewModel.getBetterTTVChannelEmotes(streamPlaybackData.broadcasterId)
+        viewModel.getBetterTTVGlobalEmotes()
     }
+
+    LaunchedEffect(chatSettingsViewModel) {
+        chatSettingsViewModel.getGlobalChatBadges()
+    }
+
     BackHandler {
         if (isFullscreen) {
             context.setScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
@@ -299,6 +302,16 @@ fun StreamingScreen(
             viewModel.addEmoteToText(it)
         }
     }
+
+    val updateMostFrequentEmoteList: (EmoteNameUrl) -> Unit = remember(viewModel) {
+        {
+            viewModel.updateTemporaryMostFrequentList(it)
+        }
+    }
+
+    val deleteEmote:() -> Unit = remember(viewModel) { {
+        viewModel.deleteEmote()
+    } }
 
     KeepScreenOn()
     Box(
@@ -543,35 +556,35 @@ fun StreamingScreen(
                             //todo: this is what I need to change
                             updateTextWithEmote = { newValue -> updateTextWithEmote(newValue) },
                             emoteBoardChannelList = viewModel.channelEmoteUrlList.value,
-                            emoteBoardMostFrequentList = EmoteNameUrlList(),//streamViewModel.mostFrequentEmoteListTesting.value,
+                            emoteBoardMostFrequentList = viewModel.mostFrequentEmoteListTesting.value,
                             deleteEmote = {
-                                //deleteEmote() // this needs to be changed
+                                deleteEmote() // this needs to be changed
                             },
                             showModView = {
                                 //showModView()
                                 //clearModViewNotifications()
                             },
-                            updateTempararyMostFrequentEmoteList = { value -> /*updateMostFrequentEmoteList(value)*/ },
+                            updateTempararyMostFrequentEmoteList = { value -> updateMostFrequentEmoteList(value) },
                             globalBetterTTVEmotes = viewModel.globalBetterTTVEmotes.value,
                             channelBetterTTVResponse = viewModel.channelBetterTTVEmote.value,
                             sharedBetterTTVResponse = viewModel.sharedChannelBetterTTVEmote.value,
                             userIsSub = viewModel.state.value.loggedInUserData?.sub ?: false,
-                            forwardSlashes = ForwardSlashCommandsImmutableCollection(emptyList()),//streamViewModel.forwardSlashCommandImmutable.value,
-                            filteredChatListImmutable = FilteredChatListImmutableCollection(emptyList()),//streamViewModel.filteredChatListImmutable.value,
+                            forwardSlashes = viewModel.forwardSlashCommandImmutable.value,
+                            filteredChatListImmutable = viewModel.filteredChatListImmutable.value,
                             actualTextFieldValue = viewModel.textFieldValue.value,
                             changeActualTextFieldValue = { text, textRange ->
                                 changeActualTextFieldValue(text, textRange)
                             },
-                            badgeListMap = EmoteListMap(emptyMap()),//chatSettingsViewModel.globalChatBadgesMap.value,
+                            badgeListMap = chatSettingsViewModel.globalChatBadgesMap.value,
                             usernameSize = chatSettingsViewModel.usernameSize.value,
                             messageSize = chatSettingsViewModel.messageSize.value,
                             lineHeight = chatSettingsViewModel.lineHeight.value,
                             useCustomUsernameColors = chatSettingsViewModel.customUsernameColor.value,
-                            globalTwitchEmoteContentMap = EmoteListMap(emptyMap()),//chatSettingsViewModel.globalEmoteMap.value,
-                            channelTwitchEmoteContentMap = EmoteListMap(emptyMap()),//chatSettingsViewModel.inlineContentMapChannelEmoteList.value,
-                            globalBetterTTVEmoteContentMap = EmoteListMap(emptyMap()),//chatSettingsViewModel.betterTTVGlobalInlineContentMapChannelEmoteList.value,
-                            channelBetterTTVEmoteContentMap = EmoteListMap(emptyMap()),//chatSettingsViewModel.betterTTVChannelInlineContentMapChannelEmoteList.value,
-                            sharedBetterTTVEmoteContentMap = EmoteListMap(emptyMap()),//chatSettingsViewModel.betterTTVSharedInlineContentMapChannelEmoteList.value,
+                            globalTwitchEmoteContentMap = chatSettingsViewModel.globalEmoteMap.value,
+                            channelTwitchEmoteContentMap = chatSettingsViewModel.inlineContentMapChannelEmoteList.value,
+                            globalBetterTTVEmoteContentMap = chatSettingsViewModel.betterTTVGlobalInlineContentMapChannelEmoteList.value,
+                            channelBetterTTVEmoteContentMap = chatSettingsViewModel.betterTTVChannelInlineContentMapChannelEmoteList.value,
+                            sharedBetterTTVEmoteContentMap = chatSettingsViewModel.betterTTVSharedInlineContentMapChannelEmoteList.value,
                             lowPowerMode = viewModel.lowPowerModeActive.value,
                         )
                     }
@@ -651,7 +664,7 @@ private fun MenuControl(
     onHideTitle: () -> Unit,
     onShowTitle: () -> Unit,
 ) {
-    var isVisible by remember { mutableStateOf(true) }  // State to track visibility of controls
+
     // State for rotation animation
     val rotation by animateFloatAsState(
         targetValue = if (isPlaying) 0f else 360f,
@@ -659,28 +672,30 @@ private fun MenuControl(
         label = "rotation player"
     )
     val coroutineScope = rememberCoroutineScope()
+    var isVisible by remember { mutableStateOf(true) }  // State to track visibility of controls
+    var hasUserInteracted by remember { mutableStateOf(false) }
+    var visibilityJob by remember { mutableStateOf<Job?>(null) }
     LaunchedEffect(Unit) {
         delay(5000)
-        isVisible = false
-        onHideTitle()
+        if (!hasUserInteracted) {
+            isVisible = false
+            onHideTitle()
+        }
     }
     var startTimeString by remember {
         mutableStateOf(OnlineSince.getOnlineSince(startTime))
     }
     // Launch an effect that continuously updates the time
     DisposableEffect(startTime) {
-        // Create a coroutine scope for the effect
         val scope = CoroutineScope(Dispatchers.Main + Job())
-        // Launch a coroutine that updates the time string every second
         val job = scope.launch {
             while (true) {
                 startTimeString = OnlineSince.getOnlineSince(startTime)
                 delay(1000L)  // Update every second
             }
         }
-        // Clean up when the composable is removed from the composition
         onDispose {
-            job.cancel()  // Cancel the coroutine when the composable leaves the composition
+            job.cancel()
         }
     }
 
@@ -691,12 +706,22 @@ private fun MenuControl(
             .pointerInput(Unit) {
                 detectTapGestures(
                     onTap = {
-                        isVisible = true
-                        onShowTitle()
-                        coroutineScope.launch {
-                            delay(5000)
+                        hasUserInteracted = true // Mark that user has interacted
+                        visibilityJob?.cancel()
+                        if (isVisible) {
+                            // Hide title if it is currently visible
                             isVisible = false
                             onHideTitle()
+                        } else {
+                            // Show title if it is currently hidden
+                            isVisible = true
+                            onShowTitle()
+
+                            visibilityJob = coroutineScope.launch {
+                                delay(5000)
+                                isVisible = false
+                                onHideTitle()
+                            }
                         }
                     }
                 )

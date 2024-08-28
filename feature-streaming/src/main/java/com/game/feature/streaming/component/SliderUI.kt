@@ -27,6 +27,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
@@ -36,6 +37,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import coil.imageLoader
 import com.paulrybitskyi.gamedge.core.R as coreR
 
 
@@ -246,17 +248,17 @@ fun ExampleText(
 
     val inlineContent = mapOf(
         Pair(
-
             modId,
             InlineTextContent(
-
                 Placeholder(
                     width = badgeSize.sp,
                     height = badgeSize.sp,
                     placeholderVerticalAlign = PlaceholderVerticalAlign.Center
                 )
             ) {
+                val imageLoader = LocalContext.current.imageLoader
                 AsyncImage(
+                    imageLoader = imageLoader,
                     model = modBadge,
                     contentDescription = stringResource(coreR.string.moderator_badge_icon_description),
                     modifier = Modifier
@@ -275,7 +277,9 @@ fun ExampleText(
                     placeholderVerticalAlign = PlaceholderVerticalAlign.Center
                 )
             ) {
+                val imageLoader = LocalContext.current.imageLoader
                 AsyncImage(
+                    imageLoader = imageLoader,
                     model = subBadge,
                     contentDescription = stringResource(coreR.string.sub_badge_icon_description),
                     modifier = Modifier
@@ -293,7 +297,9 @@ fun ExampleText(
                     placeholderVerticalAlign = PlaceholderVerticalAlign.Center
                 )
             ) {
+                val imageLoader = LocalContext.current.imageLoader
                 AsyncImage(
+                    imageLoader = imageLoader,
                     model = feelsGood,
                     contentDescription = stringResource(coreR.string.moderator_badge_icon_description),
                     modifier = Modifier

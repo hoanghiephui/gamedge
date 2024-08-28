@@ -1,6 +1,5 @@
 package com.game.feature.streaming.component.chat
 
-import android.os.Build
 import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.BorderStroke
@@ -25,6 +24,7 @@ import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -62,14 +62,13 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.LiveTv
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.outlined.AlternateEmail
-import androidx.compose.material.icons.outlined.Duo
-import androidx.compose.material.icons.outlined.InsertPhoto
-import androidx.compose.material.icons.outlined.Mood
-import androidx.compose.material.icons.outlined.Place
+import androidx.compose.material.icons.outlined.ExpandCircleDown
+import androidx.compose.material.icons.outlined.Explore
+import androidx.compose.material.icons.outlined.Groups
+import androidx.compose.material.icons.outlined.History
+import androidx.compose.material.icons.outlined.LiveTv
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -108,6 +107,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
@@ -118,10 +118,9 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
-import coil.ImageLoader
 import coil.compose.AsyncImage
-import coil.decode.GifDecoder
-import coil.decode.ImageDecoderDecoder
+import coil.imageLoader
+import com.android.model.IndivBetterTTVEmote
 import com.android.model.websockets.MessageType
 import com.game.feature.streaming.entities.FilteredChatListImmutableCollection
 import com.game.feature.streaming.entities.ForwardSlashCommandsImmutableCollection
@@ -274,28 +273,24 @@ fun ChatView(
                     )
                 },
                 showModStatus = {
-                    ShowModStatus(
+                    /*ShowModStatus(
                         modStatus = isMod,
                         orientationIsVertical = orientationIsVertical,
                         notificationAmount = notificationAmount,
                         showModView = {
                             showModView()
                         }
-                    )
+                    )*/
                 },
                 stylizedTextField = { boxModifier ->
                     StylizedTextField(
                         modifier = boxModifier,
-                        // textFieldValue = textFieldValue,
                         newFilterMethod = { newTextValue ->
                             newFilterMethod(newTextValue)
                         },
                         showEmoteBoard = {
                             hideSoftKeyboard()
-//                            scope.launch { //todo: this is what is causing the recomp and needs to be removed
-//                                delay(100)
                             emoteKeyBoardHeight.value = 350.dp
-                            // }
                         },
                         showKeyBoard = {
                             emoteKeyBoardHeight.value = 0.dp
@@ -435,10 +430,14 @@ fun ChatUIBox(
                 determineScrollState()
                 if (noChat) {
                     with(chatScope) {
-                        NoticeMessages(
-                            systemMessage = "",
-                            message = "You are in No Chat mode"
-                        )
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            Text(
+                                text = "You are in No Chat mode",
+                                modifier = Modifier
+                                    .align(Alignment.TopCenter)
+                                    .padding(top = 30.dp)
+                            )
+                        }
                     }
 
                 }
@@ -494,144 +493,190 @@ fun EmoteBoard(
     val pagerState = rememberPagerState(pageCount = {
         titles.size
     })
+    var currentInputSelector by rememberSaveable {
+        val currentInputSelector = if (emoteBoardMostFrequentList.list.isNotEmpty()) {
+            InputSelector.RECENT
+        } else if (emoteBoardChannelList.list.isNotEmpty()) {
+            InputSelector.CHANNEL
+        } else {
+            InputSelector.GLOBAL
+        }
+        mutableStateOf(currentInputSelector)
+    }
+    var currentInputGIFSelector by rememberSaveable {
+        val currentInputGIFSelector = if (sharedBetterTTVResponse.list.isNotEmpty()) {
+            InputGIFSelector.SHARE
+        } else if (channelBetterTTVResponse.list.isNotEmpty()) {
+            InputGIFSelector.CHANNEL
+        } else {
+            InputGIFSelector.GLOBAL
+        }
+        mutableStateOf(currentInputGIFSelector)
+    }
+    val showBottomBetter = globalBetterTTVEmotes.list.isNotEmpty() || channelBetterTTVResponse.list.isNotEmpty()
+            || sharedBetterTTVResponse.list.isNotEmpty()
 
-    Column(
+    Surface(
         modifier = Modifier
             .wrapContentSize()
-            .background(Color.Transparent)
-            .navigationBarsPadding()
+            .navigationBarsPadding(),
+        tonalElevation = 2.dp,
+        contentColor = MaterialTheme.colorScheme.secondary
     ) {
-        NiaTabRow(selectedTabIndex = selectedTabIndex) {
-            titles.forEachIndexed { index, title ->
-                NiaTab(
-                    selected = selectedTabIndex == index,
-                    onClick = {
-                        selectedTabIndex = index
-                        if (index == 0) {
-                            scope.launch {
-                                pagerState.animateScrollToPage(0)
+        Column(
+            modifier = Modifier
+                .wrapContentSize()
+        ) {
+            NiaTabRow(selectedTabIndex = selectedTabIndex) {
+                titles.forEachIndexed { index, title ->
+                    NiaTab(
+                        selected = selectedTabIndex == index,
+                        onClick = {
+                            selectedTabIndex = index
+                            if (index == 0) {
+                                scope.launch {
+                                    pagerState.animateScrollToPage(0)
+                                }
+                            } else {
+                                scope.launch {
+                                    pagerState.animateScrollToPage(1)
+                                }
+                            }
+                        },
+                        text = { Text(text = title) },
+                    )
+                }
+            }
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier.wrapContentSize(),
+                userScrollEnabled = false
+            ) { page ->
+                // Our page content
+                when (page) {
+                    0 -> {
+                        Column(
+                            modifier = modifier
+                        ) {
+                            Box {
+                                LazyGridEmotes(
+                                    lazyGridState = lazyGridState,
+                                    emoteBoardGlobalList = emoteBoardGlobalList,
+                                    emoteBoardChannelList = emoteBoardChannelList,
+                                    emoteBoardMostFrequentList = emoteBoardMostFrequentList,
+                                    updateTextWithEmote = { emoteValue ->
+                                        updateTextWithEmote(
+                                            emoteValue
+                                        )
+                                    },
+                                    updateTempararyMostFrequentEmoteList = { value ->
+                                        updateTempararyMostFrequentEmoteList(value)
+                                    },
+                                    modifier = Modifier.padding(bottom = 72.dp),
+                                    userIsSub = userIsSub
+                                )
+                                UserInputSelector(
+                                    modifier = Modifier.align(Alignment.BottomCenter),
+                                    onSelectorChange = {
+                                        currentInputSelector = it
+                                        when (it) {
+                                            InputSelector.RECENT -> {
+                                                scope.launch {
+                                                    lazyGridState.scrollToItem(0)
+                                                }
+                                            }
+
+                                            InputSelector.CHANNEL -> {
+                                                scope.launch {
+                                                    lazyGridState.scrollToItem(emoteBoardMostFrequentList.list.size + 1)
+                                                }
+                                            }
+
+                                            InputSelector.GLOBAL -> {
+                                                scope.launch {
+                                                    lazyGridState.scrollToItem((emoteBoardChannelList.list.size + emoteBoardMostFrequentList.list.size + 1))
+                                                }
+                                            }
+
+                                            InputSelector.NONE -> Unit
+                                        }
+                                    },
+                                    currentInputSelector = currentInputSelector,
+                                    onDeleteMessage = {
+                                        deleteEmote()
+                                    },
+                                    closeEmoteBoard = closeEmoteBoard
+                                )
+                            }
+                        }
+
+                    }
+
+                    1 -> {
+                        if (showBottomBetter) {
+                            Box {
+                                BetterTTVEmoteBoard(
+                                    globalBetterTTVResponse = globalBetterTTVEmotes,
+                                    updateTextWithEmote = { value -> updateTextWithEmote(value) },
+                                    channelBetterTTVResponse = channelBetterTTVResponse,
+                                    sharedBetterTTVResponse = sharedBetterTTVResponse,
+                                    betterTTVLazyGridState = betterTTVLazyGridState,
+                                    modifier = Modifier.padding(bottom = 72.dp)
+                                )
+                                BetterTTVEmoteBottomUI(
+                                    closeEmoteBoard = { closeEmoteBoard() },
+                                    deleteEmote = { deleteEmote() },
+                                    onSelectorChange = {
+                                        currentInputGIFSelector = it
+                                        when (it) {
+                                            InputGIFSelector.SHARE -> {
+                                                scope.launch {
+                                                    betterTTVLazyGridState.scrollToItem(emoteBoardMostFrequentList.list.size + 1)
+                                                }
+                                            }
+
+                                            InputGIFSelector.CHANNEL -> {
+                                                scope.launch {
+                                                    betterTTVLazyGridState.scrollToItem(emoteBoardMostFrequentList.list.size + 1)
+                                                }
+                                            }
+
+                                            InputGIFSelector.GLOBAL -> {
+                                                scope.launch {
+                                                    scope.launch {
+                                                        betterTTVLazyGridState.scrollToItem(channelBetterTTVResponse.list.size + 2 + emoteBoardMostFrequentList.list.size + sharedBetterTTVResponse.list.size)
+                                                    }
+                                                }
+                                            }
+
+                                            InputGIFSelector.NONE -> Unit
+                                        }
+                                    },
+                                    currentInputSelector = currentInputGIFSelector,
+                                    modifier = Modifier.align(Alignment.BottomCenter)
+                                )
+
                             }
                         } else {
-                            scope.launch {
-                                pagerState.animateScrollToPage(1)
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(300.dp)
+                            ) {
+                                Text(
+                                    text = "Not available at this stream",
+                                    modifier = Modifier.align(Alignment.Center)
+                                )
                             }
                         }
-                    },
-                    text = { Text(text = title) },
-                )
-            }
-        }
-        HorizontalPager(
-            state = pagerState,
-            modifier = Modifier.wrapContentSize()
-        ) { page ->
-            // Our page content
-            when (page) {
-                0 -> {
-                    Column(
-                        modifier = modifier
-                    ) {
-                        Box {
-                            LazyGridEmotes(
-                                lazyGridState = lazyGridState,
-                                emoteBoardGlobalList = emoteBoardGlobalList,
-                                emoteBoardChannelList = emoteBoardChannelList,
-                                emoteBoardMostFrequentList = emoteBoardMostFrequentList,//EmoteNameUrlList(),
-
-                                updateTextWithEmote = { emoteValue ->
-                                    updateTextWithEmote(
-                                        emoteValue
-                                    )
-                                },
-                                updateTempararyMostFrequentEmoteList = { value ->
-                                    updateTempararyMostFrequentEmoteList(value)
-                                },
-                                modifier = Modifier.padding(bottom = 50.dp),
-                                userIsSub = userIsSub
-
-                            )
-                            UserInputSelector(
-                                modifier = Modifier.align(Alignment.BottomCenter),
-                                onSelectorChange = {  },
-                                sendMessageEnabled = true,
-                                onMessageSent = {
-
-                                },
-                                currentInputSelector = InputSelector.NONE
-                            )
-                            /*EmoteBottomUI(
-                                modifier = Modifier.align(Alignment.BottomCenter),
-                                closeEmoteBoard = { closeEmoteBoard() },
-                                deleteEmote = { deleteEmote() },
-                                scrollToGlobalEmotes = {
-                                    scope.launch {
-                                        lazyGridState.scrollToItem((emoteBoardChannelList.list.size + emoteBoardMostFrequentList.list.size + 1))
-                                    }
-                                },
-                                scrollToChannelEmotes = {
-                                    scope.launch {
-                                        lazyGridState.scrollToItem(emoteBoardMostFrequentList.list.size + 1)
-                                    }
-                                },
-                                scrollToMostFrequentlyUsedEmotes = {
-                                    scope.launch {
-                                        lazyGridState.scrollToItem(0)
-                                    }
-                                }
-
-                            )*/
-                        }
-                    }
-
-                }
-
-                1 -> {
-                    Column(
-                        modifier = modifier
-                    ) {
-                        Box {
-                            BetterTTVEmoteBoard(
-                                globalBetterTTVResponse = globalBetterTTVEmotes,
-                                updateTextWithEmote = { value -> updateTextWithEmote(value) },
-                                channelBetterTTVResponse = channelBetterTTVResponse,
-                                sharedBetterTTVResponse = sharedBetterTTVResponse,
-                                betterTTVLazyGridState = betterTTVLazyGridState,
-                                modifier = Modifier.padding(bottom = 50.dp)
-                            )
-                            BetterTTVEmoteBottomUI(
-                                closeEmoteBoard = { closeEmoteBoard() },
-                                deleteEmote = { deleteEmote() },
-                                scrollToGlobalEmotes = {
-                                    scope.launch {
-                                        betterTTVLazyGridState.scrollToItem(channelBetterTTVResponse.list.size + 2 + emoteBoardMostFrequentList.list.size + sharedBetterTTVResponse.list.size)
-                                    }
-                                },
-                                scrollToChannelEmotes = {
-                                    scope.launch {
-                                        betterTTVLazyGridState.scrollToItem(emoteBoardMostFrequentList.list.size + 1)
-                                    }
-                                },
-//                            scrollToMostFrequentlyUsedEmotes={
-//                                scope.launch {
-//                                    betterTTVLazyGridState.scrollToItem(0)
-//                                }
-//                            },
-                                scrollToSharedChannelEmotes = {
-                                    scope.launch {
-                                        betterTTVLazyGridState.scrollToItem(channelBetterTTVResponse.list.size + 1 + emoteBoardMostFrequentList.list.size + 1)
-                                    }
-                                },
-                                modifier = Modifier.align(Alignment.BottomCenter)
-                            )
-
-                        }
                     }
                 }
-            }
 
+            }
+            /****END OF THE HORIZONTAL PAGER****/
         }
-        /****END OF THE HORIZONTAL PAGER****/
     }
+
 
 }
 
@@ -652,7 +697,7 @@ fun BetterTTVEmoteBoard(
     Log.d("BetterTTVEmoteBoardRELOAD", "RELOAD")
     LazyVerticalGrid(
         state = betterTTVLazyGridState,
-        columns = GridCells.Adaptive(minSize = 60.dp),
+        columns = GridCells.Adaptive(minSize = 50.dp),
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 5.dp)
@@ -660,141 +705,115 @@ fun BetterTTVEmoteBoard(
         verticalArrangement = Arrangement.spacedBy(5.dp),
         horizontalArrangement = Arrangement.spacedBy(5.dp)
     ) {
-        /*****************************START OF THE Most Recent EMOTES*******************************/
-//        header {
-//            Column(
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .padding(horizontal = 5.dp)
-//            ) {
-//                Spacer(modifier = Modifier.padding(5.dp))
-//                Text(
-//                    "Frequently Used Emotes",
-//                    color = MaterialTheme.colorScheme.onPrimary,
-//                    fontSize = MaterialTheme.typography.headlineSmall.fontSize
-//                ) // or any composable for your single row
-//                Spacer(modifier = Modifier.padding(2.dp))
-//                Divider(
-//                    thickness = 2.dp,
-//                    color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.8f),
-//                    modifier = Modifier.fillMaxWidth()
-//                )
-//                Spacer(modifier = Modifier.padding(5.dp))
-//            }
-//
-//        }
-//        items(
-//            mostFrequentBetterTTVResponse.list,
-//        ) {
-//            GifLoadingAnimation(
-//                url ="https://cdn.betterttv.net/emote/${it.id}/1x",
-//                contentDescription = "${it.code} emote",
-//                emoteName =it.code,
-//                updateTextWithEmote ={value ->
-//                    updateTextWithEmote(value)
-//                }
-//            )
-//        }
+
         /*****************************START OF THE CHANNEL EMOTES*******************************/
-        //todo: adding the channelUI
-        header {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 5.dp)
-            ) {
-                Spacer(modifier = Modifier.padding(5.dp))
-                Text(
-                    "Channel Emotes",
-                ) // or any composable for your single row
-                Spacer(modifier = Modifier.padding(2.dp))
-                HorizontalDivider(
-                    thickness = 2.dp,
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Spacer(modifier = Modifier.padding(5.dp))
+        if (channelBetterTTVResponse.list.isNotEmpty()) {
+            header {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 5.dp)
+                ) {
+                    Spacer(modifier = Modifier.padding(5.dp))
+                    Text(
+                        "Channel Emotes",
+                    )
+                    Spacer(modifier = Modifier.padding(2.dp))
+                    HorizontalDivider(
+                        thickness = 2.dp,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(modifier = Modifier.padding(5.dp))
+                }
+
             }
 
-        }
-
-        items(channelBetterTTVResponse.list) {
-            GifLoadingAnimation(
-                url = "https://cdn.betterttv.net/emote/${it.id}/1x",
-                contentDescription = "${it.code} emote",
-                emoteName = it.code,
-                updateTextWithEmote = { value ->
-                    updateTextWithEmote(value)
-//                            updateFrequentBetterTTVTempList(it)
-                }
-            )
+            items(channelBetterTTVResponse.list) {
+                EmoteGif(it, updateTextWithEmote)
+            }
         }
 
         /*****************************START OF THE SHARED CHANNEL EMOTES*******************************/
-        header {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 5.dp)
-            ) {
-                Spacer(modifier = Modifier.padding(5.dp))
-                Text(
-                    "Shared Emotes",
-                ) // or any composable for your single row
-                Spacer(modifier = Modifier.padding(2.dp))
-                HorizontalDivider(
-                    thickness = 2.dp,
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Spacer(modifier = Modifier.padding(5.dp))
+        if (sharedBetterTTVResponse.list.isNotEmpty()) {
+            header {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 5.dp)
+                ) {
+                    Spacer(modifier = Modifier.padding(5.dp))
+                    Text(
+                        "Shared Emotes",
+                    ) // or any composable for your single row
+                    Spacer(modifier = Modifier.padding(2.dp))
+                    HorizontalDivider(
+                        thickness = 2.dp,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(modifier = Modifier.padding(5.dp))
+                }
+
             }
 
+            items(sharedBetterTTVResponse.list) {
+                EmoteGif(it, updateTextWithEmote)
+            }
         }
-
-        items(sharedBetterTTVResponse.list) {
-            GifLoadingAnimation(
-                url = "https://cdn.betterttv.net/emote/${it.id}/1x",
-                contentDescription = "${it.code} emote",
-                emoteName = it.code,
-                updateTextWithEmote = { value ->
-                    updateTextWithEmote(value)
-//                    updateFrequentBetterTTVTempList(it)
-                }
-            )
-        }
-
 
         /*****************************START OF THE GLOBAL EMOTES*******************************/
-        header {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 5.dp)
-            ) {
-                Spacer(modifier = Modifier.padding(5.dp))
-                Text(
-                    "Global Emotes"
-                ) // or any composable for your single row
-                Spacer(modifier = Modifier.padding(2.dp))
-                HorizontalDivider(
-                    thickness = 2.dp,
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Spacer(modifier = Modifier.padding(5.dp))
+        if (globalBetterTTVResponse.list.isNotEmpty()) {
+            header {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 5.dp)
+                ) {
+                    Spacer(modifier = Modifier.padding(5.dp))
+                    Text(
+                        "Global Emotes"
+                    ) // or any composable for your single row
+                    Spacer(modifier = Modifier.padding(2.dp))
+                    HorizontalDivider(
+                        thickness = 2.dp,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(modifier = Modifier.padding(5.dp))
+                }
+
             }
 
+            items(globalBetterTTVResponse.list) {
+                EmoteGif(it, updateTextWithEmote)
+            }
         }
+    }
+}
 
-
-        items(globalBetterTTVResponse.list) {
-            GifLoadingAnimation(
-                url = "https://cdn.betterttv.net/emote/${it.id}/1x",
-                contentDescription = "${it.code} emote",
-                emoteName = it.code,
-                updateTextWithEmote = { value ->
-                    updateTextWithEmote(value)
-                }
-            )
-        }
+@Composable
+private fun EmoteGif(
+    it: IndivBetterTTVEmote,
+    updateTextWithEmote: (String) -> Unit
+) {
+    Surface(
+        modifier = Modifier.size(50.dp),
+        tonalElevation = 2.dp,
+        shadowElevation = 2.dp,
+        contentColor = MaterialTheme.colorScheme.secondary,
+        shape = RoundedCornerShape(8.dp)
+    ) {
+        GifLoadingAnimation(
+            modifier = Modifier
+                .size(50.dp)
+                .padding(5.dp)
+                .clip(RoundedCornerShape(8.dp))
+                .border(1.dp, MaterialTheme.colorScheme.secondary, RoundedCornerShape(8.dp)),
+            url = "https://cdn.betterttv.net/emote/${it.id}/2x",
+            contentDescription = "${it.code} emote",
+            emoteName = it.code,
+            updateTextWithEmote = { value ->
+                updateTextWithEmote(value)
+            }
+        )
     }
 }
 
@@ -805,6 +824,7 @@ fun BetterTTVEmoteBoard(
  * */
 @Composable
 fun GifLoadingAnimation(
+    modifier: Modifier,
     url: String,
     contentDescription: String,
     emoteName: String,
@@ -812,23 +832,12 @@ fun GifLoadingAnimation(
 
 ) {
     val context = LocalContext.current
-    val imageLoader = ImageLoader.Builder(context)
-        .components {
-            if (Build.VERSION.SDK_INT >= 28) {
-                add(ImageDecoderDecoder.Factory())
-            } else {
-                add(GifDecoder.Factory())
-            }
-        }
-        .build()
-
     AsyncImage(
         model = url,
         contentDescription = contentDescription,
-        imageLoader = imageLoader,
-        modifier = Modifier
-            .size(60.dp)
-            .padding(5.dp)
+        imageLoader = context.imageLoader,
+        modifier =
+        modifier
             .clickable {
                 updateTextWithEmote(emoteName)
             }
@@ -837,10 +846,10 @@ fun GifLoadingAnimation(
 
 @Composable
 private fun UserInputSelector(
+    closeEmoteBoard: () -> Unit,
     onSelectorChange: (InputSelector) -> Unit,
-    sendMessageEnabled: Boolean,
-    onMessageSent: () -> Unit,
     currentInputSelector: InputSelector,
+    onDeleteMessage: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -851,38 +860,36 @@ private fun UserInputSelector(
         verticalAlignment = Alignment.CenterVertically
     ) {
         InputSelectorButton(
-            onClick = { onSelectorChange(InputSelector.EMOJI) },
-            icon = Icons.Outlined.Mood,
-            selected = currentInputSelector == InputSelector.EMOJI,
+            onClick = closeEmoteBoard,
+            icon = Icons.Outlined.ExpandCircleDown,
+            selected = false,
+            description = ""
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+
+        InputSelectorButton(
+            onClick = { onSelectorChange(InputSelector.RECENT) },
+            icon = Icons.Outlined.History,
+            selected = currentInputSelector == InputSelector.RECENT,
             description = ""
         )
         InputSelectorButton(
-            onClick = { onSelectorChange(InputSelector.DM) },
-            icon = Icons.Outlined.AlternateEmail,
-            selected = currentInputSelector == InputSelector.DM,
+            onClick = { onSelectorChange(InputSelector.CHANNEL) },
+            icon = Icons.Outlined.LiveTv,
+            selected = currentInputSelector == InputSelector.CHANNEL,
             description = ""
         )
         InputSelectorButton(
-            onClick = { onSelectorChange(InputSelector.PICTURE) },
-            icon = Icons.Outlined.InsertPhoto,
-            selected = currentInputSelector == InputSelector.PICTURE,
-            description = ""
-        )
-        InputSelectorButton(
-            onClick = { onSelectorChange(InputSelector.MAP) },
-            icon = Icons.Outlined.Place,
-            selected = currentInputSelector == InputSelector.MAP,
+            onClick = { onSelectorChange(InputSelector.GLOBAL) },
+            icon = Icons.Outlined.Explore,
+            selected = currentInputSelector == InputSelector.GLOBAL,
             description = ""
         )
 
-        val border = if (!sendMessageEnabled) {
-            BorderStroke(
-                width = 1.dp,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
-            )
-        } else {
-            null
-        }
+        val border = BorderStroke(
+            width = 1.dp,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
+        )
         Spacer(modifier = Modifier.weight(1f))
 
         val disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
@@ -895,8 +902,7 @@ private fun UserInputSelector(
         // Send button
         Button(
             modifier = Modifier.height(36.dp),
-            enabled = sendMessageEnabled,
-            onClick = onMessageSent,
+            onClick = onDeleteMessage,
             colors = buttonColors,
             border = border,
             contentPadding = PaddingValues(0.dp)
@@ -1007,103 +1013,74 @@ fun EmoteBottomUI(
 fun BetterTTVEmoteBottomUI(
     closeEmoteBoard: () -> Unit,
     deleteEmote: () -> Unit,
-    scrollToGlobalEmotes: () -> Unit,
-    scrollToChannelEmotes: () -> Unit,
-//    scrollToMostFrequentlyUsedEmotes:()->Unit,
-    scrollToSharedChannelEmotes: () -> Unit,
+    onSelectorChange: (InputGIFSelector) -> Unit,
+    currentInputSelector: InputGIFSelector,
     modifier: Modifier,
 ) {
     val haptic = LocalHapticFeedback.current
     Row(
         modifier = modifier
-            .fillMaxWidth()
-            .padding(vertical = 5.dp, horizontal = 10.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
+            .height(72.dp)
+            .wrapContentHeight()
+            .padding(start = 16.dp, end = 16.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Log.d("EmoteBottomUIRedererd", "RENDERED")
+        InputSelectorButton(
+            onClick = closeEmoteBoard,
+            icon = Icons.Outlined.ExpandCircleDown,
+            selected = false,
+            description = ""
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        InputSelectorButton(
+            onClick = { onSelectorChange(InputGIFSelector.CHANNEL) },
+            icon = Icons.Outlined.LiveTv,
+            selected = currentInputSelector == InputGIFSelector.CHANNEL,
+            description = ""
+        )
+        InputSelectorButton(
+            onClick = { onSelectorChange(InputGIFSelector.SHARE) },
+            icon = Icons.Outlined.Groups,
+            selected = currentInputSelector == InputGIFSelector.SHARE,
+            description = ""
+        )
+        InputSelectorButton(
+            onClick = { onSelectorChange(InputGIFSelector.GLOBAL) },
+            icon = Icons.Outlined.Explore,
+            selected = currentInputSelector == InputGIFSelector.GLOBAL,
+            description = ""
+        )
 
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                modifier = Modifier
-                    .size(30.dp)
-                    .clickable {
-                        closeEmoteBoard()
-                    },
-                imageVector = Icons.Default.KeyboardArrowDown,
-                contentDescription = "click to close keyboard emote"
-            )
-            Spacer(modifier = Modifier.width(10.dp))
+        val border = BorderStroke(
+            width = 1.dp,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
+        )
+        Spacer(modifier = Modifier.weight(1f))
 
-//            Icon(modifier= Modifier
-//                .size(25.dp)
-//                .clickable {
-//                    Log.d("EmoteBottomUI", "RECENT")
-//                    scrollToMostFrequentlyUsedEmotes()
-//                },
-//                tint = MaterialTheme.colorScheme.onPrimary,
-//                painter = painterResource(id =R.drawable.autorenew_24), contentDescription = "click to scroll to most recent emotes")
-//            Spacer(modifier = Modifier.width(10.dp))
+        val disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
 
-            Icon(
-                modifier = Modifier
-                    .size(25.dp)
-                    .clickable {
-                        scrollToChannelEmotes()
-                        Log.d("EmoteBottomUI", "CHANNEL")
-                    },
-                tint = MaterialTheme.colorScheme.onPrimary,
-                painter = painterResource(id = coreR.drawable.channel_emotes_24),
-                contentDescription = "click to scroll to channel emotes"
-            )
-            Spacer(modifier = Modifier.width(10.dp))
+        val buttonColors = ButtonDefaults.buttonColors(
+            disabledContainerColor = Color.Transparent,
+            disabledContentColor = disabledContentColor
+        )
 
-            Icon(
-                modifier = Modifier
-                    .size(25.dp)
-                    .clickable {
-                        scrollToSharedChannelEmotes()
-                        Log.d("EmoteBottomUI", "SHARED")
-                    },
-                tint = MaterialTheme.colorScheme.onPrimary,
-                painter = painterResource(id = coreR.drawable.shared_24),
-                contentDescription = "click to scroll to shared emotes"
-            )
-            Spacer(modifier = Modifier.width(10.dp))
-
-            Icon(
-                modifier = Modifier
-                    .size(25.dp)
-                    .clickable {
-                        scrollToGlobalEmotes()
-                        Log.d("EmoteBottomUI", "GLOBAL")
-                    },
-                tint = MaterialTheme.colorScheme.onPrimary,
-                painter = painterResource(id = coreR.drawable.world_emotes_24),
-                contentDescription = "click to scroll to gloabl emotes"
-            )
-
-
-        }
-        Box(modifier = Modifier
-            .clip(RoundedCornerShape(4.dp))
-            .background(Color.DarkGray)
-            .clickable {
+        // Send button
+        Button(
+            modifier = Modifier.height(36.dp),
+            onClick = {
                 deleteEmote()
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-            }
-            .padding(vertical = 5.dp, horizontal = 10.dp)
-
+            },
+            colors = buttonColors,
+            border = border,
+            contentPadding = PaddingValues(0.dp)
         ) {
             Icon(
                 modifier = Modifier.size(25.dp),
-                tint = MaterialTheme.colorScheme.onPrimary,
-                painter = painterResource(id = coreR.drawable.baseline_backspace_24),
+                imageVector = Icons.AutoMirrored.Filled.Backspace,
                 contentDescription = "click to delete emote"
             )
         }
-
-
     }
 }
 
@@ -1125,7 +1102,7 @@ fun LazyGridEmotes(
 ) {
     LazyVerticalGrid(
         state = lazyGridState,
-        columns = GridCells.Adaptive(minSize = 60.dp),
+        columns = GridCells.Adaptive(minSize = 50.dp),
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 5.dp)
@@ -1157,18 +1134,28 @@ fun LazyGridEmotes(
 
             items(
                 items = emoteBoardMostFrequentList.list,
-                key = EmoteNameUrl::id
+                contentType = { "Recent" }
             ) {
-                AsyncImage(
-                    model = it.url,
-                    contentDescription = it.name,
-                    modifier = Modifier
-                        .size(50.dp)
-                        .padding(5.dp)
-                        .clickable {
-                            updateTextWithEmote(it.name)
-                        }
-                )
+                Surface(
+                    modifier = Modifier.size(50.dp),
+                    tonalElevation = 2.dp,
+                    shadowElevation = 2.dp,
+                    contentColor = MaterialTheme.colorScheme.secondary,
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    AsyncImage(
+                        model = it.url,
+                        contentDescription = it.name,
+                        modifier = Modifier
+                            .size(50.dp)
+                            .padding(5.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .border(1.dp, MaterialTheme.colorScheme.secondary, RoundedCornerShape(8.dp))
+                            .clickable {
+                                updateTextWithEmote(it.name)
+                            }
+                    )
+                }
             }
         }
 
@@ -1197,11 +1184,58 @@ fun LazyGridEmotes(
             items(
                 items = emoteBoardChannelList.list,
                 key = EmoteNameUrlEmoteType::id,
+                contentType = {"Channel"}
             ) {
                 if (it.emoteType == EmoteTypes.SUBS && !userIsSub) {
-                    Box(
-                        modifier = Modifier
-                            .size(50.dp)
+                    Surface(
+                        modifier = Modifier.size(50.dp),
+                        shadowElevation = 2.dp,
+                        contentColor = MaterialTheme.colorScheme.secondary,
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            AsyncImage(
+                                model = it.url,
+                                contentDescription = it.name,
+                                modifier = Modifier
+                                    .size(50.dp)
+                                    .padding(5.dp)
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .border(1.dp, MaterialTheme.colorScheme.secondary, RoundedCornerShape(8.dp))
+                            )
+                            Spacer(
+                                modifier = Modifier
+                                    .size(50.dp)
+                                    .background(
+                                        Color.Black.copy(0.4f),
+                                        RoundedCornerShape(8.dp)
+                                    )
+                                    .align(Alignment.Center)
+                            )
+                            Icon(
+                                imageVector = Icons.Default.Lock,
+                                contentDescription = "Emote locked. Subscribe to access",
+                                tint = Color.White,
+                                modifier = Modifier
+                                    .padding(
+                                        end = 6.dp,
+                                        bottom = 5.dp
+                                    )
+                                    .size(18.dp)
+                                    .align(Alignment.BottomEnd),
+                            )
+                        }
+                    }
+
+                } else {
+                    Surface(
+                        modifier = Modifier.size(50.dp),
+                        tonalElevation = 2.dp,
+                        shadowElevation = 2.dp,
+                        contentColor = MaterialTheme.colorScheme.secondary,
+                        shape = RoundedCornerShape(8.dp)
                     ) {
                         AsyncImage(
                             model = it.url,
@@ -1211,44 +1245,14 @@ fun LazyGridEmotes(
                                 .padding(5.dp)
                                 .clip(RoundedCornerShape(8.dp))
                                 .border(1.dp, MaterialTheme.colorScheme.secondary, RoundedCornerShape(8.dp))
+                                .clickable {
+                                    updateTextWithEmote(it.name)
+                                    updateTempararyMostFrequentEmoteList(
+                                        EmoteNameUrl(it.id, it.name, it.url)
+                                    )
+                                }
                         )
-                        Spacer(
-                            modifier = Modifier
-                                .size(50.dp)
-                                .background(
-                                    Color.Black.copy(0.4f),
-                                    RoundedCornerShape(8.dp)
-                                )
-                        )
-                        Icon(
-                            imageVector = Icons.Default.Lock,
-                            contentDescription = "Emote locked. Subscribe to access",
-                            tint = Color.White,
-                            modifier = Modifier
-                                .padding(
-                                    end = 14.dp,
-                                    bottom = 5.dp
-                                )
-                                .size(18.dp)
-                                .align(Alignment.BottomEnd),
-                        )
-
                     }
-
-                } else {
-                    AsyncImage(
-                        model = it.url,
-                        contentDescription = it.name,
-                        modifier = Modifier
-                            .size(50.dp)
-                            .padding(5.dp)
-                            .clickable {
-                                updateTextWithEmote(it.name)
-                                updateTempararyMostFrequentEmoteList(
-                                    EmoteNameUrl(it.id, it.name, it.url)
-                                )
-                            }
-                    )
                 }
             }
         }
@@ -1276,21 +1280,32 @@ fun LazyGridEmotes(
 
             items(
                 items = emoteBoardGlobalList.list,
-                key = EmoteNameUrl::id
+                key = EmoteNameUrl::id,
+                contentType = {"GLOBAL"}
             ) {
-                AsyncImage(
-                    model = it.url,
-                    contentDescription = it.name,
-                    modifier = Modifier
-                        .size(50.dp)
-                        .padding(5.dp)
-                        .clickable {
-                            updateTextWithEmote(it.name)
-                            updateTempararyMostFrequentEmoteList(
-                                EmoteNameUrl(it.id, it.name, it.url)
-                            )
-                        }
-                )
+                Surface(
+                    modifier = Modifier.size(50.dp),
+                    tonalElevation = 2.dp,
+                    shadowElevation = 2.dp,
+                    contentColor = MaterialTheme.colorScheme.secondary,
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    AsyncImage(
+                        model = it.url,
+                        contentDescription = it.name,
+                        modifier = Modifier
+                            .size(50.dp)
+                            .padding(5.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .border(1.dp, MaterialTheme.colorScheme.secondary, RoundedCornerShape(8.dp))
+                            .clickable {
+                                updateTextWithEmote(it.name)
+                                updateTempararyMostFrequentEmoteList(
+                                    EmoteNameUrl(it.id, it.name, it.url)
+                                )
+                            }
+                    )
+                }
             }
         }
     }
@@ -2303,9 +2318,6 @@ fun StylizedTextField(
     actualTextFieldValue: TextFieldValue,
     changeActualTextFieldValue: (String, TextRange) -> Unit
 ) {
-    //todo: NOW I NEED TO MAKE THE EMOTE BOARD AND KEYBOARD SHOW AT ALL
-    Log.d("StylizedTextFieldRecomp", "RECOMP")
-
     val focusRequester = remember { FocusRequester() }
     val keyboard = LocalSoftwareKeyboardController.current
     val source = remember {
@@ -2330,11 +2342,16 @@ fun StylizedTextField(
                 interactionSource = source,
                 modifier = Modifier
                     .fillMaxWidth()
+                    .heightIn(30.dp)
                     .focusRequester(focusRequester),
                 singleLine = false,
                 maxLines = 5,
                 value = actualTextFieldValue,
-
+                textStyle = TextStyle( // Adjust text style for padding reduction
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Normal,
+                    lineHeight = 15.sp
+                ),
                 shape = RoundedCornerShape(8.dp),
                 onValueChange = { newText ->
                     newFilterMethod(newText)
@@ -2356,7 +2373,14 @@ fun StylizedTextField(
                     errorIndicatorColor = Color.Transparent
                 ),
                 placeholder = {
-                    Text(stringResource(coreR.string.send_a_message), color = Color.White)
+                    Text(
+                        text = stringResource(coreR.string.send_a_message), color = Color.White,
+                        style = TextStyle(
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Normal,
+                            lineHeight = 15.sp
+                        )
+                    )
                 },
                 trailingIcon = {
                     if (!iconClicked) {
@@ -2488,7 +2512,7 @@ fun ShowModStatus(
  * CheckIfUserDeleted is the composable that will be used to determine if there should be extra information shown
  * depending if the user's message has been deleted or not
  *
- * @param twitchUser a [TwitchUserData][com.example.clicker.network.websockets.models.TwitchUserData] object that represents the state of an individual user and their chat message
+ * @param twitchUser a [TwitchUserData][TwitchUserData] object that represents the state of an individual user and their chat message
  * */
 @Composable
 fun CheckIfUserDeleted(twitchUser: TwitchUserData) {
@@ -2510,8 +2534,6 @@ fun CheckIfUserDeleted(twitchUser: TwitchUserData) {
  *
  * CheckIfUserIsBanned is the composable that will be used to determine if there should be extra information shown
  * depending if the user has been banned by a moderator
- *
- * @param twitchUser a [TwitchUserData][com.example.clicker.network.websockets.models.TwitchUserData] object that represents the state of an individual user and their chat message
  *
  * */
 @Composable
@@ -2627,7 +2649,7 @@ fun ChatBadges(
     lineHeight: Float,
     useCustomUsernameColors: Boolean
 ) {
-    val usernameColor = if (useCustomUsernameColors) color else MaterialTheme.colorScheme.onPrimary
+    val usernameColor = if (useCustomUsernameColors) color else MaterialTheme.colorScheme.secondary
 
 
     val newMap =
@@ -2652,7 +2674,7 @@ fun ChatBadges(
             }
         }
 
-        withStyle(style = SpanStyle(color = usernameColor, fontSize = usernameSize.sp)) {
+        withStyle(style = SpanStyle(color = usernameColor, fontSize = usernameSize.sp, fontWeight = FontWeight.Bold)) {
             append("$username ")
         }
         //todo:below should get replaced with the new messageList
@@ -2684,8 +2706,14 @@ fun ChatBadges(
 
 enum class InputSelector {
     NONE,
-    MAP,
-    DM,
-    EMOJI,
-    PICTURE
+    RECENT,
+    CHANNEL,
+    GLOBAL
+}
+
+enum class InputGIFSelector {
+    NONE,
+    CHANNEL,
+    SHARE,
+    GLOBAL
 }

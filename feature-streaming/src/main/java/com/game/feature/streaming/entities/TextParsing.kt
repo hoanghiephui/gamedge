@@ -189,7 +189,6 @@ class TextParsing @Inject constructor() {
 
     fun deleteEmote(
         emoteMap: Map<String, InlineTextContent>
-
     ) {
         val tokenScanner = DeletingEmotes(
             textFieldValue.value,
@@ -203,8 +202,6 @@ class TextParsing @Inject constructor() {
         )
         Log.d("addToken", "startScanningTokens()")
         tokenScanner.startScanningTokens()
-
-
     }
 
 

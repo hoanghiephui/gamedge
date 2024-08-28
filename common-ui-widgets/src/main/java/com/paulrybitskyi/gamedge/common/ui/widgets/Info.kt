@@ -21,8 +21,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.Icon
-import androidx.compose.material.Text
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,8 +43,8 @@ fun Info(
     title: String,
     modifier: Modifier = Modifier,
     iconSize: Dp = 100.dp,
-    iconColor: Color = GamedgeTheme.colors.onBackground,
-    titleTextColor: Color = GamedgeTheme.colors.onBackground,
+    iconColor: Color = GamedgeTheme.colors.background,
+    titleTextColor: Color = GamedgeTheme.colors.background,
     titleTextStyle: TextStyle = GamedgeTheme.typography.subtitle1,
 ) {
     Column(

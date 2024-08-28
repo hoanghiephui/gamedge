@@ -8,13 +8,17 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import coil.imageLoader
+import com.android.model.BetterTTVChannelEmotes
 import com.android.model.IndivBetterTTVEmote
 import com.android.model.Response
+import com.android.model.websockets.ChatBadgePair
 import com.paulrybitskyi.gamedge.common.domain.chat.EmoteListMap
 import com.paulrybitskyi.gamedge.common.domain.chat.EmoteNameUrl
 import com.paulrybitskyi.gamedge.common.domain.chat.EmoteNameUrlEmoteType
@@ -75,14 +79,15 @@ internal class TwitchEmoteUseCaseImpl @Inject constructor(
         Pair( //todo: This one can stay
             feelsGoodId,
             InlineTextContent(
-
                 Placeholder(
                     width = 35.sp,
                     height = 35.sp,
                     placeholderVerticalAlign = PlaceholderVerticalAlign.Center
                 )
             ) {
+                val imageLoader = LocalContext.current.imageLoader
                 AsyncImage(
+                    imageLoader = imageLoader,
                     model = feelsGood,
                     contentDescription = null,
                     modifier = Modifier
@@ -99,14 +104,15 @@ internal class TwitchEmoteUseCaseImpl @Inject constructor(
         Pair( //todo: This should get moved
             modId,
             InlineTextContent(
-
                 Placeholder(
                     width = badgeSize.sp,
                     height = badgeSize.sp,
                     placeholderVerticalAlign = PlaceholderVerticalAlign.Center
                 )
             ) {
+                val imageLoader = LocalContext.current.imageLoader
                 AsyncImage(
+                    imageLoader = imageLoader,
                     model = modBadge,
                     contentDescription = null,
                     modifier = Modifier
@@ -124,7 +130,9 @@ internal class TwitchEmoteUseCaseImpl @Inject constructor(
                     placeholderVerticalAlign = PlaceholderVerticalAlign.Center
                 )
             ) {
+                val imageLoader = LocalContext.current.imageLoader
                 AsyncImage(
+                    imageLoader = imageLoader,
                     model = subBadge,
                     contentDescription = null,
                     modifier = Modifier
@@ -190,7 +198,7 @@ internal class TwitchEmoteUseCaseImpl @Inject constructor(
             //todo: this function signature is terrible, confusing  and needs to be changed
             globalEmoteParsing(
                 newInnerInlineContentMap = newInnerInlineContentMap,
-                parsedEmoteData = parsedEmoteData.toImmutableList(),
+                parsedEmoteData = parsedEmoteData.distinctBy { it.id }.toImmutableList(),
                 updateEmoteListMap = { item ->
                     _emoteList.value = emoteList.value.copy(
                         map = item
@@ -250,12 +258,12 @@ internal class TwitchEmoteUseCaseImpl @Inject constructor(
                     url = it.url
                 )
             }
-            _channelEmoteList.tryEmit(newChannelEmoteList.toPersistentList())
+            _channelEmoteList.tryEmit(newChannelEmoteList.distinctBy { it.id }.toPersistentList())
 
 
             //todo: this function signature is terrible, confusing  and needs to be changed
             newChannelEmoteParsing(
-                parsedEmoteData = sortedEmoteData.toImmutableList(),
+                parsedEmoteData = sortedEmoteData.distinctBy { it.id }.toImmutableList(),
                 innerInlineContentMap = innerInlineContentMap,
                 convertResponseDataToGlobalEmoteMap = { emoteValue, innerMap ->
                     createChannelEmoteMapValue(
@@ -293,6 +301,109 @@ internal class TwitchEmoteUseCaseImpl @Inject constructor(
     override fun getBetterTTVGlobalEmotes(): Flow<DomainResult<List<IndivBetterTTVEmote>>> = flow {
         emit(gamesDataStores.tvEmoteRepository.getGlobalEmotes())
     }.flowOn(dispatcherProvider.main)
+
+    override fun getGlobalChatBadges(): Flow<DomainResult<List<ChatBadgePair>>> = flow {
+        emit(gamesDataStores.streamRepository.getGlobalChatBadges())
+    }.flowOn(dispatcherProvider.main)
+
+    override fun getBetterTTVChannelEmotes(broadcasterId: String): Flow<Response<BetterTTVChannelEmotes>> = flow {
+        emit(Response.Loading)
+        Log.d("getBetterTTVChannelEmotes", "LOADING")
+        val response = gamesDataStores.tvEmoteRepository.getChannelEmotes(broadcasterId)
+        if (response.isOk) {
+            Log.d("getBetterTTVChannelEmotes", "SUCCESS")
+            emit(Response.Success(BetterTTVChannelEmotes()))
+            val sharedEmotes = response.value.sharedEmotes
+            val channelEmotes = response.value.channelEmotes
+            Log.d("getBetterTTVChannelEmotes", "sharedEmotes ->$sharedEmotes")
+            Log.d("getBetterTTVChannelEmotes", "channelEmotes ->$channelEmotes")
+
+            val channelBetterTTVEmoteList = channelEmotes.map {
+                EmoteNameUrl(
+                    id = it.id,
+                    name = it.code,
+                    url = "https://cdn.betterttv.net/emote/${it.id}/2x"
+                )
+            }
+            val sharedBetterTTVEmoteList = sharedEmotes.map {
+                EmoteNameUrl(
+                    id = it.id,
+                    name = it.code,
+                    url = "https://cdn.betterttv.net/emote/${it.id}/2x"
+                )
+            }
+            _channelBetterTTVEmoteList.tryEmit(channelBetterTTVEmoteList.toPersistentList())
+            _sharedBetterTTVEmoteList.tryEmit(sharedBetterTTVEmoteList.toPersistentList())
+            val sharedAndChannelList = mutableListOf<EmoteNameUrlEmoteType>()
+
+            channelEmotes.also { listOfChannelEmotes ->
+                val parsedChannelEmotes = listOfChannelEmotes.map { channelEmote ->
+                    IndivBetterTTVEmote(
+                        id = channelEmote.id,
+                        code = channelEmote.code,
+                        imageType = channelEmote.imageType,
+                        animated = channelEmote.animated,
+                        userId = channelEmote.userId,
+                        modifier = false
+                    )
+                }
+                Log.d("getBetterTTVChannelEmotes", "parsedData ->$parsedChannelEmotes")
+                _channelBetterTTVEmotes.value = _channelBetterTTVEmotes.value.copy(
+                    list = parsedChannelEmotes.toImmutableList()
+                )
+                listOfChannelEmotes.forEach {
+                    sharedAndChannelList.add(
+                        EmoteNameUrlEmoteType(
+                            id = it.id,
+                            name = it.code,
+                            url = "https://cdn.betterttv.net/emote/${it.id}/2x",
+                            emoteType = EmoteTypes.FOLLOWERS
+                        )
+                    )
+                }
+            }
+
+            sharedEmotes.also { listOfChannelEmotes ->
+                val parsedSharedEmotes = listOfChannelEmotes.map { channelEmote ->
+                    IndivBetterTTVEmote(
+                        id = channelEmote.id,
+                        code = channelEmote.code,
+                        imageType = channelEmote.imageType,
+                        animated = channelEmote.animated,
+                        userId = channelEmote.id,
+                        modifier = false
+                    )
+                }
+                _sharedBetterTTVEmotes.value = _sharedBetterTTVEmotes.value.copy(
+                    list = parsedSharedEmotes.toImmutableList()
+                )
+                listOfChannelEmotes.forEach {
+                    sharedAndChannelList.add(
+                        EmoteNameUrlEmoteType(
+                            id = it.id,
+                            name = it.code,
+                            url = "https://cdn.betterttv.net/emote/${it.id}/2x",
+                            emoteType = EmoteTypes.FOLLOWERS
+                        )
+                    )
+                }
+            }
+            val innerInlineContentMap: MutableMap<String, InlineTextContent> = mutableMapOf()
+            sharedAndChannelList.forEach { emoteValue -> // convert the parsed data into values that can be stored into _emoteList
+                createChannelEmoteMapValue(emoteValue, innerInlineContentMap)
+            }
+            _emoteList.value = emoteList.value.copy(
+                map = _emoteList.value.map + innerInlineContentMap
+            )
+            Log.d("getBetterTTVChannelEmotes", "DONE")
+        } else {
+            Log.d("getBetterTTVChannelEmotes", "FAILED")
+        }
+    }.catch { cause ->
+        Log.d("getChannelEmotes", "EXCEPTION error message ->${cause.message}")
+        Log.d("getChannelEmotes", "EXCEPTION error cause ->${cause.cause}")
+        emit(Response.Failure(Exception("Unable to get emotes")))
+    }
 
     /**
      * globalEmoteParsing() is a private function used to update the [emoteList], [emoteBoardGlobalList]

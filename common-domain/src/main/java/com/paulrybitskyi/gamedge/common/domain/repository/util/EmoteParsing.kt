@@ -4,21 +4,23 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import coil.imageLoader
 import com.paulrybitskyi.gamedge.common.domain.chat.EmoteNameUrl
 import com.paulrybitskyi.gamedge.common.domain.chat.EmoteNameUrlEmoteType
 import javax.inject.Inject
 
 class EmoteParsing @Inject constructor() {
 
-     fun createMapValueForComposeChat(
-         emoteValue: EmoteNameUrl,
-         innerInlineContentMap: MutableMap<String, InlineTextContent>
-    ){
+    fun createMapValueForComposeChat(
+        emoteValue: EmoteNameUrl,
+        innerInlineContentMap: MutableMap<String, InlineTextContent>
+    ) {
         val url = emoteValue.url
         val value = InlineTextContent(
             Placeholder(
@@ -27,7 +29,9 @@ class EmoteParsing @Inject constructor() {
                 placeholderVerticalAlign = PlaceholderVerticalAlign.Center
             )
         ) {
+            val imageLoader = LocalContext.current.imageLoader
             AsyncImage(
+                imageLoader = imageLoader,
                 model = url,
                 contentDescription = "${emoteValue.name} emote",
                 modifier = Modifier
@@ -49,7 +53,7 @@ class EmoteParsing @Inject constructor() {
     fun createMapValueForComposeChatChannelEmotes(
         emoteValue: EmoteNameUrlEmoteType,
         innerInlineContentMap: MutableMap<String, InlineTextContent>
-    ){
+    ) {
         val url = emoteValue.url
         val value = InlineTextContent(
             Placeholder(
@@ -58,7 +62,9 @@ class EmoteParsing @Inject constructor() {
                 placeholderVerticalAlign = PlaceholderVerticalAlign.Center
             )
         ) {
+            val imageLoader = LocalContext.current.imageLoader
             AsyncImage(
+                imageLoader = imageLoader,
                 model = url,
                 contentDescription = "${emoteValue.name} emote",
                 modifier = Modifier

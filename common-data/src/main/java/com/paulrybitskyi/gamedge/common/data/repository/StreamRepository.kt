@@ -3,10 +3,10 @@ package com.paulrybitskyi.gamedge.common.data.repository
 import com.android.model.StreamData
 import com.android.model.UserModel
 import com.android.model.websockets.ChannelEmoteResponse
+import com.android.model.websockets.ChatBadgePair
 import com.android.model.websockets.ChatSettings
 import com.android.model.websockets.ChatSettingsData
 import com.android.model.websockets.EmoteData
-import com.android.model.websockets.GlobalChatBadgesData
 import com.github.michaelbull.result.mapEither
 import com.paulrybitskyi.gamedge.common.api.ApiResult
 import com.paulrybitskyi.gamedge.common.data.common.ApiErrorMapper
@@ -68,10 +68,17 @@ internal class StreamRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getGlobalChatBadges(): DomainResult<GlobalChatBadgesData> {
+    override suspend fun getGlobalChatBadges(): DomainResult<List<ChatBadgePair>> {
         return withContext(dispatcherProvider.io) {
             streamEndpoint.getGlobalChatBadges().mapEither(
-                { response -> response },
+                { response ->
+                    response.data.map {
+                        ChatBadgePair(
+                            id = it.set_id,
+                            url = it.versions[0].image_url_2x
+                        )
+                    }
+                },
                 apiErrorMapper::mapToDomainError
             )
         }

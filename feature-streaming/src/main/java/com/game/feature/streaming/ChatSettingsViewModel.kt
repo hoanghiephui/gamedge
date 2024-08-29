@@ -88,11 +88,11 @@ class ChatSettingsViewModel @Inject constructor(
     private val inlineContentMapGlobalBadgeList = mutableStateOf(EmoteListMap(createNewBadgeMap()))
     val globalChatBadgesMap: State<EmoteListMap> = inlineContentMapGlobalBadgeList
 
-    private val inlineContentMapGlobalEmoteList = mutableStateOf(EmoteListMap(mapOf()))
-    val globalEmoteMap: State<EmoteListMap> = inlineContentMapGlobalEmoteList
+    private val _globalEmoteInlineContentMap = mutableStateOf(EmoteListMap(mapOf()))
+    val globalEmoteMap: State<EmoteListMap> = _globalEmoteInlineContentMap
 
-    private val _inlineContentMapChannelEmoteList = mutableStateOf(EmoteListMap(mapOf()))
-    val inlineContentMapChannelEmoteList: State<EmoteListMap> = _inlineContentMapChannelEmoteList
+    private val _channelEmoteInlineContentMap = mutableStateOf(EmoteListMap(mapOf()))
+    val inlineContentMapChannelEmoteList: State<EmoteListMap> = _channelEmoteInlineContentMap
 
     private val _betterTTVGlobalInlineContentMapChannelEmoteList = mutableStateOf(EmoteListMap(mapOf()))
     val betterTTVGlobalInlineContentMapChannelEmoteList: State<EmoteListMap> =
@@ -200,10 +200,10 @@ class ChatSettingsViewModel @Inject constructor(
 
     private fun monitorForChannelTwitchEmotes() {
         viewModelScope.launch {
-            twitchEmoteUseCase.combinedEmoteList.collect { response ->
-                if (globalEmoteList.isEmpty()) {
-                    globalEmoteList.addAll(response)
-                    createNewGlobalEmoteMap()
+            twitchEmoteUseCase.channelEmoteList.collect { response ->
+                if (channelEmoteList.isEmpty()) {
+                    channelEmoteList.addAll(response)
+                    _channelEmoteInlineContentMap.value = EmoteListMap(createNewGlobalEmoteMap())
                 }
                 Log.d("combinedEmoteListing", "response ->${response}")
             }
@@ -212,10 +212,10 @@ class ChatSettingsViewModel @Inject constructor(
 
     private fun monitorForGlobalTwitchEmotes() {
         viewModelScope.launch {
-            twitchEmoteUseCase.channelEmoteList.collect { response ->
-                if (channelEmoteList.isEmpty()) {
-                    channelEmoteList.addAll(response)
-                    _inlineContentMapChannelEmoteList.value = EmoteListMap(createNewChannelEmoteMap())
+            twitchEmoteUseCase.combinedEmoteList.collect { response ->
+                if (globalEmoteList.isEmpty()) {
+                    globalEmoteList.addAll(response)
+                    _globalEmoteInlineContentMap.value = EmoteListMap(createNewGlobalEmoteMap())
                 }
                 Log.d("channelEmoteList", "response ->${response}")
             }
@@ -435,8 +435,8 @@ class ChatSettingsViewModel @Inject constructor(
 
     fun changeEmoteSize(newValue: Float) {
         _emoteSize.floatValue = newValue
-        inlineContentMapGlobalEmoteList.value = EmoteListMap(createNewGlobalEmoteMap())
-        _inlineContentMapChannelEmoteList.value = EmoteListMap(createNewChannelEmoteMap())
+        _globalEmoteInlineContentMap.value = EmoteListMap(createNewGlobalEmoteMap())
+        _channelEmoteInlineContentMap.value = EmoteListMap(createNewChannelEmoteMap())
         _betterTTVGlobalInlineContentMapChannelEmoteList.value = EmoteListMap(createBetterTTVGlobalEmoteMap())
         _betterTTVChannelInlineContentMapChannelEmoteList.value = EmoteListMap(createBetterTTVChanelEmoteMap())
         _betterTTVSharedInlineContentMapChannelEmoteList.value = EmoteListMap(createBetterTTVSharedEmoteMap())

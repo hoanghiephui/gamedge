@@ -104,7 +104,8 @@ class MainActivity : ComponentActivity() {
             }
 
             val appState = rememberNiaAppState(
-                networkMonitor = networkMonitor
+                networkMonitor = networkMonitor,
+                uiProfileState = viewModel.state
             )
 
             CompositionLocalProvider(

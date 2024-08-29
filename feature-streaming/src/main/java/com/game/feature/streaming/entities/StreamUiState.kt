@@ -2,9 +2,10 @@ package com.game.feature.streaming.entities
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.text.input.TextFieldValue
+import com.android.model.Response
 import com.android.model.websockets.ChatSettingsData
 import com.paulrybitskyi.gamedge.common.domain.websockets.LoggedInUserData
-import com.android.model.Response
+import com.paulrybitskyi.gamedge.common.domain.websockets.MessageToken
 
 data class StreamUIState(
     val chatSettings: Response<ChatSettingsData> = Response.Loading, //websocket twitchImpl
@@ -49,7 +50,8 @@ data class EmoteBoardData(
 )
 data class ClickedUserNameChats(
     val dateSent:String,
-    val message:String
+    val message: String,
+    val messageTokenList: List<MessageToken>,
 )
 
 @Immutable

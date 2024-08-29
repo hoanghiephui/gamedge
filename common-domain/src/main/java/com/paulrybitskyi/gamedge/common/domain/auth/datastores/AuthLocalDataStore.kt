@@ -27,4 +27,5 @@ interface AuthLocalDataStore {
     val authorizationTokenTwitch: Flow<String>
     suspend fun saveMyProfile(userDataModel: UserDataModel)
     suspend fun getMyProfile(): UserDataModel?
+    val profileFlow: Flow<UserDataModel>
 }

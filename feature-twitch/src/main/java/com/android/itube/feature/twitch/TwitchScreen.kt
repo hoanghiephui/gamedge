@@ -54,6 +54,7 @@ import com.kevinnzou.web.WebViewState
 import com.kevinnzou.web.rememberWebViewNavigator
 import com.kevinnzou.web.rememberWebViewState
 import com.paulrybitskyi.gamedge.common.domain.live.entities.StreamPlaybackAccessToken
+import com.paulrybitskyi.gamedge.common.ui.CommandsHandler
 import com.paulrybitskyi.gamedge.common.ui.v2.component.NiaButton
 import com.paulrybitskyi.gamedge.common.ui.widgets.NetworkError
 import com.paulrybitskyi.gamedge.common.ui.widgets.TwitchLogo
@@ -63,12 +64,13 @@ import com.paulrybitskyi.gamedge.core.R as coreR
 
 @Composable
 internal fun TwitchRoute(
-    onTopicClick: (StreamPlaybackAccessToken) -> Unit,
+    onStreamingClick: (StreamPlaybackAccessToken) -> Unit,
     viewModel: TwitchViewModel = hiltViewModel(),
 ) {
     val navigation: NavHostController = rememberNavController()
     val authorizationTokenTwitch by viewModel.authorizationTokenTwitch.collectAsStateWithLifecycle()
     val streamingUrlState by viewModel.streamingUrlState.collectAsStateWithLifecycle()
+    CommandsHandler(viewModel = viewModel)
     TwitchScreen(
         onSaveToken = {
             viewModel.onSaveToken(it)
@@ -86,7 +88,7 @@ internal fun TwitchRoute(
     }
     LaunchedEffect(streamingUrlState) {
         if (streamingUrlState != null) {
-            onTopicClick(streamingUrlState!!)
+            onStreamingClick(streamingUrlState!!)
             viewModel.onClearStreamUrl()
         }
     }

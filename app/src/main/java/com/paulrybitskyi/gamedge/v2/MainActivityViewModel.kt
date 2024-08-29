@@ -18,8 +18,10 @@ package com.paulrybitskyi.gamedge.v2
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.android.model.UserDataModel
 import com.paulrybitskyi.gamedge.common.data.UserData
 import com.paulrybitskyi.gamedge.common.data.repository.UserDataRepository
+import com.paulrybitskyi.gamedge.common.domain.auth.datastores.AuthLocalDataStore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -30,12 +32,19 @@ import javax.inject.Inject
 @HiltViewModel
 class MainActivityViewModel @Inject constructor(
     userDataRepository: UserDataRepository,
+    authLocalDataStore: AuthLocalDataStore,
 ) : ViewModel() {
     val uiState: StateFlow<MainActivityUiState> = userDataRepository.userData.map {
         MainActivityUiState.Success(it)
     }.stateIn(
         scope = viewModelScope,
         initialValue = MainActivityUiState.Loading,
+        started = SharingStarted.WhileSubscribed(5_000),
+    )
+
+    val state: StateFlow<UserDataModel?> = authLocalDataStore.profileFlow.stateIn(
+        scope = viewModelScope,
+        initialValue = null,
         started = SharingStarted.WhileSubscribed(5_000),
     )
 }

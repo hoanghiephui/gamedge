@@ -75,5 +75,10 @@ internal class AuthFileDataStore @Inject constructor(
         return protoUserDataStore.data
             .firstOrNull()
             ?.let(protoAuthMapper::mapToDomainUserDataModel)
+
+
     }
+
+    override val profileFlow: Flow<UserDataModel>
+        get() = protoUserDataStore.data.map { protoAuthMapper.mapToDomainUserDataModel(it) }
 }

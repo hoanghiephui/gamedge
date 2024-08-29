@@ -6,7 +6,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -57,10 +59,17 @@ fun StreamLoadedSection(
             )
         }
         if (sectionState.isFetchLiveStreamURLLoading) {
-            NiaOverlayLoadingWheel(
-                contentDesc = "loading",
-                modifier = Modifier.align(Alignment.Center)
-            )
+            Box(modifier = Modifier.fillMaxSize()) {
+                Spacer(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.6f))
+                )
+                NiaOverlayLoadingWheel(
+                    contentDesc = "loading",
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            }
         }
     }
 }

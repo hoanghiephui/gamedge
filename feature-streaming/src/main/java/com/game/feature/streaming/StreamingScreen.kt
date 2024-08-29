@@ -47,6 +47,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -78,6 +79,7 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.media3.common.C
 import androidx.media3.common.TrackSelectionOverride
 import androidx.media3.common.Tracks
@@ -123,6 +125,7 @@ fun StreamingScreen(
     var isFullscreen by rememberSaveable { mutableStateOf(false) }
     var isVolumeOff by rememberSaveable { mutableStateOf(false) }
     val context = LocalContext.current
+    val uiStateProfile by viewModel.uiStateProfile.collectAsStateWithLifecycle()
 
     val configuration = LocalConfiguration.current
     var orientation by remember { mutableIntStateOf(Configuration.ORIENTATION_PORTRAIT) }
@@ -313,6 +316,17 @@ fun StreamingScreen(
         viewModel.deleteEmote()
     } }
 
+    val updateClickedUser: (String, String, Boolean, Boolean) -> Unit = remember(viewModel) {
+        { username, userId, banned, isMod ->
+            viewModel.updateClickedChat(
+                username,
+                userId,
+                banned,
+                isMod
+            )
+        }
+    }
+
     KeepScreenOn()
     Box(
         modifier = Modifier
@@ -496,7 +510,7 @@ fun StreamingScreen(
                         ) {
                             TitleAndProfile(
                                 modifier = modifier,
-                                viewModel.streamPlaybackAccessToken
+                                uiStateProfile
                             )
                         }
 
@@ -507,12 +521,12 @@ fun StreamingScreen(
                                 //showClickedUserBottomModal()
                             },
                             updateClickedUser = { username, userId, banned, isMod ->
-                                /*updateClickedUser(
+                                updateClickedUser(
                                     username,
                                     userId,
                                     banned,
                                     isMod
-                                )*/
+                                )
                             },
                             showTimeoutDialog = {
                                 //streamViewModel.openTimeoutDialog.value = true
@@ -616,32 +630,38 @@ private fun TitleAndProfile(
     modifier: Modifier,
     data: StreamPlaybackAccessToken
 ) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .wrapContentHeight()
-            .padding(16.dp)
+    Surface(
+        tonalElevation = 2.dp,
+        contentColor = MaterialTheme.colorScheme.secondary,
+        shadowElevation = 3.dp
     ) {
-        AsyncImage(
-            modifier = Modifier
-                .padding(end = 8.dp)
-                .size(50.dp)
-                .clip(CircleShape)                       // clip to the circle shape
-                .border(2.dp, Color.Gray, CircleShape),
-            model = "https://static-cdn.jtvnw.net/jtv_user_pictures/34c5c8da-19b6-47b2-85ba-cc7ae87f1413-profile_image-50x50.png",
-            contentScale = ContentScale.Crop,
-            contentDescription = "",
-            imageLoader = LocalContext.current.imageLoader
-        )
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = data.streamerName,
-                style = MaterialTheme.typography.titleMedium
+        Row(
+            modifier = modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .padding(16.dp)
+        ) {
+            AsyncImage(
+                modifier = Modifier
+                    .padding(end = 8.dp)
+                    .size(50.dp)
+                    .clip(CircleShape)                       // clip to the circle shape
+                    .border(2.dp, Color.Gray, CircleShape),
+                model = data.thumbnailProfile,
+                contentScale = ContentScale.Crop,
+                contentDescription = "",
+                imageLoader = LocalContext.current.imageLoader
             )
-            Text(
-                text = data.title,
-                style = MaterialTheme.typography.bodyMedium
-            )
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = data.streamerName,
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Text(
+                    text = data.title,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
         }
     }
 }

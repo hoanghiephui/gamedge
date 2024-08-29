@@ -30,6 +30,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navOptions
 import com.android.itube.feature.twitch.navigation.TWITCH_ROUTE
 import com.android.itube.feature.twitch.navigation.navigateToTwitch
+import com.android.model.UserDataModel
 import com.paulrybitskyi.gamedge.common.data.common.NetworkMonitor
 import com.paulrybitskyi.gamedge.common.ui.widgets.TrackDisposableJank
 import com.paulrybitskyi.gamedge.feature.discovery.navigation.FOR_YOU_ROUTE
@@ -41,6 +42,7 @@ import com.paulrybitskyi.gamedge.feature.news.navigation.navigateToNews
 import com.paulrybitskyi.gamedge.v2.navigation.TopLevelDestination
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
@@ -49,6 +51,7 @@ fun rememberNiaAppState(
     networkMonitor: NetworkMonitor,
     coroutineScope: CoroutineScope = rememberCoroutineScope(),
     navController: NavHostController = rememberNavController(),
+    uiProfileState: StateFlow<UserDataModel?>,
 ): NiaAppState {
     NavigationTrackingSideEffect(navController)
     return remember(
@@ -60,6 +63,7 @@ fun rememberNiaAppState(
             navController = navController,
             coroutineScope = coroutineScope,
             networkMonitor = networkMonitor,
+            uiProfileState = uiProfileState
         )
     }
 }
@@ -69,6 +73,7 @@ class NiaAppState(
     val navController: NavHostController,
     coroutineScope: CoroutineScope,
     networkMonitor: NetworkMonitor,
+    uiProfileState: StateFlow<UserDataModel?>,
 ) {
     val currentDestination: NavDestination?
         @Composable get() = navController
@@ -96,6 +101,7 @@ class NiaAppState(
      * route.
      */
     val topLevelDestinations: List<TopLevelDestination> = TopLevelDestination.entries
+    val userModel = uiProfileState
 
     /**
      * UI logic for navigating to a top level destination in the app. Top level destinations have

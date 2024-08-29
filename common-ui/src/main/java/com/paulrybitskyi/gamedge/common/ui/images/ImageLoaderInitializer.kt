@@ -26,7 +26,6 @@ import coil.disk.DiskCache
 import coil.memory.MemoryCache
 import com.paulrybitskyi.hiltbinder.BindType
 import dagger.hilt.android.qualifiers.ApplicationContext
-import okhttp3.Call
 import okhttp3.OkHttpClient
 import javax.inject.Inject
 

@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -25,6 +26,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastFilter
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.paulrybitskyi.gamedge.common.ui.CommandsHandler
@@ -34,6 +36,7 @@ import com.paulrybitskyi.gamedge.common.ui.theme.GamedgeTheme
 import com.paulrybitskyi.gamedge.common.ui.widgets.NewsResourceHeaderImage
 import com.paulrybitskyi.gamedge.common.ui.widgets.RefreshableContent
 import com.paulrybitskyi.gamedge.common.ui.widgets.categorypreview.GamesCategoryPreview
+import com.paulrybitskyi.gamedge.common.ui.widgets.categorypreview.GamesCategoryPreviewItemUiModel
 import com.paulrybitskyi.gamedge.feature.discovery.GamesDiscoveryCategory
 import com.paulrybitskyi.gamedge.feature.discovery.GamesDiscoveryItemUiModel
 import com.paulrybitskyi.gamedge.feature.discovery.GamesDiscoveryViewModel
@@ -45,6 +48,7 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import okhttp3.internal.filterList
 
 @Composable
 internal fun GamesDiscoveryRoute(
@@ -117,7 +121,10 @@ private fun CategoryPreviewItems(
             val categoryGames = remember(item.games) {
                 item.games.mapToCategoryUiModels().toImmutableList()
             }
-            if (categoryGames.isNotEmpty() && GamesDiscoveryCategory.POPULAR.id == item.id) {
+            if (categoryGames.isEmpty()) {
+                return@items
+            }
+            if (GamesDiscoveryCategory.POPULAR.id == item.id) {
                 val carouselState = rememberCarouselState { categoryGames.size }
                 HorizontalMultiBrowseCarousel(
                     state = carouselState,

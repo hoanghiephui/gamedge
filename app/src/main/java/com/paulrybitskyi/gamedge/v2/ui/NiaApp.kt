@@ -42,6 +42,7 @@ import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
+import com.android.model.UserDataModel
 import com.paulrybitskyi.gamedge.common.ui.v2.component.NiaBackground
 import com.paulrybitskyi.gamedge.common.ui.v2.component.NiaGradientBackground
 import com.paulrybitskyi.gamedge.common.ui.v2.component.NiaNavigationSuiteScaffold
@@ -75,6 +76,7 @@ fun NiaApp(
             val snackbarHostState = remember { SnackbarHostState() }
 
             val isOffline by appState.isOffline.collectAsStateWithLifecycle()
+            val userDataModel by appState.userModel.collectAsStateWithLifecycle()
 
             // If user is not connected to the internet show a snack bar to inform them.
             val notConnectedMessage = stringResource(coreR.string.not_connected)
@@ -94,12 +96,12 @@ fun NiaApp(
                 onSettingsDismissed = { showSettingsDialog = false },
                 onTopAppBarActionClick = { showSettingsDialog = true },
                 windowAdaptiveInfo = windowAdaptiveInfo,
+                userDataModel = userDataModel
             )
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NiaApp(
     appState: NiaAppState,
@@ -109,6 +111,7 @@ fun NiaApp(
     onTopAppBarActionClick: () -> Unit,
     modifier: Modifier = Modifier,
     windowAdaptiveInfo: WindowAdaptiveInfo = currentWindowAdaptiveInfo(),
+    userDataModel: UserDataModel?
 ) {
     val currentDestination = appState.currentDestination
     if (appState.currentTopLevelDestination != null) {
@@ -141,10 +144,10 @@ fun NiaApp(
             },
             windowAdaptiveInfo = windowAdaptiveInfo,
         ) {
-            ContentScreen(modifier, snackbarHostState, appState, onTopAppBarActionClick)
+            ContentScreen(modifier, snackbarHostState, appState, onTopAppBarActionClick, userDataModel = userDataModel)
         }
     } else {
-        ContentScreen(modifier, snackbarHostState, appState, onTopAppBarActionClick)
+        ContentScreen(modifier, snackbarHostState, appState, onTopAppBarActionClick, userDataModel = userDataModel)
     }
 
 }
@@ -155,7 +158,8 @@ private fun ContentScreen(
     modifier: Modifier,
     snackbarHostState: SnackbarHostState,
     appState: NiaAppState,
-    onTopAppBarActionClick: () -> Unit
+    onTopAppBarActionClick: () -> Unit,
+    userDataModel: UserDataModel?
 ) {
     Scaffold(
         modifier = modifier.semantics {
@@ -194,6 +198,7 @@ private fun ContentScreen(
                     ),
                     onActionClick = { onTopAppBarActionClick() },
                     onNavigationClick = { appState.navigateToSearch() },
+                    thumbProfile = userDataModel?.profileImageUrl
                 )
             }
 

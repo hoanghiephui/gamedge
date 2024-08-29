@@ -19,6 +19,9 @@
 package com.paulrybitskyi.gamedge.common.ui.v2.component
 
 import androidx.annotation.StringRes
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -33,6 +36,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.paulrybitskyi.gamedge.common.ui.v2.icon.NiaIcons
 import com.paulrybitskyi.gamedge.common.ui.v2.theme.NiaTheme
 
@@ -48,17 +52,19 @@ fun NiaTopAppBar(
     colors: TopAppBarColors = TopAppBarDefaults.centerAlignedTopAppBarColors(),
     onNavigationClick: () -> Unit = {},
     onActionClick: () -> Unit = {},
+    thumbProfile: String? = null
 ) {
     CenterAlignedTopAppBar(
         title = { Text(text = stringResource(id = titleRes)) },
         navigationIcon = {
-            IconButton(onClick = onNavigationClick) {
-                Icon(
-                    imageVector = navigationIcon,
-                    contentDescription = navigationIconContentDescription,
-                    tint = MaterialTheme.colorScheme.onSurface,
-                )
-            }
+            StreamIcon(
+                contentDescription = "logo",
+                modifier = Modifier
+                    .size(64.dp)
+                    .clickable(onClick = onNavigationClick)
+                    .padding(16.dp),
+                urlImage = thumbProfile
+            )
         },
         actions = {
             IconButton(onClick = onActionClick) {

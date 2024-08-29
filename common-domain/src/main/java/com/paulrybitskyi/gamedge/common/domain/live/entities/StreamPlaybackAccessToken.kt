@@ -17,5 +17,6 @@ data class StreamPlaybackAccessToken(
     val clientId: String,
     val broadcasterId: String,
     val userId: String,
-    val appLogin: String
+    val appLogin: String,
+    val thumbnailProfile: String = ""
 ) : Parcelable

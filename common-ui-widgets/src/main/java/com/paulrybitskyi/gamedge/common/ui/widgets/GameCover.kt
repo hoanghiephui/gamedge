@@ -129,8 +129,8 @@ fun NewsResourceHeaderImage(
     val imageLoader = rememberAsyncImagePainter(
         model = headerImageUrl,
         onState = { state ->
-            isLoading = state is AsyncImagePainter.State.Loading
-            isError = state is AsyncImagePainter.State.Error
+            isLoading = state is State.Loading
+            isError = state is State.Error
         },
     )
     val isLocalInspection = LocalInspectionMode.current

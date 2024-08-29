@@ -22,7 +22,7 @@ internal val StreamUiState.finiteUiState: ResultUiState
         else -> error("Unknown games category UI state.")
     }
 private val StreamUiState.isInEmptyState: Boolean
-    get() = (!isLoading && items.isEmpty())
+    get() = (!isLoading && items.isEmpty() && !isError)
 
 private val StreamUiState.isInLoadingState: Boolean
     get() = (isLoading && items.isEmpty())

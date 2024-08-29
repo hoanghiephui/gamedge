@@ -25,6 +25,7 @@ import com.game.feature.streaming.entities.ClickedUserNameChats
 import com.game.feature.streaming.entities.ClickedUsernameChatsWithDateSentImmutable
 import com.game.feature.streaming.entities.StreamUIState
 import com.game.feature.streaming.entities.TextParsing
+import com.paulrybitskyi.gamedge.common.data.websockets.MessageScanner
 import com.paulrybitskyi.gamedge.common.domain.chat.EmoteNameUrl
 import com.paulrybitskyi.gamedge.common.domain.chat.EmoteNameUrlList
 import com.paulrybitskyi.gamedge.common.domain.common.extensions.resultOrError
@@ -57,10 +58,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -94,6 +97,9 @@ class StreamingViewModel @Inject constructor(
     private var _uiState: MutableState<StreamUIState> = mutableStateOf(StreamUIState())
     val state: State<StreamUIState> = _uiState
 
+    private var _uiStateProfile: MutableStateFlow<StreamPlaybackAccessToken> = MutableStateFlow(streamPlaybackAccessToken)
+    val uiStateProfile = _uiStateProfile.asStateFlow()
+
     /********THIS IS ALL THE EMOTE RELATED CALLS**************************************/
     val inlineTextContentTest = twitchEmoteUseCase.emoteList
     val globalEmoteUrlList = twitchEmoteUseCase.emoteBoardGlobalList
@@ -122,6 +128,17 @@ class StreamingViewModel @Inject constructor(
     private var _clickedUserBadgesImmutable by mutableStateOf(
         ClickedUserBadgesImmutable(clickedUserBadges)
     )
+    // Publicly exposed immutable state as State
+    val clickedUserBadgesImmutable: State<ClickedUserBadgesImmutable>
+        get() = mutableStateOf(_clickedUserBadgesImmutable)
+    private fun addAllClickedUserBadgesImmutable(clickedBadges:List<String>){
+        clickedUserBadges.addAll(clickedBadges)
+        _clickedUserBadgesImmutable = ClickedUserBadgesImmutable(clickedUserBadges)
+    }
+    private fun clearAllClickedUserBadgesImmutable(){
+        clickedUserBadges.clear()
+        _clickedUserBadgesImmutable = ClickedUserBadgesImmutable(listOf())
+    }
 
     /**
      * I need to make the immutable version of clickedUsernameChatsWithDateSent
@@ -228,7 +245,7 @@ class StreamingViewModel @Inject constructor(
     val modActionList = mutableStateListOf<TwitchUserData>()
 
     /**
-     * The UI state that represents all the data meant for the [ChatSettingsContainer.EnhancedChatSettingsBox] composable
+     * The UI state that represents all the data meant for the composable
      * */
     private val _advancedChatSettingsState = mutableStateOf(AdvancedChatSettings())
     val advancedChatSettingsState = _advancedChatSettingsState
@@ -295,16 +312,11 @@ class StreamingViewModel @Inject constructor(
     }
 
     init {
-        //TODO: SOCKET METHOD
         monitorForChannelName()
     }
 
     init {
-        //TODO: SOCKET METHOD
-
         monitorSocketRoomState()
-
-
     }
 
     /**
@@ -331,7 +343,25 @@ class StreamingViewModel @Inject constructor(
 
         // getChatSettings(broadcasterId)
         listChats.clear()
+        getUserInformation(broadcasterId)
+    }
 
+    private fun getUserInformation(userId: String) {
+        streamUseCase.getUserInformation(userId)
+            .resultOrError()
+            .onError {
+                logger.error(logTag, "Failed to UserInformation", it)
+                dispatchCommand(GeneralCommand.ShowLongToast(errorMapper.mapToMessage(it)))
+            }.distinctUntilChanged()
+            .onEach { emittedUiState ->
+                logger.info(logTag, "UserInformation ${emittedUiState.data.first().id}")
+                _uiStateProfile.update {
+                    it.copy(
+                        thumbnailProfile = emittedUiState.data.first().profileImageUrl
+                    )
+                }
+            }
+            .launchIn(viewModelScope)
     }
 
     /**
@@ -606,7 +636,8 @@ class StreamingViewModel @Inject constructor(
                         listOf(
                             ClickedUserNameChats(
                                 message = twitchUserMessage.userType ?: "",
-                                dateSent = twitchUserMessage.dateSend
+                                dateSent = twitchUserMessage.dateSend,
+                                messageTokenList = MessageScanner(twitchUserMessage.userType ?: "").tokenList
                             )
                         )
                     )
@@ -686,6 +717,42 @@ class StreamingViewModel @Inject constructor(
 
     fun clearAllChatters() {
         allChatters.clear()
+    }
+
+    //CHAT METHOD
+    fun updateClickedChat(
+        clickedUsername: String,
+        clickedUserId: String,
+        banned: Boolean,
+        isMod: Boolean
+    ) {
+        Log.d("updateClickedChat","CLICKED")
+        Log.d("updateClickedChat","clickedUsername ->${clickedUsername}")
+
+        clearClickedUsernameChatsDateSent()
+        clearAllClickedUserBadgesImmutable()
+        val messages = listChats.filter { it.displayName == clickedUsername }
+            .map { "${it.dateSend} " +if (it.deleted)  it.userType!! + " (deleted by mod)" else it.userType!!   }
+        val clickedUserChats = listChats.filter { it.displayName == clickedUsername }
+        val clickedUserMessages = clickedUserChats.map {
+            val scanner = MessageScanner(it.userType?:"")
+            /**WHEN*/
+            scanner.startScanningTokens()
+            ClickedUserNameChats(
+                message =it.userType?:"",
+                dateSent = it.dateSend,
+                messageTokenList = scanner.tokenList
+            )
+        }
+        val badges = clickedUserChats.first().badges
+        addAllClickedUserBadgesImmutable(badges)
+        addAllClickedUsernameChatsDateSent(clickedUserMessages)
+        _clickedUIState.value = _clickedUIState.value.copy(
+            clickedUsername = clickedUsername,
+            clickedUserId = clickedUserId,
+            clickedUsernameBanned = banned,
+            clickedUsernameIsMod = isMod
+        )
     }
 
     val errorValue = TwitchUserDataObjectMother

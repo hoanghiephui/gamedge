@@ -1,5 +1,6 @@
 package com.android.itube.feature.twitch.section
 
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -18,7 +19,9 @@ internal fun StreamInitialSection(
     ) {
         if (sectionState.finiteUiState == ResultUiState.Error) {
             NetworkError(
-                modifier = Modifier.align(Alignment.Center),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .align(Alignment.Center),
                 onClickReload = sectionState.onClickReload,
             )
         }

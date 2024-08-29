@@ -621,7 +621,12 @@ fun EmoteBoard(
                                     channelBetterTTVResponse = channelBetterTTVResponse,
                                     sharedBetterTTVResponse = sharedBetterTTVResponse,
                                     betterTTVLazyGridState = betterTTVLazyGridState,
-                                    modifier = Modifier.padding(bottom = 72.dp)
+                                    modifier = Modifier.padding(bottom = 72.dp),
+                                    updateTempararyMostFrequentEmoteList = { usedEmote ->
+                                        updateTempararyMostFrequentEmoteList(
+                                            usedEmote
+                                        )
+                                    }
                                 )
                                 BetterTTVEmoteBottomUI(
                                     closeEmoteBoard = { closeEmoteBoard() },
@@ -691,8 +696,8 @@ fun BetterTTVEmoteBoard(
     sharedBetterTTVResponse: IndivBetterTTVEmoteList,
     betterTTVLazyGridState: LazyGridState,
     updateTextWithEmote: (String) -> Unit,
-    modifier: Modifier
-
+    modifier: Modifier,
+    updateTempararyMostFrequentEmoteList: (EmoteNameUrl) -> Unit,
 ) {
     Log.d("BetterTTVEmoteBoardRELOAD", "RELOAD")
     LazyVerticalGrid(
@@ -729,7 +734,7 @@ fun BetterTTVEmoteBoard(
             }
 
             items(channelBetterTTVResponse.list) {
-                EmoteGif(it, updateTextWithEmote)
+                EmoteGif(it, updateTextWithEmote, updateTempararyMostFrequentEmoteList)
             }
         }
 
@@ -756,7 +761,7 @@ fun BetterTTVEmoteBoard(
             }
 
             items(sharedBetterTTVResponse.list) {
-                EmoteGif(it, updateTextWithEmote)
+                EmoteGif(it, updateTextWithEmote, updateTempararyMostFrequentEmoteList)
             }
         }
 
@@ -783,7 +788,7 @@ fun BetterTTVEmoteBoard(
             }
 
             items(globalBetterTTVResponse.list) {
-                EmoteGif(it, updateTextWithEmote)
+                EmoteGif(it, updateTextWithEmote, updateTempararyMostFrequentEmoteList)
             }
         }
     }
@@ -792,7 +797,8 @@ fun BetterTTVEmoteBoard(
 @Composable
 private fun EmoteGif(
     it: IndivBetterTTVEmote,
-    updateTextWithEmote: (String) -> Unit
+    updateTextWithEmote: (String) -> Unit,
+    updateTempararyMostFrequentEmoteList: (EmoteNameUrl) -> Unit,
 ) {
     Surface(
         modifier = Modifier.size(50.dp),
@@ -812,6 +818,13 @@ private fun EmoteGif(
             emoteName = it.code,
             updateTextWithEmote = { value ->
                 updateTextWithEmote(value)
+                updateTempararyMostFrequentEmoteList(
+                    EmoteNameUrl(
+                        id = it.id,
+                        name = it.code,
+                        url = "https://cdn.betterttv.net/emote/${it.id}/2x"
+                    )
+                )
             }
         )
     }

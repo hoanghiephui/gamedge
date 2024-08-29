@@ -54,6 +54,7 @@ import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.Backspace
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Autorenew
@@ -136,10 +137,12 @@ import com.paulrybitskyi.gamedge.common.domain.websockets.MessageToken
 import com.paulrybitskyi.gamedge.common.domain.websockets.PrivateMessageType
 import com.paulrybitskyi.gamedge.common.domain.websockets.TwitchUserData
 import com.paulrybitskyi.gamedge.common.ui.rememberDraggableActions
+import com.paulrybitskyi.gamedge.common.ui.v2.component.ChatInput
 import com.paulrybitskyi.gamedge.common.ui.v2.component.NiaTab
 import com.paulrybitskyi.gamedge.common.ui.v2.component.NiaTabRow
 import com.paulrybitskyi.gamedge.common.ui.widgets.InputSelectorButton
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 import com.paulrybitskyi.gamedge.core.R as coreR
@@ -283,7 +286,7 @@ fun ChatView(
                     )*/
                 },
                 stylizedTextField = { boxModifier ->
-                    StylizedTextField(
+                    ChatInput(
                         modifier = boxModifier,
                         newFilterMethod = { newTextValue ->
                             newFilterMethod(newTextValue)
@@ -297,22 +300,21 @@ fun ChatView(
                         },
                         iconClicked = iconClicked,
                         setIconClicked = { newValue -> iconClicked = newValue },
-
                         actualTextFieldValue = actualTextFieldValue,
                         changeActualTextFieldValue = { text, textRange ->
                             changeActualTextFieldValue(text, textRange)
-                        },
+                        }
                     )
                 },
                 showIconBasedOnTextLength = {
                     ShowIconBasedOnTextLength(
                         textFieldValue = textFieldValue,
                         chat = { item ->
-                            hideSoftKeyboard()
                             //this is to close the emote board
                             emoteKeyBoardHeight.value = 0.dp
                             iconClicked = false
                             sendMessageToWebSocket(item)
+                            hideSoftKeyboard()
                         },
                         showModal = {
                             showModal()
@@ -1197,7 +1199,7 @@ fun LazyGridEmotes(
             items(
                 items = emoteBoardChannelList.list,
                 key = EmoteNameUrlEmoteType::id,
-                contentType = {"Channel"}
+                contentType = { "Channel" }
             ) {
                 if (it.emoteType == EmoteTypes.SUBS && !userIsSub) {
                     Surface(
@@ -1294,7 +1296,7 @@ fun LazyGridEmotes(
             items(
                 items = emoteBoardGlobalList.list,
                 key = EmoteNameUrl::id,
-                contentType = {"GLOBAL"}
+                contentType = { "GLOBAL" }
             ) {
                 Surface(
                     modifier = Modifier.size(50.dp),
@@ -2085,7 +2087,7 @@ fun EnterChatColumn(
     ) {
         Column(
             modifier = modifier
-                .padding(bottom = 4.dp)
+                .padding(vertical = 6.dp)
         ) {
             filteredRow()
 
@@ -2286,7 +2288,7 @@ fun ShowIconBasedOnTextLength(
             }
         ) {
             Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                imageVector = Icons.AutoMirrored.Filled.Send,
                 contentDescription = stringResource(coreR.string.send_chat),
                 modifier = Modifier,
             )
@@ -2323,11 +2325,11 @@ fun ShowIconBasedOnTextLength(
 @Composable
 fun StylizedTextField(
     modifier: Modifier,
-    newFilterMethod: (TextFieldValue) -> Unit,
     showKeyBoard: () -> Unit,
     showEmoteBoard: () -> Unit,
     iconClicked: Boolean,
     setIconClicked: (Boolean) -> Unit,
+    newFilterMethod: (TextFieldValue) -> Unit,
     actualTextFieldValue: TextFieldValue,
     changeActualTextFieldValue: (String, TextRange) -> Unit
 ) {

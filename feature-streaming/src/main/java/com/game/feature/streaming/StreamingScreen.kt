@@ -43,6 +43,7 @@ import androidx.compose.material.icons.filled.IosShare
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.Pause
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -144,6 +145,7 @@ fun StreamingScreen(
     val openWarningDialog by viewModel.openWarningDialog
     val keyboardController = LocalSoftwareKeyboardController.current
     var isVisibleTitle by remember { mutableStateOf(true) }  // State to track visibility of controls
+    val textFieldValue by viewModel.textFieldValue
 
     LaunchedEffect(configuration) {
         // Save any changes to the orientation value on the configuration object
@@ -312,9 +314,11 @@ fun StreamingScreen(
         }
     }
 
-    val deleteEmote:() -> Unit = remember(viewModel) { {
-        viewModel.deleteEmote()
-    } }
+    val deleteEmote: () -> Unit = remember(viewModel) {
+        {
+            viewModel.deleteEmote()
+        }
+    }
 
     val updateClickedUser: (String, String, Boolean, Boolean) -> Unit = remember(viewModel) {
         { username, userId, banned, isMod ->
@@ -376,6 +380,17 @@ fun StreamingScreen(
                                 .padding(28.dp)
                                 .align(Alignment.Center)
                         )
+                        AnimatedVisibility(
+                            visible = showLoading,
+                            modifier = Modifier
+                                .align(Alignment.Center)
+                                .wrapContentSize()
+                        ) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.align(Alignment.Center),
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
                         MenuControl(
                             isFullscreen = isFullscreen,
                             isVolumeOff = isVolumeOff,
@@ -456,6 +471,18 @@ fun StreamingScreen(
                                     .fillMaxWidth()
                                     .aspectRatio(16 / 9f, true)
                             )
+                            androidx.compose.animation.AnimatedVisibility(
+                                visible = showLoading,
+                                modifier = Modifier
+                                    .align(Alignment.Center)
+                                    .wrapContentSize()
+                            ) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier
+                                        .align(Alignment.Center),
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            }
                             MenuControl(
                                 isFullscreen = isFullscreen,
                                 isVolumeOff = isVolumeOff,
@@ -564,7 +591,10 @@ fun StreamingScreen(
                             },
                             inlineContentMap = viewModel.inlineTextContentTest.value,
                             hideSoftKeyboard = {
-                                keyboardController?.hide()
+                                rememberCoroutineScope.launch {
+                                    delay(300)
+                                    keyboardController?.hide()
+                                }
                             },
                             emoteBoardGlobalList = viewModel.globalEmoteUrlList.value,
                             //todo: this is what I need to change
@@ -585,7 +615,7 @@ fun StreamingScreen(
                             userIsSub = viewModel.state.value.loggedInUserData?.sub ?: false,
                             forwardSlashes = viewModel.forwardSlashCommandImmutable.value,
                             filteredChatListImmutable = viewModel.filteredChatListImmutable.value,
-                            actualTextFieldValue = viewModel.textFieldValue.value,
+                            actualTextFieldValue = textFieldValue,
                             changeActualTextFieldValue = { text, textRange ->
                                 changeActualTextFieldValue(text, textRange)
                             },

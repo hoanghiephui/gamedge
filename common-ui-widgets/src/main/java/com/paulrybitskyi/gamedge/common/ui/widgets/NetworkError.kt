@@ -25,10 +25,10 @@ fun NetworkError(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        /*Image(
-            painter = painterResource(id = CoreDataResourceDrawable.icon_error_status),
+        Image(
+            painter = painterResource(id = com.paulrybitskyi.gamedge.core.R.drawable.twitch),
             contentDescription = null
-        )*/
+        )
 
         Spacer(modifier = Modifier.height(24.dp))
 

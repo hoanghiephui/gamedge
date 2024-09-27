@@ -7,7 +7,7 @@
 # Twitch App available at Google Play
 [<img src="https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png"
       alt="Download from Google Play"
-      height="80">](https://play.google.com/store/apps/details?id=game.twit.tv.live)
+      height="80">](https://play.google.com/store/apps/details?id=game.twit.tv.live&utm_source=github)
 
 
 An Android application for browsing video games and checking the latest gaming news from around the world.

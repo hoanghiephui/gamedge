@@ -1,9 +1,14 @@
-# Gamedge
+# TwitchTV
 
 ![Min API](https://img.shields.io/badge/API-21%2B-orange.svg?style=flat)
 [![Platform](https://img.shields.io/badge/platform-Android-green.svg)](http://developer.android.com/index.html)
 [![Build](https://github.com/mars885/gamedge/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/mars885/gamedge/actions)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+# Twitch App available at Google Play
+[<img src="https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png"
+      alt="Download from Google Play"
+      height="80">](https://play.google.com/store/apps/details?id=game.twit.tv.live)
+
 
 An Android application for browsing video games and checking the latest gaming news from around the world.
 
@@ -11,55 +16,10 @@ Built entirely using the Jetpack Compose.
 
 The aim of this project is to showcase the latest trends in Android development by utilizing the best practices, libraries, and tools to develop a fully-fledged Android application.
 
-## Contents
-* [Demonstration](#demonstration)
-  * [Videos](#videos)
-  * [Screenshots](#screenshots)
-* [Tech Stack](#tech-stack)
-* [Architecture](#architecture)
-* [Development Setup](#development-setup)
-  * [IGDB](#igdb)
-  * [Gamespot](#gamespot)
-* [Download](#download)
-* [Contribution](#contribution)
-* [Questions](#questions)
-* [License](#license)
-
 ## Demonstration
 
-### Videos
-
-<details>
-<summary><b>Demo 1</b></summary>
-</p>
-
-https://user-images.githubusercontent.com/14782808/111520186-88671800-8760-11eb-8995-8e45a5cd9213.mp4
-</details>
-<details>
-<summary><b>Demo 2</b></summary>
-</p>
-
-https://user-images.githubusercontent.com/14782808/111520260-9b79e800-8760-11eb-9665-1062ed2b2c24.mp4
-</details>
-<details>
-<summary><b>Demo 3</b></summary>
-</p>
-
-https://user-images.githubusercontent.com/14782808/111520365-b187a880-8760-11eb-9dbe-0ffc44635ef8.mp4
-</details>
-
 ### Screenshots
-
-<p>
-<img src="/media/screenshot1.png" width="32%"/>
-<img src="/media/screenshot2.png" width="32%"/>
-<img src="/media/screenshot3.png" width="32%"/>
-</p>
-<p>
-<img src="/media/screenshot4.png" width="32%"/>
-<img src="/media/screenshot5.png" width="32%"/>
-<img src="/media/screenshot6.png" width="32%"/>
-</p>
+https://pog-for-twitch.vercel.app
 
 ## Tech Stack
 
